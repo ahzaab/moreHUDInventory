@@ -16,6 +16,7 @@ public:
    void ExtendItemCard(GFxMovieView * view, GFxValue * object, InventoryEntryData * item);
    void Initialize();
    bool m_showBookRead;
+   bool m_enableItemCardResize;
 
 private:
    static void ReplaceStringInPlace(std::string& subject, const std::string& search,

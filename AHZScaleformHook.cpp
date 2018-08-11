@@ -27,10 +27,14 @@ EventResult AHZEventHandler::ReceiveEvent(MenuOpenCloseEvent * evn, EventDispatc
          if (!view)
          {
             _ERROR("The IMenu returned NULL. The moreHUDInventory movie will not be loaded.");
-         }
+         }  
 
          args[0].SetString("AHZItemCardContainer");
-         view->Invoke("_root.getNextHighestDepth", &args[1], NULL, 0);
+         //view->Invoke("_root.getNextHighestDepth", &args[1], NULL, 0);
+
+         // -16384 is used to load it behind the existing item card.  Using SwapDepth causes issues when zooming in the 3D models from the menu.
+         args[1].SetNumber(-16384);
+
          view->Invoke("_root.createEmptyMovieClip", &hudComponent, args, 2);
 
          if (!hudComponent.objectInterface)
