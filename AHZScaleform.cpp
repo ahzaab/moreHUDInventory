@@ -55,6 +55,7 @@ void CAHZScaleform::Initialize()
    m_showBookRead = g_ahzConfiguration.GetBooleanValue("General", "bShowBookRead", true);
    m_showBookSkill = g_ahzConfiguration.GetBooleanValue("General", "bShowBookSkill", true);
    m_showKnownEnchantment = g_ahzConfiguration.GetBooleanValue("General", "bShowKnownEnchantment", true);
+   m_enableItemCardResize = g_ahzConfiguration.GetBooleanValue("General", "bEnableItemCardResize", true); 
 }
 
 bool CAHZScaleform::GetWasBookRead(TESForm *form)
