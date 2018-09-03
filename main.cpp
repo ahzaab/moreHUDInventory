@@ -10,7 +10,7 @@
 
 using namespace std;
 
-#define PLUGIN_VERSION  (10004)
+#define PLUGIN_VERSION  (10005)
 #define PLUGIN_NAME  ("AHZmoreHUDInventory")
 
 IDebugLog	gLog;
