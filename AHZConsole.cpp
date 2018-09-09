@@ -19,7 +19,7 @@ CAHZDebugConsole::CAHZDebugConsole()
 }
 
 
-CAHZDebugConsole::~CAHZDebugConsole()
+CAHZDebugConsole::~CAHZDebugConsole() 
 {
 #if _DEBUG
    if (p_stream)
