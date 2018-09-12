@@ -17,6 +17,7 @@ public:
    void Initialize();
    bool m_showBookRead;
    bool m_enableItemCardResize;
+   bool CAHZScaleform::GetWasBookRead(TESForm *form);
 
 private:
    static void ReplaceStringInPlace(std::string& subject, const std::string& search,
@@ -28,7 +29,6 @@ private:
    static double mRound(double d);
    string GetBookSkill(TESForm *form);
    bool GetIsKnownEnchantment(InventoryEntryData * item);
-   bool CAHZScaleform::GetWasBookRead(TESForm *form);
 
    bool m_showBookSkill;
    bool m_showKnownEnchantment;

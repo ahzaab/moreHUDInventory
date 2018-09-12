@@ -11,6 +11,7 @@ EventResult AHZEventHandler::ReceiveEvent(MenuOpenCloseEvent * evn, EventDispatc
       (menuName == "Crafting Menu") ||
       (menuName == "ContainerMenu") ||
       (menuName == "BarterMenu") ||
+	  (menuName == "MagicMenu") ||
       (menuName == "Main Menu")  // Load it in the main menu to sneak in and flip the extendData flag
       && (evn->opening))
    {
