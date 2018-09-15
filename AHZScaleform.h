@@ -18,6 +18,7 @@ public:
    bool m_showBookRead;
    bool m_enableItemCardResize;
    bool CAHZScaleform::GetWasBookRead(TESForm *form);
+   bool isSurvivalMode();
 
 private:
    static void ReplaceStringInPlace(std::string& subject, const std::string& search,
@@ -32,4 +33,5 @@ private:
 
    bool m_showBookSkill;
    bool m_showKnownEnchantment;
+   bool m_showPosNegEffects;
 };
