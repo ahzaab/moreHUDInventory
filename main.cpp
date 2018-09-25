@@ -7,10 +7,10 @@
 #include "skse64/ScaleformCallbacks.h"          // for GFxFunctionHandler
 #include <stddef.h>                             // for NULL
 #include "AHZConfiguration.h"
+#include "PapyrusMoreHudIE.h"
 
 using namespace std;
 
-#define PLUGIN_VERSION  (10009)
 #define PLUGIN_NAME  ("AHZmoreHUDInventory")
 
 IDebugLog	gLog;
@@ -20,6 +20,7 @@ CAHZScaleform m_ahzScaleForm;
 static UInt32 g_skseVersion = 0;
 SKSEScaleformInterface		* g_scaleform = NULL;
 SKSEMessagingInterface *g_skseMessaging = NULL;
+SKSEPapyrusInterface * g_sksePapyrus = NULL;
 AHZEventHandler menuEvent;
 
 
@@ -185,6 +186,12 @@ extern "C"
          return false;
       }
 
+	  g_sksePapyrus = (SKSEPapyrusInterface *)skse->QueryInterface(kInterface_Papyrus);
+	  if (!g_skseMessaging)
+	  {
+		  _ERROR("couldn't get Papyrus interface");
+		  return false;
+	  }
 
       // supported runtime version
       return true;
@@ -214,6 +221,9 @@ extern "C"
 
       // Register listener for the gme loaded event
       g_skseMessaging->RegisterListener(skse->GetPluginHandle(), "SKSE", EventListener);
+
+	  // Register Papyrus functions
+	  g_sksePapyrus->Register(papyrusMoreHudIE::RegisterFuncs);
 
       _MESSAGE("%s -v%d Loaded", PLUGIN_NAME, PLUGIN_VERSION);
       return true;
