@@ -10,7 +10,7 @@
 
 using namespace std;
 
-#define PLUGIN_VERSION  (10007)
+#define PLUGIN_VERSION  (10009)
 #define PLUGIN_NAME  ("AHZmoreHUDInventory")
 
 IDebugLog	gLog;
@@ -51,7 +51,7 @@ public:
    virtual void	Invoke(Args * args)
    {
       args->result->SetBool(m_ahzScaleForm.m_showBookRead);
-   }
+   } 
 };
 
 
@@ -104,7 +104,6 @@ bool RegisterScaleform(GFxMovieView * view, GFxValue * root)
    RegisterFunction <SKSEScaleform_GetCurrentMenu>(root, view, "GetCurrentMenu");
    RegisterFunction <SKSEScaleform_EnableItemCardResize>(root, view, "EnableItemCardResize");
    RegisterFunction <SKSEScaleform_GetWasBookRead>(root, view, "GetWasBookRead");
-   
    MenuManager::GetSingleton()->MenuOpenCloseEventDispatcher()->AddEventSink(&menuEvent);
    return true;
 }

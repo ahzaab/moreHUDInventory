@@ -7,12 +7,12 @@ EventResult AHZEventHandler::ReceiveEvent(MenuOpenCloseEvent * evn, EventDispatc
 {
    string menuName(evn->menuName.data);
 
-   if ((menuName == "InventoryMenu") ||
+   if (((menuName == "InventoryMenu") ||
       (menuName == "Crafting Menu") ||
       (menuName == "ContainerMenu") ||
       (menuName == "BarterMenu") ||
 	  (menuName == "MagicMenu") ||
-      (menuName == "Main Menu")  // Load it in the main menu to sneak in and flip the extendData flag
+      (menuName == "Main Menu"))  // Load it in the main menu to sneak in and flip the extendData flag
       && (evn->opening))
    {
       g_currentMenu.clear();
