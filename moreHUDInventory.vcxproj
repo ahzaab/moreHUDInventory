@@ -335,7 +335,7 @@
     <ClCompile Include="AHZScaleform.cpp" />
     <ClCompile Include="AHZUtilities.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="PapyrusMoreHudIE.cpp" />
+    <ClCompile Include="AHZPapyrusMoreHudIE.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\skse64\GameAPI.h" />
@@ -346,7 +346,7 @@
     <ClInclude Include="AHZScaleformHook.h" />
     <ClInclude Include="AHZScaleform.h" />
     <ClInclude Include="AHZUtilities.h" />
-    <ClInclude Include="PapyrusMoreHudIE.h" />
+    <ClInclude Include="AHZPapyrusMoreHudIE.h" />
     <ClInclude Include="resource2.h" />
   </ItemGroup>
   <ItemGroup>

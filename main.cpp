@@ -7,7 +7,7 @@
 #include "skse64/ScaleformCallbacks.h"          // for GFxFunctionHandler
 #include <stddef.h>                             // for NULL
 #include "AHZConfiguration.h"
-#include "PapyrusMoreHudIE.h"
+#include "AHZPapyrusMoreHudIE.h"
 
 using namespace std;
 

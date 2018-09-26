@@ -1,11 +1,13 @@
-#include "PapyrusMoreHudIE.h"
+#include "AHZPapyrusMoreHudIE.h"
 #include "skse64/PluginManager.h"
 
 #include "skse64_common/skse_version.h"
-
+#include "common/ICriticalSection.h"
 
 namespace papyrusMoreHudIE {
-	static map<UInt32, string> g_ahzRegisteredIcons;
+	typedef std::map<UInt32, BSFixedString> AhzIconItemCache;
+	static ICriticalSection	s_iconItemCacheLock;
+	static AhzIconItemCache s_ahzRegisteredIcons;
 
 	UInt32 GetVersion(StaticFunctionTag* base)
 	{
@@ -14,62 +16,93 @@ namespace papyrusMoreHudIE {
 
 	bool IsIconItemRegistered(StaticFunctionTag* base, UInt32 itemID)
 	{
+		bool found = false;
+		_MESSAGE("IsIconItemRegistered %d", itemID);
+		s_iconItemCacheLock.Enter();
 		// Create an iterator of map
-		std::map<UInt32, string>::iterator it;
+		AhzIconItemCache::iterator it;
 
 		// Find the element with key itemID
-		it = g_ahzRegisteredIcons.find(itemID);
+		it = s_ahzRegisteredIcons.find(itemID);
 
 		// Check if element exists in map or not
-		return (it != g_ahzRegisteredIcons.end());
+		found = (it != s_ahzRegisteredIcons.end());
+
+		s_iconItemCacheLock.Leave();
+
+		return found;
 	}
 
 	void AddIconItem(StaticFunctionTag* base, UInt32 itemID, BSFixedString iconName)
 	{
+		_MESSAGE("AddIconItem %d, %s", itemID, iconName.c_str());
+		s_iconItemCacheLock.Enter();
 		if (!IsIconItemRegistered(base, itemID))
 		{
-			g_ahzRegisteredIcons.insert(pair<UInt32, string>(itemID, string(iconName.c_str())));
+			s_ahzRegisteredIcons.insert(AhzIconItemCache::value_type(itemID, iconName));
 		}
+		s_iconItemCacheLock.Leave();
 	}
 
 	void RemoveIconItem(StaticFunctionTag* base, UInt32 itemID)
 	{
+		_MESSAGE("RemoveIconItem %d", itemID);
+		s_iconItemCacheLock.Enter();
 		if (!IsIconItemRegistered(base, itemID))
 		{
-			g_ahzRegisteredIcons.erase(itemID);
+			s_ahzRegisteredIcons.erase(itemID);
 		}
+		s_iconItemCacheLock.Leave();
 	}
 
 	void AddIconItems(StaticFunctionTag* base, VMArray<UInt32> itemIDs, VMArray<BSFixedString> iconNames)
 	{
+		s_iconItemCacheLock.Enter();
 		if (itemIDs.Length() != iconNames.Length())
+		{
+			s_iconItemCacheLock.Leave();
 			return;
+		}
 
 		for (UInt32 i = 0; i < itemIDs.Length(); i++)
 		{
-			UInt32 * itemID = NULL;
-			BSFixedString * iconName = NULL;
-			itemIDs.Get(itemID, i);
-			iconNames.Get(iconName, i);
-			if (itemID && iconName)
-			{
-				AddIconItem(base, *itemID, *iconName);
-			}
+			UInt32 itemID;
+			BSFixedString iconName;
+			itemIDs.Get(&itemID, i);
+			iconNames.Get(&iconName, i);
+			AddIconItem(base, itemID, iconName);
 		}
+		s_iconItemCacheLock.Leave();
 	}
 
 	void RemoveIconItems(StaticFunctionTag* base, VMArray<UInt32> itemIDs)
 	{
+		s_iconItemCacheLock.Enter();
 		for (UInt32 i = 0; i < itemIDs.Length(); i++)
 		{
-			UInt32 * itemID = NULL;
-			BSFixedString * iconName = NULL;
-			itemIDs.Get(itemID, i);
+			UInt32 itemID;
+			itemIDs.Get(&itemID, i);
 			if (itemID)
 			{
-				RemoveIconItem(base, *itemID);
+				RemoveIconItem(base, itemID);
 			}
 		}
+		s_iconItemCacheLock.Leave();
+	}
+
+	string GetIconName(UInt32 itemID)
+	{
+		string iconName("");
+		s_iconItemCacheLock.Enter();
+
+		if (IsIconItemRegistered(NULL, itemID))
+		{
+			iconName.append(s_ahzRegisteredIcons[itemID].c_str());
+		}
+
+		s_iconItemCacheLock.Leave();
+
+		return iconName;
 	}
 }
 
