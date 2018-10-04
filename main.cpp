@@ -10,7 +10,7 @@
 
 using namespace std;
 
-#define PLUGIN_VERSION  (10009)
+#define PLUGIN_VERSION  (10010)
 #define PLUGIN_NAME  ("AHZmoreHUDInventory")
 
 IDebugLog	gLog;
@@ -148,7 +148,7 @@ extern "C"
 
          return false;
       }
-      else if (skse->runtimeVersion < (MAKE_EXE_VERSION(1, 5, 50)))
+      else if (skse->runtimeVersion < (MAKE_EXE_VERSION(1, 5, 53)))
       {
          _ERROR("unsupported runtime version %08X", skse->runtimeVersion);
 
