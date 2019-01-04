@@ -13,11 +13,7 @@ namespace papyrusMoreHudIE
 	bool RegisterFuncs(VMClassRegistry* registry);
 
 	UInt32 GetVersion(StaticFunctionTag* base);
-	bool IsIconItemRegistered(StaticFunctionTag* base, UInt32 
-	
-	
-	
-	);
+	bool IsIconItemRegistered(StaticFunctionTag* base, UInt32);
 	void AddIconItem(StaticFunctionTag* base, UInt32 itemID, BSFixedString iconName);
 	void RemoveIconItem(StaticFunctionTag* base, UInt32 itemID);
 	void AddIconItems(StaticFunctionTag* base, VMArray<UInt32> itemIDs, VMArray<BSFixedString> iconNames);

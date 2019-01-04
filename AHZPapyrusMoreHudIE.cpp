@@ -48,7 +48,7 @@ namespace papyrusMoreHudIE {
 	{
 		_MESSAGE("RemoveIconItem %d", itemID);
 		s_iconItemCacheLock.Enter();
-		if (!IsIconItemRegistered(base, itemID))
+		if (IsIconItemRegistered(base, itemID))
 		{
 			s_ahzRegisteredIcons.erase(itemID);
 		}
