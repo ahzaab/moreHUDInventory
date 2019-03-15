@@ -1,12 +1,9 @@
 ﻿
 #include "AHZScaleformHook.h"
-#include "AHZInventoryMenu.h"
 #include "skse64/GameBSExtraData.h"
 #include "skse64/skse64_common/Utilities.h"
 
 string g_currentMenu;
-
-InventoryMenu* g_inventoryMenu;
 
 EventResult AHZEventHandler::ReceiveEvent(MenuOpenCloseEvent * evn, EventDispatcher<MenuOpenCloseEvent> * dispatcher)
 {
@@ -24,22 +21,6 @@ EventResult AHZEventHandler::ReceiveEvent(MenuOpenCloseEvent * evn, EventDispatc
       g_currentMenu.append(menuName.c_str());
       GFxMovieView *view = MenuManager::GetSingleton()->GetMovieView(&evn->menuName);
       HUDMenu *hudMenu = dynamic_cast<HUDMenu*>(MenuManager::GetSingleton()->GetMenu(&evn->menuName));
-      if (!g_inventoryMenu)
-      {
-         BSFixedString inventoryMenuName("InventoryMenu");
-         g_inventoryMenu = dynamic_cast<InventoryMenu*>(MenuManager::GetSingleton()->GetMenu(&inventoryMenuName));
-         if (g_inventoryMenu)
-         {
-            const char * temps;
-            for (int i = 0; i < g_inventoryMenu->inventoryData->items.count; i++)
-            {
-               InventoryEntryData* objDesc = g_inventoryMenu->inventoryData->items[i]->objDesc;
-               temps = CALL_MEMBER_FN(objDesc, GenerateName)();
-               _MESSAGE(temps);
-
-            }
-         }
-      }
       if (view)
       {
          GFxValue hudComponent;

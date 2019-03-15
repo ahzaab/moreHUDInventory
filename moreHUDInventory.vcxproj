@@ -113,7 +113,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>RUNTIME;PLUGIN_VERSION=(10011);RUNTIME_VERSION=0x010503E0;_DEBUG;_WINDOWS;_USRDLL;PLUGIN_EXAMPLE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RUNTIME;PLUGIN_VERSION=(10012);RUNTIME_VERSION=0x01050490;_DEBUG;_WINDOWS;_USRDLL;PLUGIN_EXAMPLE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>
@@ -164,7 +164,7 @@
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>RUNTIME;PLUGIN_VERSION=(10011);RUNTIME_VERSION=0x010503E0;WIN32;NDEBUG;_WINDOWS;_USRDLL;PLUGIN_EXAMPLE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RUNTIME;PLUGIN_VERSION=(10012);RUNTIME_VERSION=0x01050490;WIN32;NDEBUG;_WINDOWS;_USRDLL;PLUGIN_EXAMPLE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>
@@ -343,7 +343,6 @@
     <ClInclude Include="..\skse64\ScaleformCallbacks.h" />
     <ClInclude Include="AHZConfiguration.h" />
     <ClInclude Include="AHZConsole.h" />
-    <ClInclude Include="AHZInventoryMenu.h" />
     <ClInclude Include="AHZScaleformHook.h" />
     <ClInclude Include="AHZScaleform.h" />
     <ClInclude Include="AHZUtilities.h" />
