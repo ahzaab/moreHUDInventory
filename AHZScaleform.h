@@ -5,6 +5,7 @@
 #include "skse64/ScaleformCallbacks.h"
 #include "skse64/ScaleformMovie.h"
 #include "AHZConfiguration.h"
+#include "AHZPapyrusMoreHudIE.h"
 
 using namespace std;
 

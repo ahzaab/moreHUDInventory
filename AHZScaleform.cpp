@@ -1,4 +1,5 @@
 ﻿#include "AHZScaleform.h"
+#include "skse64\HashUtil.h"
 
 bool m_showBookRead;
 bool m_showBookSkill;
@@ -23,106 +24,116 @@ CAHZScaleform::~CAHZScaleform()
 
 void CAHZScaleform::ExtendItemCard(GFxMovieView * view, GFxValue * object, InventoryEntryData * item)
 {
-   if (!item || !object || !view || !item->type)
-   {
-      return;
-   }
+	if (!item || !object || !view || !item->type)
+	{
+		return;
+	}
 
 
-   GFxValue obj;
-   view->CreateObject(&obj);
+	GFxValue obj;
+	view->CreateObject(&obj);
 
-   if (item->type->GetFormType() == kFormType_Armor || item->type->GetFormType() == kFormType_Weapon && m_showKnownEnchantment)
-   {
-      RegisterBoolean(&obj, "enchantmentKnown", GetIsKnownEnchantment(item));
-      // Add the object to the scaleform function
-      object->SetMember("AHZItemCardObj", &obj);
-   }
-   else if (item->type->GetFormType() == kFormType_Book)
-   {
-      if (m_showBookSkill)
-      {
-         string bookSkill = GetBookSkill(item->type);
-         if (bookSkill.length())
-         {
-            RegisterString(&obj, "bookSkill", bookSkill.c_str());
-         }
-      }
+	if (item->type->GetFormType() == kFormType_Armor || item->type->GetFormType() == kFormType_Weapon && m_showKnownEnchantment)
+	{
+		RegisterBoolean(&obj, "enchantmentKnown", GetIsKnownEnchantment(item));
+		// Add the object to the scaleform function
+		object->SetMember("AHZItemCardObj", &obj);
+	}
+	else if (item->type->GetFormType() == kFormType_Book)
+	{
+		if (m_showBookSkill)
+		{
+			string bookSkill = GetBookSkill(item->type);
+			if (bookSkill.length())
+			{
+				RegisterString(&obj, "bookSkill", bookSkill.c_str());
+			}
+		}
 
-      // Add the object to the scaleform function
-      object->SetMember("AHZItemCardObj", &obj);
-   }
-   else if (item->type->GetFormType() == kFormType_Potion)
-   {
-	   if (m_showPosNegEffects)
-	   {
-		   AlchemyItem *alchItem = DYNAMIC_CAST(item->type, TESForm, AlchemyItem);
-		   // Check the extra data for enchantments learned by the player
-		   if (item->extendDataList && alchItem)
-		   {
-			   for (ExtendDataList::Iterator it = item->extendDataList->Begin(); !it.End(); ++it)
-			   {
-				   BaseExtraList * pExtraDataList = it.Get();
+		// Add the object to the scaleform function
+		object->SetMember("AHZItemCardObj", &obj);
+	}
+	else if (item->type->GetFormType() == kFormType_Potion)
+	{
+		if (m_showPosNegEffects)
+		{
+			AlchemyItem *alchItem = DYNAMIC_CAST(item->type, TESForm, AlchemyItem);
+			// Check the extra data for enchantments learned by the player
+			if (item->extendDataList && alchItem)
+			{
+				for (ExtendDataList::Iterator it = item->extendDataList->Begin(); !it.End(); ++it)
+				{
+					BaseExtraList * pExtraDataList = it.Get();
 
-				   // Search extra data for player created poisons
-				   if (pExtraDataList)
-				   {
-					   if (pExtraDataList->HasType(kExtraData_Poison))
-					   {
-						   if (ExtraPoison* extraPoison = static_cast<ExtraPoison*>(pExtraDataList->GetByType(kExtraData_Poison)))
-						   {
-							   alchItem = extraPoison->poison;
-						   }
-					   }
-				   }
-			   }
-		   }
+					// Search extra data for player created poisons
+					if (pExtraDataList)
+					{
+						if (pExtraDataList->HasType(kExtraData_Poison))
+						{
+							if (ExtraPoison* extraPoison = static_cast<ExtraPoison*>(pExtraDataList->GetByType(kExtraData_Poison)))
+							{
+								alchItem = extraPoison->poison;
+							}
+						}
+					}
+				}
+			}
 
-		   if (alchItem && alchItem->effectItemList.count)
-		   {
-			   UInt32 effectCount = alchItem->effectItemList.count;
-			   UInt32 negEffects = 0;
-			   UInt32 posEffects = 0;
-			   bool survivalMode = isSurvivalMode();
+			if (alchItem && alchItem->effectItemList.count)
+			{
+				UInt32 effectCount = alchItem->effectItemList.count;
+				UInt32 negEffects = 0;
+				UInt32 posEffects = 0;
+				bool survivalMode = isSurvivalMode();
 
-			   for (int i = 0; i < effectCount; i++)
-			   {
-				   if (alchItem->effectItemList[i]->mgef)
-				   {
-					   string effectName = string(alchItem->effectItemList[i]->mgef->description.c_str());
-					   size_t found = effectName.find("[SURV=");
-					   bool surVivalDescFound = (found != string::npos);
+				for (int i = 0; i < effectCount; i++)
+				{
+					if (alchItem->effectItemList[i]->mgef)
+					{
+						string effectName = string(alchItem->effectItemList[i]->mgef->description.c_str());
+						size_t found = effectName.find("[SURV=");
+						bool surVivalDescFound = (found != string::npos);
 
-					   if (((alchItem->effectItemList[i]->mgef->properties.flags & EffectSetting::Properties::kEffectType_Detrimental) == EffectSetting::Properties::kEffectType_Detrimental) || 
-						   ((alchItem->effectItemList[i]->mgef->properties.flags & EffectSetting::Properties::kEffectType_Hostile) == EffectSetting::Properties::kEffectType_Hostile))
-					   {
+						if (((alchItem->effectItemList[i]->mgef->properties.flags & EffectSetting::Properties::kEffectType_Detrimental) == EffectSetting::Properties::kEffectType_Detrimental) ||
+							((alchItem->effectItemList[i]->mgef->properties.flags & EffectSetting::Properties::kEffectType_Hostile) == EffectSetting::Properties::kEffectType_Hostile))
+						{
 
-						   // Do not include the survival mode effects when not in survival mode
-						   if (!survivalMode && surVivalDescFound)
-						   {
-							   continue;
-						   }
-						   negEffects++; 
-					   }
-					   else
-					   {
-						   // Do not include the survival mode effects when not in survival mode
-						   if (!survivalMode && surVivalDescFound)
-						   {
-							   continue;
-						   }
-						   posEffects++;
-					   }
-				   }
-			   }
+							// Do not include the survival mode effects when not in survival mode
+							if (!survivalMode && surVivalDescFound)
+							{
+								continue;
+							}
+							negEffects++;
+						}
+						else
+						{
+							// Do not include the survival mode effects when not in survival mode
+							if (!survivalMode && surVivalDescFound)
+							{
+								continue;
+							}
+							posEffects++;
+						}
+					}
+				}
 
-			   RegisterNumber(&obj, "PosEffects", posEffects);
-			   RegisterNumber(&obj, "NegEffects", negEffects);
-		   }
-	   }
-	   // Add the object to the scaleform function
-	   object->SetMember("AHZItemCardObj", &obj);
-   }
+				RegisterNumber(&obj, "PosEffects", posEffects);
+				RegisterNumber(&obj, "NegEffects", negEffects);
+			}
+		}
+		// Add the object to the scaleform function
+		object->SetMember("AHZItemCardObj", &obj);
+	}
+
+	// Static icons
+	const char* name = CALL_MEMBER_FN(item, GenerateName)();
+	SInt32 itemId = (SInt32)HashUtil::CRC32(name, item->type->formID & 0x00FFFFFF);
+	string iconName = papyrusMoreHudIE::GetIconName(itemId);
+
+	if (iconName.length())
+	{
+		RegisterString(object, "AHZItemIcon", iconName.c_str());
+	}
 }
 
 bool CAHZScaleform::isSurvivalMode()

@@ -1,5 +1,7 @@
 ﻿
 #include "AHZScaleformHook.h"
+#include "skse64/GameBSExtraData.h"
+#include "skse64/skse64_common/Utilities.h"
 
 string g_currentMenu;
 
