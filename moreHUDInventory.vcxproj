@@ -343,6 +343,7 @@
     <ClInclude Include="..\skse64\ScaleformCallbacks.h" />
     <ClInclude Include="AHZConfiguration.h" />
     <ClInclude Include="AHZConsole.h" />
+    <ClInclude Include="AHZInventoryMenu.h" />
     <ClInclude Include="AHZScaleformHook.h" />
     <ClInclude Include="AHZScaleform.h" />
     <ClInclude Include="AHZUtilities.h" />
