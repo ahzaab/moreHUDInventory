@@ -17,7 +17,7 @@ namespace papyrusMoreHudIE {
 	bool IsIconItemRegistered(StaticFunctionTag* base, UInt32 itemID)
 	{
 		bool found = false;
-		_MESSAGE("IsIconItemRegistered %d", itemID);
+		//_MESSAGE("IsIconItemRegistered %d", itemID);
 		s_iconItemCacheLock.Enter();
 		// Create an iterator of map
 		AhzIconItemCache::iterator it;
@@ -35,7 +35,7 @@ namespace papyrusMoreHudIE {
 
 	void AddIconItem(StaticFunctionTag* base, UInt32 itemID, BSFixedString iconName)
 	{
-		_MESSAGE("AddIconItem %d, %s", itemID, iconName.c_str());
+		//_MESSAGE("AddIconItem %d, %s", itemID, iconName.c_str());
 		s_iconItemCacheLock.Enter();
 		if (!IsIconItemRegistered(base, itemID))
 		{
@@ -46,7 +46,7 @@ namespace papyrusMoreHudIE {
 
 	void RemoveIconItem(StaticFunctionTag* base, UInt32 itemID)
 	{
-		_MESSAGE("RemoveIconItem %d", itemID);
+		//_MESSAGE("RemoveIconItem %d", itemID);
 		s_iconItemCacheLock.Enter();
 		if (IsIconItemRegistered(base, itemID))
 		{
