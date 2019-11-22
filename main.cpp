@@ -185,7 +185,7 @@ extern "C"
 
 			return false;
 		}
-		else if (skse->runtimeVersion < (MAKE_EXE_VERSION(1, 5, 80)))
+		else if (skse->runtimeVersion < (MAKE_EXE_VERSION(1, 5, 97)))
 		{
 			_ERROR("unsupported runtime version %08X", skse->runtimeVersion);
 
