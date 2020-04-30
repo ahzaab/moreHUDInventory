@@ -12,7 +12,7 @@
 
 using namespace std;
 
-#define PLUGIN_NAME  ("AHZmoreHUDInventory")
+#define PLUGIN_NAME  ("AHZmoreHUDInventory") 
 
 IDebugLog	gLog;
 PluginHandle	g_pluginHandle = kPluginHandle_Invalid;

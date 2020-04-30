@@ -1,0 +1,16 @@
+
+; If any parameters are left blank the built-in default values are used including the default clips
+
+[LargeItemCard]
+fXOffset=0
+fYOffset=-20
+fXScale=1.0
+fYScale=1.0
+fDescriptionYMargin = 35
+;Vanilla is 15
+fDescriptionXmargin = 30
+sSWFPath='moreHUDIE/customLargeItemCard.swf'
+
+[ItemCard]
+;Vanilla is 60
+fAlpha=60
