@@ -1,5 +1,7 @@
 Scriptname AhzMoreHudIE Hidden
 
+;This script will only work with iEquip
+
 ; Gets the version e.g 10008 for 1.0.8
 int Function GetVersion() global native
 

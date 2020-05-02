@@ -225,11 +225,16 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 			_config[AHZDefines.CFG_LIC_ALPHA] = AHZ_NormalALPHA;	
 			
 		if (!_config[AHZDefines.CFG_LIC_DESCRIPTION_YMARGIN])
-			_config[AHZDefines.CFG_LIC_DESCRIPTION_YMARGIN] = AHZ_YMargin_WithItems;				
+			_config[AHZDefines.CFG_LIC_DESCRIPTION_YMARGIN] = AHZ_YMargin;				
 			
 		if (!_config[AHZDefines.CFG_LIC_DESCRIPTION_XMARGIN])
-			_config[AHZDefines.CFG_LIC_DESCRIPTION_XMARGIN] = AHZ_XMargin;					
+			_config[AHZDefines.CFG_LIC_DESCRIPTION_XMARGIN] = AHZ_XMargin;	
 			
+		if (!_config[AHZDefines.CFG_LIC_DESCRIPTION_EXTRADATA_HEIGHT])
+			_config[AHZDefines.CFG_LIC_DESCRIPTION_EXTRADATA_HEIGHT] = AHZ_YMargin_WithItems;										
+			
+		if (!_config[AHZDefines.CFG_LIC_CRAFTING_YOFFSET])
+			_config[AHZDefines.CFG_LIC_CRAFTING_YOFFSET] = AHZ_CraftingMenuYShift;				
 	}
 
 	function configLoaded(event:Object):Void{
@@ -615,11 +620,11 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 
             if (marginRequired)
             {
-                processedTextField._height = (itemCardBottom - processedTextField._y) - _config[AHZDefines.CFG_LIC_DESCRIPTION_YMARGIN];
+                processedTextField._height = (itemCardBottom - processedTextField._y) - (_config[AHZDefines.CFG_LIC_DESCRIPTION_YMARGIN] + _config[AHZDefines.CFG_LIC_DESCRIPTION_EXTRADATA_HEIGHT]);
             }
             else
             {
-                processedTextField._height = (itemCardBottom - processedTextField._y) - AHZ_YMargin;
+                processedTextField._height = (itemCardBottom - processedTextField._y) - _config[AHZDefines.CFG_LIC_DESCRIPTION_YMARGIN];
             }
 
             ShrinkToFit(processedTextField);
@@ -627,9 +632,9 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
             // Need to shift up to make room for the requied crafting materials
             if (_currentMenu == "Crafting Menu" && !_craftingMenuCardShifted)
             {
-                itemCard._parent._y = itemCard._parent._y + AHZ_CraftingMenuYShift;
-                this._y = this._y + AHZ_CraftingMenuYShift;
-                additionDescriptionHolder._y = additionDescriptionHolder._y - AHZ_CraftingMenuYShift;
+                itemCard._parent._y = itemCard._parent._y + _config[AHZDefines.CFG_LIC_CRAFTING_YOFFSET] ;
+                this._y = this._y + _config[AHZDefines.CFG_LIC_CRAFTING_YOFFSET] ;
+                additionDescriptionHolder._y = additionDescriptionHolder._y - _config[AHZDefines.CFG_LIC_CRAFTING_YOFFSET] ;
                 _craftingMenuCardShifted = true;
             }
         }
@@ -640,9 +645,9 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
             // Shift back to normal
             if (_currentMenu == "Crafting Menu" && _craftingMenuCardShifted)
             {
-                itemCard._parent._y = itemCard._parent._y - AHZ_CraftingMenuYShift;
-                this._y = this._y - AHZ_CraftingMenuYShift;
-                additionDescriptionHolder._y = additionDescriptionHolder._y + AHZ_CraftingMenuYShift;
+                itemCard._parent._y = itemCard._parent._y - _config[AHZDefines.CFG_LIC_CRAFTING_YOFFSET] ;
+                this._y = this._y - _config[AHZDefines.CFG_LIC_CRAFTING_YOFFSET] ;
+                additionDescriptionHolder._y = additionDescriptionHolder._y + _config[AHZDefines.CFG_LIC_CRAFTING_YOFFSET] ;
                 _craftingMenuCardShifted = false;
             }
         }

@@ -9,4 +9,7 @@
     static var CFG_LIC_ALPHA: String = 'falpha:itemcard';
 	static var CFG_LIC_DESCRIPTION_YMARGIN: String = 'fdescriptionymargin:largeitemcard';
 	static var CFG_LIC_DESCRIPTION_XMARGIN: String = 'fdescriptionxmargin:largeitemcard';	
+	
+	static var CFG_LIC_DESCRIPTION_EXTRADATA_HEIGHT: String = 'fextradataheight:largeitemcard';
+	static var CFG_LIC_CRAFTING_YOFFSET: String = 'fcraftingcardyoffset:largeitemcard';
 }
