@@ -2,6 +2,7 @@
 import ahz.scripts.widgets.AHZDefines.AHZCCSurvFrames;
 import ahz.scripts.widgets.AHZDefines.AHZVanillaFrames;
 import flash.display.BitmapData;
+import flash.filters.DropShadowFilter;
 import mx.managers.DepthManager;
 
 class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
@@ -313,6 +314,12 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
             return;
         }
 
+		var filter:DropShadowFilter = new DropShadowFilter(2,45,0,100,2,2,1.5);
+		var filterArray:Array = new Array();
+  		filterArray.push(filter);
+		iconHolder.filters = filterArray;
+
+
         _global.skse.plugins.AHZmoreHUDInventory.AHZLog("Frame Count: " + itemCard._totalframes, false);
 
         if (itemCard._totalframes >= AHZCCSurvFrames.MAX_FRAMES)
@@ -424,12 +431,14 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
             if (_itemCardOverride)
             {
                 this._alpha = itemCard._alpha - (100 - _config[AHZDefines.CFG_LIC_ALPHA]);
-                cardBackground._alpha = 0;
+                //cardBackground._alpha = 0;
+				cardBackground.visible = false;
             }
             else
             {
                 this._alpha = 0;
-                cardBackground._alpha = _config[AHZDefines.CFG_LIC_ALPHA];
+                //cardBackground._alpha = _config[AHZDefines.CFG_LIC_ALPHA];
+				cardBackground.visible = true;
             }
         }
 
@@ -603,8 +612,9 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
             default:
                 {
                     processedTextField = undefined;
-                    cardBackground._alpha = _config[AHZDefines.CFG_LIC_ALPHA];
-                    this._alpha = 0;
+                    //cardBackground._alpha = _config[AHZDefines.CFG_LIC_ALPHA];
+                    cardBackground.visible = true;
+					this._alpha = 0;
                 }
                 break;
         }
@@ -886,10 +896,11 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 	public function onLoadInit(s_mc: MovieClip): Void
 	{
 		_global.skse.plugins.AHZmoreHUDInventory.AHZLog("CLIP LOADED: " + LoadedLargeItemCard_mc, false);	
-		LoadedLargeItemCard_mc._alpha = 100;
-		LoadedLargeItemCard_mc.visible = true;
-		LoadedLargeItemCard_mc._x = 0;
-		LoadedLargeItemCard_mc._y = 0;
+		//LoadedLargeItemCard_mc._alpha = 100;
+		//LoadedLargeItemCard_mc.visible = true;
+		//LoadedLargeItemCard_mc._x = 0;
+		//LoadedLargeItemCard_mc._y = 0;
+		s_mc.gotoAndStop(0);
 		clipReady();
 	}
 	
