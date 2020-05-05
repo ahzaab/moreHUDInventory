@@ -323,19 +323,19 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 
         if (itemCard._totalframes >= AHZCCSurvFrames.MAX_FRAMES)
         {
-            _global.skse.plugins.AHZmoreHUDInventory.AHZLog("Survival Card Detected", true);
+            _global.skse.plugins.AHZmoreHUDInventory.AHZLog("Survival Card Detected", false);
             _isCCSurvCard = true;
             _frameDefines = AHZCCSurvFrames;
         }
         else if (itemCard._totalframes >= AHZCCSkyUIFrames.MAX_FRAMES)
         {
-            _global.skse.plugins.AHZmoreHUDInventory.AHZLog("SkyUI Survival Integration Card Detected", true);
+            _global.skse.plugins.AHZmoreHUDInventory.AHZLog("SkyUI Survival Integration Card Detected", false);
             _isCCSurvCard = true;
             _frameDefines = AHZCCSkyUIFrames;
         }
         else
         {
-            _global.skse.plugins.AHZmoreHUDInventory.AHZLog("Vanilla Card Detected", true);
+            _global.skse.plugins.AHZmoreHUDInventory.AHZLog("Vanilla Card Detected", false);
             _isCCSurvCard = false;
             _frameDefines = AHZVanillaFrames;
         }
