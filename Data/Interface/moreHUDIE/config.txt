@@ -1,0 +1,22 @@
+
+; If any parameters are left blank the built-in default values are used including the default clips
+
+[LargeItemCard]
+fXOffset=0
+fYOffset=-20
+fXScale=1.0
+fYScale=1.0
+
+;Vanilla is 0
+fDescriptionYMargin = 35
+;Vanilla is 15
+fDescriptionXmargin = 30
+;Vanilla is 35, This is the height of the extra data on some item cards like magic level and cost
+fExtraDataHeight= 35
+;Vanilla is -25.  for some crafting menus, the item card data is shifted to display required materials
+fCraftingCardYOffset= -25
+sSWFPath='moreHUDIE/customLargeItemCard.swf'
+
+[ItemCard]
+;Vanilla is 60
+fAlpha=60
