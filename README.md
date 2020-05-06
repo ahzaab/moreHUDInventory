@@ -23,3 +23,6 @@ The compiled .dll is installed in the Skyrim Data Folder to `Data/SKSE/Plugins`
 
 ## Does it need papyrus?
 No.  There is no papyrus.  All settings are made in the corresponding ini file.
+
+## Configuration
+Starting in version 1.0.15 Mod authors can change parameters and load custom large item card backgrounds as shown [here](https://github.com/ahzaab/moreHUDInventory/tree/master/Data/Interface/moreHUDIE).
