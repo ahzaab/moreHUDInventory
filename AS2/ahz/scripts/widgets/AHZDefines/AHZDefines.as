@@ -12,4 +12,8 @@
 	
 	static var CFG_LIC_DESCRIPTION_EXTRADATA_HEIGHT: String = 'fextradataheight:largeitemcard';
 	static var CFG_LIC_CRAFTING_YOFFSET: String = 'fcraftingcardyoffset:largeitemcard';
+	
+	static var CFG_ICON_PATH: String = 'sswfpath:icons';
+	static var CFG_ICON_POS_EFFECT_COLOR: String = 'sposeffectfontcolorhex:icons';
+	static var CFG_ICON_NEG_EFFECT_COLOR: String = 'snegeffectfontcolorhex:icons';
 }

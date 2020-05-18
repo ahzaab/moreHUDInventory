@@ -20,3 +20,8 @@ sSWFPath='moreHUDIE/customLargeItemCard.swf'
 [ItemCard]
 ;Vanilla is 60
 fAlpha=60
+
+[Icons]
+sSWFPath='moreHUDIE/icons.swf'
+sPosEffectFontColorHex = '#189515'
+sNegEffectFontColorHex = '#FF0000'
