@@ -28,7 +28,6 @@ namespace papyrusMoreHudIE {
 
 	typedef std::map<UInt32, BSFixedString> AhzIconItemCache;
 	typedef std::map<std::string, BGSListForm*> AhzIconFormListCache;
-	static ICriticalSection	s_iconItemCacheLock;
 	static AhzIconItemCache s_ahzRegisteredIcons;
 	static AhzIconFormListCache s_ahzRegisteredIconFormLists;
 	static std::recursive_mutex mtx;
@@ -57,12 +56,15 @@ namespace papyrusMoreHudIE {
 		}
 	}
 
-	bool IsIconFormListRegistered(std::string iconName)
+	bool IsIconFormListRegistered_Internal(std::string iconName)
 	{
 		//_MESSAGE("IsIconItemRegistered %d", itemID);
 		std::lock_guard <recursive_mutex> lock(mtx);
 		// Create an iterator of map
 		AhzIconFormListCache::iterator it;
+
+		if (s_ahzRegisteredIconFormLists.empty())
+			return false;
 
 		// Find the element with key itemID
 		it = s_ahzRegisteredIconFormLists.find(iconName);
@@ -73,13 +75,13 @@ namespace papyrusMoreHudIE {
 
 	bool IsIconFormListRegistered(StaticFunctionTag* base, BSFixedString iconName)
 	{
-		return IsIconFormListRegistered(iconName.c_str());
+		return IsIconFormListRegistered_Internal(iconName.c_str());
 	}
 
 	bool HasForm(std::string iconName, UInt32 formId)
 	{
 		std::lock_guard <recursive_mutex> lock(mtx);
-		if (IsIconFormListRegistered(iconName))
+		if (IsIconFormListRegistered_Internal(iconName))
 		{
 			auto formList = s_ahzRegisteredIconFormLists[iconName];
 
@@ -202,6 +204,15 @@ bool papyrusMoreHudIE::RegisterFuncs(VMClassRegistry* registry)
 	registry->RegisterFunction(
 		new NativeFunction1<StaticFunctionTag, void, VMArray<UInt32>>("RemoveIconItems", "AhzMoreHudIE", papyrusMoreHudIE::RemoveIconItems, registry));
 
+	registry->RegisterFunction(
+		new NativeFunction2<StaticFunctionTag, void, BSFixedString, BGSListForm*>("RegisterIconFormList", "AhzMoreHudIE", papyrusMoreHudIE::RegisterIconFormList, registry));
+
+	registry->RegisterFunction(
+		new NativeFunction1<StaticFunctionTag, void, BSFixedString>("UnRegisterIconFormList", "AhzMoreHudIE", papyrusMoreHudIE::UnRegisterIconFormList, registry));
+
+	registry->RegisterFunction(
+		new NativeFunction1<StaticFunctionTag, bool, BSFixedString>("IsIconFormListRegistered", "AhzMoreHudIE", papyrusMoreHudIE::IsIconFormListRegistered, registry));
+
 
 	registry->SetFunctionFlags("AhzMoreHudIE", "GetVersion", VMClassRegistry::kFunctionFlag_NoWait);
 	registry->SetFunctionFlags("AhzMoreHudIE", "IsIconItemRegistered", VMClassRegistry::kFunctionFlag_NoWait);
@@ -209,6 +220,10 @@ bool papyrusMoreHudIE::RegisterFuncs(VMClassRegistry* registry)
 	registry->SetFunctionFlags("AhzMoreHudIE", "RemoveIconItem", VMClassRegistry::kFunctionFlag_NoWait);
 	registry->SetFunctionFlags("AhzMoreHudIE", "AddIconItems", VMClassRegistry::kFunctionFlag_NoWait);
 	registry->SetFunctionFlags("AhzMoreHudIE", "RemoveIconItems", VMClassRegistry::kFunctionFlag_NoWait);
+
+	registry->SetFunctionFlags("AhzMoreHudIE", "RegisterIconFormList", VMClassRegistry::kFunctionFlag_NoWait);
+	registry->SetFunctionFlags("AhzMoreHudIE", "UnRegisterIconFormList", VMClassRegistry::kFunctionFlag_NoWait);
+	registry->SetFunctionFlags("AhzMoreHudIE", "IsIconFormListRegistered", VMClassRegistry::kFunctionFlag_NoWait);
 
 	return true;
 }

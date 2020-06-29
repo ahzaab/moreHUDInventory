@@ -134,6 +134,11 @@ void CAHZScaleform::ExtendItemCard(GFxMovieView * view, GFxValue * object, Inven
 	{
 		RegisterString(object, "AHZItemIcon", iconName.c_str());
 	}
+
+
+	RegisterBoolean(object, "AHZdbmNew", papyrusMoreHudIE::HasForm("dbmNew", item->type->formID));
+	RegisterBoolean(object, "AHZdbmDisp", papyrusMoreHudIE::HasForm("dbmDisp", item->type->formID));
+
 }
 
 bool CAHZScaleform::isSurvivalMode()

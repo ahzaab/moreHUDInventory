@@ -22,7 +22,7 @@ namespace papyrusMoreHudIE
 	void RegisterIconFormList(StaticFunctionTag* base, BSFixedString iconName, BGSListForm *list);
 	void UnRegisterIconFormList(StaticFunctionTag* base, BSFixedString iconName);
 	bool IsIconFormListRegistered(StaticFunctionTag* base, BSFixedString iconName);
-	bool IsIconFormListRegistered(std::string iconName);
+	bool IsIconFormListRegistered_Internal(std::string iconName);
 	string GetIconName(UInt32 itemID);
 	bool HasForm(std::string iconName, UInt32 formId);
 }
