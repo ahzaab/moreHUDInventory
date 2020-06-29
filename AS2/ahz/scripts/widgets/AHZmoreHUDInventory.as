@@ -844,6 +844,17 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 				IconContainer.appendImage(customIcon);
 			}
 		}
+		
+		if (_selectedItem.AHZdbmNew)
+		{
+			IconContainer.appendImage("dbmNew");
+		}		
+		
+		if (_selectedItem.AHZdbmDisp)
+		{
+			IconContainer.appendImage("dbmDisp");
+		}	
+		
 	}
 
 	function interpolate(pBegin:Number, pEnd:Number, pMax:Number, pStep:Number):Number

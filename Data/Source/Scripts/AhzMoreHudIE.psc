@@ -19,3 +19,12 @@ Function AddIconItems(int[] aItemIds, string[] aIconNames) global native
 
 ; Removes an array of Item ID's 
 Function RemoveIconItems(int[] aItemIds) global native
+
+; Returns true if the form list with the key
+Function RegisterIconFormList(string aKey, FormList alist) global native
+
+; Unregistered a form list with this key
+Function UnRegisterIconFormList(string aKey) global native
+
+; Returns true if the form list is registered
+bool Function IsIconFormListRegistered(string aKey) global native
