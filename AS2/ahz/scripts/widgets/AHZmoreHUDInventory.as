@@ -59,6 +59,11 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 	private static var AHZ_FontScale:Number         = 0.90;
 	private static var AHZ_CraftingMenuYShift:Number = -25;
 	private static var AHZ_NormalALPHA:Number = 60;
+	private static var AHZ_IconsFile:String = 'moreHUDIE/baseIcons.swf'
+	private static var AHZ_ItemCardFile:String = 'moreHUDIE/baseLargeItemCard.swf'
+	
+	
+	
 
 	// Types from ItemCard
 	private static var ICT_ARMOR: Number            = 1;
@@ -323,6 +328,12 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 
 		if (!_config[AHZDefines.CFG_ICON_NEG_EFFECT_COLOR])
 			_config[AHZDefines.CFG_ICON_NEG_EFFECT_COLOR] = '#FF0000';
+			
+		if (!_config[AHZDefines.CFG_LIC_PATH])
+			_config[AHZDefines.CFG_LIC_PATH] = AHZ_ItemCardFile;
+					
+		if (!_config[AHZDefines.CFG_ICON_PATH])
+			_config[AHZDefines.CFG_ICON_PATH] = AHZ_IconsFile;
 	}
 
 	function configLoaded(event:Object):Void
@@ -845,11 +856,15 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 			}
 		}
 		
+		_global.skse.plugins.AHZmoreHUDInventory.AHZLog("_selectedItem.AHZdbmNew: " + _selectedItem.AHZdbmNew, false);
+		_global.skse.plugins.AHZmoreHUDInventory.AHZLog("  _selectedItem.formId: " + _selectedItem.formId.toString(16), false);
 		if (_selectedItem.AHZdbmNew)
 		{
 			IconContainer.appendImage("dbmNew");
 		}		
 		
+		_global.skse.plugins.AHZmoreHUDInventory.AHZLog("_selectedItem.AHZdbmDisp: " + _selectedItem.AHZdbmDisp, false);
+		_global.skse.plugins.AHZmoreHUDInventory.AHZLog("  _selectedItem.formId: " + _selectedItem.formId.toString(16), false);
 		if (_selectedItem.AHZdbmDisp)
 		{
 			IconContainer.appendImage("dbmDisp");

@@ -1,2 +1,7 @@
 Source\Scripts\AhzMoreHudIE.psc
+Scripts\AhzMoreHudIE.pex
+Interface\exported\moreHUDIE\baseIcons.swf
+Interface\exported\moreHUDIE\baseLargeItemCard.swf
+Interface\exported\moreHUDIE\config.txt
+Interface\exported\AHZmoreHUDInventory.swf
 Interface\AHZmoreHUDInventory.swf

@@ -15,13 +15,13 @@ fDescriptionXmargin = 15
 fExtraDataHeight= 35
 ;Vanilla is -25.  for some crafting menus, the item card data is shifted to display required materials
 fCraftingCardYOffset= -25
-sSWFPath='moreHUDIE/customLargeItemCard.swf'
+sSWFPath='moreHUDIE/baseLargeItemCard.swf'
 
 [ItemCard]
 ;Vanilla is 60
 fAlpha=60
 
 [Icons]
-sSWFPath='moreHUDIE/icons.swf'
+sSWFPath='moreHUDIE/baseIcons.swf'
 sPosEffectFontColorHex = '#189515'
 sNegEffectFontColorHex = '#FF0000'

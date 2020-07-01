@@ -16,9 +16,11 @@ namespace papyrusMoreHudIE {
 		virtual bool Accept(TESForm* form)
 		{
 			if (!m_form || !form)
-				return true;
+				return false;
 
-			return !(m_form->formID == form->formID);
+			auto found = ((m_form->formID) == (form->formID));
+
+			return found;
 		}
 
 	private:
@@ -41,6 +43,10 @@ namespace papyrusMoreHudIE {
 	{
 		//_MESSAGE("AddIconItem %d, %s", itemID, iconName.c_str());
 		std::lock_guard <recursive_mutex> lock(mtx);
+
+		if (!list)
+			return;
+
 		if (!IsIconFormListRegistered(base, iconName))
 		{
 			s_ahzRegisteredIconFormLists.insert(AhzIconFormListCache::value_type(iconName.c_str(), list));
@@ -50,6 +56,7 @@ namespace papyrusMoreHudIE {
 	{
 		//_MESSAGE("AddIconItem %d, %s", itemID, iconName.c_str());
 		std::lock_guard <recursive_mutex> lock(mtx);
+
 		if (IsIconFormListRegistered(base, iconName))
 		{
 			s_ahzRegisteredIconFormLists.erase(iconName.c_str());

@@ -9,6 +9,7 @@ if (!$(Test-Path "$destinationDataPath\Interface"))
 }
 
 Copy-Item "$sourcePath\Source\Scripts\ahzMoreHudIE.psc" -Destination "$destinationDataPath\Source\Scripts"
+Copy-Item "$sourcePath\Scripts\ahzMoreHudIE.pex" -Destination "$destinationDataPath\Scripts"
 Copy-Item "$sourcePath\AHZmoreHUDInventory.esl" -Destination "$destinationDataPath"
 Copy-Item "$sourcePath\AHZmoreHUDInventory.esl" -Destination "$destinationDataPath"
 Copy-Item "$sourcePath\Interface\AHZmoreHUDInventory.swf" -Destination "$destinationDataPath\Interface"
