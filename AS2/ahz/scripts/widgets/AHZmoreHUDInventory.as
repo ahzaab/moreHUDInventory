@@ -71,6 +71,9 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 	private static var ICT_BOOK: Number             = 4;
 	private static var ICT_POTION: Number           = 6;        // Used for Spell Tomes (shrug)
 	private static var ICT_FOOD: Number = 5;
+	private static var ICT_MISC: Number = 3;
+	private static var ICT_KEY: Number = 9;
+
 
 	private static var BOOKFLAG_READ: Number        = 0x08;
 	private static var SHOW_PANEL                   = 1;
@@ -750,6 +753,23 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		}
 	}
 
+	function checkDbm(selectedItemIn:Object):Void
+	{
+		if (!selectedItemIn)
+		{
+			return;
+		}
+		
+		if (selectedItemIn.AHZdbmNew)
+		{
+			IconContainer.appendImage("dbmNew");
+		}		
+		if (selectedItemIn.AHZdbmDisp)
+		{
+			IconContainer.appendImage("dbmDisp");
+		}			
+	}
+
 	// A hook to update the item card with extended items
 	// Note this function does not get called by the crafting menus.  If we need to extend
 	// the crafting menu, I need to find another way.  I found no publically accessable hooks
@@ -795,11 +815,17 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 				return
 			}
 		}
-		else if (type != ICT_BOOK && type != ICT_ARMOR && type != ICT_WEAPON && type != ICT_POTION && type != ICT_FOOD && !_selectedItem.AHZItemIcon)
+		else if (type != ICT_BOOK &&
+				 type != ICT_ARMOR && 
+				 type != ICT_WEAPON && 
+				 type != ICT_POTION && 
+				 type != ICT_FOOD && !_selectedItem.AHZItemIcon)
 		{
+			// Allo for checking Misc and Keys (Empty Frame)
+			checkDbm(_selectedItem);
 			return;
 		}
-
+		
 		if (_selectedItem.AHZItemCardObj.enchantmentKnown)
 		{
 			IconContainer.appendImage("ahzKnown");
@@ -855,21 +881,8 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 				IconContainer.appendImage(customIcon);
 			}
 		}
-		
-		_global.skse.plugins.AHZmoreHUDInventory.AHZLog("_selectedItem.AHZdbmNew: " + _selectedItem.AHZdbmNew, false);
-		_global.skse.plugins.AHZmoreHUDInventory.AHZLog("  _selectedItem.formId: " + _selectedItem.formId.toString(16), false);
-		if (_selectedItem.AHZdbmNew)
-		{
-			IconContainer.appendImage("dbmNew");
-		}		
-		
-		_global.skse.plugins.AHZmoreHUDInventory.AHZLog("_selectedItem.AHZdbmDisp: " + _selectedItem.AHZdbmDisp, false);
-		_global.skse.plugins.AHZmoreHUDInventory.AHZLog("  _selectedItem.formId: " + _selectedItem.formId.toString(16), false);
-		if (_selectedItem.AHZdbmDisp)
-		{
-			IconContainer.appendImage("dbmDisp");
-		}	
-		
+
+		checkDbm(_selectedItem);
 	}
 
 	function interpolate(pBegin:Number, pEnd:Number, pMax:Number, pStep:Number):Number

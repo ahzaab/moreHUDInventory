@@ -83,7 +83,7 @@ class AHZIconContainer
 		if (_tf._alpha != alphaValue)
 		{
 			_tf._alpha = alphaValue;
-			for (var i = 0; i < _currentImageIndex; i++)
+			for (var i = 0; i <= _currentImageIndex; i++)
 			{
 				loadedIcons[i]._alpha = _tf._alpha;
 			}			
