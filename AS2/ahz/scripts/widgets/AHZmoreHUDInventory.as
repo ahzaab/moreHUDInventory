@@ -283,11 +283,19 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 			_iconContainerTextFormat.font = "$EverywhereMediumFont";
 			tf.setNewTextFormat(_iconContainerTextFormat);
 			tf.text = "";
-
-			var filter:DropShadowFilter = new DropShadowFilter(2,45,0,100,2,2,1.5);
-			var filterArray:Array = new Array();
-			filterArray.push(filter);
-			tf.filters = filterArray;
+			
+			if (_config[AHZDefines.CFG_ICON_DROP_SHADOW])
+			{
+				var filter:DropShadowFilter = new DropShadowFilter(2,45,0,100,2,2,1.5);
+				var filterArray:Array = new Array();
+				filterArray.push(filter);
+				tf.filters = filterArray;
+			}
+			else
+			{
+				var filterArray:Array = new Array();
+				tf.filters = filterArray;
+			}
 
 			IconContainer.textField = tf;
 			IconContainer.setNewTextFormat(_iconContainerTextFormat);
@@ -337,6 +345,13 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 					
 		if (!_config[AHZDefines.CFG_ICON_PATH])
 			_config[AHZDefines.CFG_ICON_PATH] = AHZ_IconsFile;
+		
+		// Kind of unnecessary if defaulting to false
+		if (_config[AHZDefines.CFG_ICON_DROP_SHADOW] == undefined ||
+			_config[AHZDefines.CFG_ICON_DROP_SHADOW] == null)
+		{	
+			_config[AHZDefines.CFG_ICON_DROP_SHADOW] = false;
+		}
 	}
 
 	function configLoaded(event:Object):Void
@@ -570,10 +585,19 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		_iconContainerTextFormat.font = "$EverywhereMediumFont";
 		IconContainer.setNewTextFormat(_iconContainerTextFormat);
 
-		var filter:DropShadowFilter = new DropShadowFilter(2,45,0,100,2,2,1.5);
-		var filterArray:Array = new Array();
-		filterArray.push(filter);
-		IconContainer.textField.filters = filterArray;		
+		if (_config[AHZDefines.CFG_ICON_DROP_SHADOW])
+		{
+			var filter:DropShadowFilter = new DropShadowFilter(2,45,0,100,2,2,1.5);
+			var filterArray:Array = new Array();
+			filterArray.push(filter);
+			IconContainer.textField.filters = filterArray;
+		}
+		else
+		{
+			var filterArray:Array = new Array();
+			IconContainer.textField.filters = filterArray;
+		}
+
 		IconContainer.html = false;
 		IconContainer.text = "";
 	}
@@ -720,16 +744,13 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 				additionDescriptionHolder._y = additionDescriptionHolder._y - _config[AHZDefines.CFG_LIC_CRAFTING_YOFFSET] ;
 				_craftingMenuCardShifted = true;
 			}
-
-			IconContainer.textWidth = this._width;
-			IconContainer._x = this._x - (itemCard._parent._x + itemCard._x);
 		}
 		else
 		{
-			IconContainer._x = 0;
-			IconContainer.textWidth = cardBackground._width;
 			_itemCardOverride = false;
-
+			this._alpha = 0;
+			cardBackground._alpha = _config[AHZDefines.CFG_LIC_ALPHA];			
+			
 			// Shift back to normal
 			if (_currentMenu == "Crafting Menu" && _craftingMenuCardShifted)
 			{
@@ -739,6 +760,9 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 				_craftingMenuCardShifted = false;
 			}
 		}
+		
+		IconContainer._x = itemCard.ItemText._x + itemCard.ItemText.ItemTextField._x;
+		IconContainer.textWidth = itemCard.ItemText.ItemTextField._width;		
 
 		// Shift any control the is below the processedTextField, down to the new
 		// Width

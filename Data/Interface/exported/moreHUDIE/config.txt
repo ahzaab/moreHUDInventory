@@ -25,3 +25,4 @@ fAlpha=60
 sSWFPath='moreHUDIE/baseIcons.swf'
 sPosEffectFontColorHex = '#189515'
 sNegEffectFontColorHex = '#FF0000'
+bEnableDropShadow = false
