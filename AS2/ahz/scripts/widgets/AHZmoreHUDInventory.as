@@ -116,7 +116,7 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		if (itemCard["background"])
 		{
 			return MovieClip(itemCard["background"]);
-		}
+		}	
 		else
 		{
 			// Vanilla does not name the background clip.  So we must
@@ -142,6 +142,17 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 				}
 			}
 		}
+		
+		if (itemCard["Enchanting_Slim_Background"])
+		{
+			return MovieClip(itemCard["Enchanting_Slim_Background"]);
+		}	
+				
+		if (itemCard["Enchanting_Background"])
+		{
+			return MovieClip(itemCard["Enchanting_Background"]);
+		}			
+		
 		return undefined;
 	}
 
@@ -196,8 +207,8 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		// Sneak in the main menu and enable extended data before any inventory menu can load
 		if (_currentMenu == "Main Menu")
 		{
-			_global.skse.plugins.AHZmoreHUDInventory.AHZLog(
-				"AHZmoreHUDInventory turning on extended data.", true);
+			//_global.skse.plugins.AHZmoreHUDInventory.AHZLog(
+				//"AHZmoreHUDInventory turning on extended data.", true);
 			_global.skse.ExtendData(true);
 
 			return;
@@ -449,6 +460,7 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		}
 		_enableItemCardResize = _global.skse.plugins.AHZmoreHUDInventory.EnableItemCardResize();
 
+		
 		if (_enableItemCardResize)
 		{
 			cardBackground = GetBackgroundMovie();
@@ -460,7 +472,6 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		}
 
 		var t = this;
-
 		t.setDepthTo(-16384);
 
 		// Start monitoring the frames
@@ -527,6 +538,18 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 				this._alpha = 0;
 				cardBackground._alpha = _config[AHZDefines.CFG_LIC_ALPHA];
 			}
+		}
+		else
+		{
+			// When not changing item card sizes, just make sure the alpha is set from the
+			// config
+			if (itemCard._currentframe != _lastFrame)
+			{
+				cardBackground = GetBackgroundMovie();
+				_lastFrame = itemCard._currentframe;
+				this._alpha = 0;
+				cardBackground._alpha = _config[AHZDefines.CFG_LIC_ALPHA];
+			}		
 		}
 
 		_selectedIndex = GetSelectedIndex();
@@ -699,13 +722,7 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 					processedTextField = itemCard.MagicEffectsLabel;
 				}
 				break;
-
-			/*case _frameDefines.CFT_ENCHANTING:
-			{
-			    processedTextField = itemCard.EnchantmentLabel;
-			}
-			break; 	*/
-
+				
 			// All other frames are not going to be resized
 			default:
 				{
@@ -761,9 +778,6 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 			}
 		}
 		
-		IconContainer._x = itemCard.ItemText._x + itemCard.ItemText.ItemTextField._x;
-		IconContainer.textWidth = itemCard.ItemText.ItemTextField._width;		
-
 		// Shift any control the is below the processedTextField, down to the new
 		// Width
 		if (_itemCardOverride)
@@ -807,6 +821,10 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		ResetIconText();
 		var iconName:String;
 
+		IconContainer._x = itemCard.ItemText._x + itemCard.ItemText.ItemTextField._x;
+		IconContainer.textWidth = itemCard.ItemText.ItemTextField._width;		
+		IconContainer._y = ((itemCard.ItemText._y + itemCard.ItemText.ItemTextField._y) - IconContainer.textHeight) + 10;
+
 		if (_enableItemCardResize)
 		{
 			AdjustItemCard(_lastFrame);
@@ -821,19 +839,10 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		// Magic Menu cannot be extended by plugins so call a function to get the iconName
 		if (_currentMenu == "MagicMenu")
 		{
-			//_global.skse.plugins.AHZmoreHUDInventory.AHZLog("Getting Magic Item", false);
-			//for (var o in _selectedItem)
-			//{
-			//	_global.skse.plugins.AHZmoreHUDInventory.AHZLog("      " + o + ":" + _selectedItem[o], false);
-			//}
-
-			//_global.skse.plugins.AHZmoreHUDInventory.AHZLog("Getting Magic Item " + _selectedItem.formId, false);
+			// Only for iEquip 
 			var returnValue:Object = {returnObject:{itemIcon:""}}
 									 _global.skse.plugins.AHZmoreHUDInventory.GetIconForItemId(_selectedItem.formId, _selectedItem.text, returnValue);
 			iconName = returnValue.returnObject.iconName;
-
-			//_global.skse.plugins.AHZmoreHUDInventory.AHZLog("iconName: " + iconName, false);
-
 			if (!iconName || !iconName.length)
 			{
 				return
@@ -845,7 +854,7 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 				 type != ICT_POTION && 
 				 type != ICT_FOOD && !_selectedItem.AHZItemIcon)
 		{
-			// Allo for checking Misc and Keys (Empty Frame)
+			// Allow for checking Misc and Keys (Empty Frame)
 			checkDbm(_selectedItem);
 			return;
 		}
@@ -872,25 +881,21 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 				 _selectedItem.AHZItemCardObj.NegEffects > 0)
 		{
 			IconContainer.html = true;
-
 			if (_selectedItem.AHZItemCardObj.PosEffects > 0)
 			{
 				IconContainer.appendImage("ahzHealth");
 				IconContainer.appendHtml("<font face=\'$EverywhereBoldFont\' size=\'18\' color=\'"+_config[AHZDefines.CFG_ICON_POS_EFFECT_COLOR]+"\'>&nbsp;" + _selectedItem.AHZItemCardObj.PosEffects + "</font>");
+				IconContainer.appendHtml("<font face=\'$EverywhereBoldFont\' size=\'18\' color=\'"+_config[AHZDefines.CFG_ICON_POS_EFFECT_COLOR]+"\'>&nbsp;&nbsp;&nbsp;</font>");
 			}
 			if (_selectedItem.AHZItemCardObj.NegEffects > 0)
-			{
-				// Add space if we have both
-				if (_selectedItem.AHZItemCardObj.PosEffects > 0)
-				{
-					IconContainer.appendHtml("<font face=\'$EverywhereBoldFont\' size=\'18\' color=\'"+_config[AHZDefines.CFG_ICON_POS_EFFECT_COLOR]+"\'>&nbsp;&nbsp;&nbsp;</font>");
-				}
-				
+			{				
 				IconContainer.appendImage("ahzPoison");
 				IconContainer.appendHtml("<font face=\'$EverywhereBoldFont\' size=\'18\' color=\'"+_config[AHZDefines.CFG_ICON_NEG_EFFECT_COLOR]+"\'>&nbsp;" + _selectedItem.AHZItemCardObj.NegEffects + "</font>");
+				IconContainer.appendHtml("<font face=\'$EverywhereBoldFont\' size=\'18\' color=\'"+_config[AHZDefines.CFG_ICON_POS_EFFECT_COLOR]+"\'>&nbsp;&nbsp;&nbsp;</font>");	
 			}
 		}
 
+		// If coming from the Magic Menu (No extended data) or other menus (the name is part of the extended data for all other menus
 		if (_selectedItem.AHZItemIcon || (iconName && iconName.length))
 		{
 			var customIcon:String;

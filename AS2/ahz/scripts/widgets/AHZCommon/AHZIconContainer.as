@@ -131,6 +131,12 @@ class AHZIconContainer
 		return _tf._width;
 	}	
 	
+	public function get textHeight():Number
+	{
+		//_global.skse.plugins.AHZmoreHUDInventory.AHZLog("~get textWidth~ ", false);
+		return _tf._height;
+	}		
+	
 	public function set htmlText(textValue:String):Void
 	{
 		if (!textValue){
