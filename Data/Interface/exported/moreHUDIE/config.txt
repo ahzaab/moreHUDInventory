@@ -1,4 +1,3 @@
-
 ; If any parameters are left blank the built-in default values are used including the default clips
 
 [LargeItemCard]
@@ -7,19 +6,25 @@ fYOffset=0
 fXScale=1.0
 fYScale=1.0
 
-;Vanilla is 0
-fDescriptionYMargin = 0
+;Vanilla is 15, does not apply when extra data is shown in the bottom of the itemcard, like magic cost, etc
+fDescriptionBottomMargin = 15
+;Vanilla is 44 based on the tallest bottom element. This is the margin used for the description when the item card displays extra data like magic level and cost, active effects remaining time, etc
+fDescriptionBottomMarginExtra = 44
 ;Vanilla is 15
-fDescriptionXmargin = 15
-;Vanilla is 35, This is the height of the extra data on some item cards like magic level and cost
-fExtraDataHeight= 35
+fDescriptionLeftMargin = 15
+;Vanilla is 15
+fDescriptionRightMargin = 15
+;Padding between the Decription and extra bottom elements
+fExtraDataPadding = 5
 ;Vanilla is -25.  for some crafting menus, the item card data is shifted to display required materials
-fCraftingCardYOffset= -25
+fCraftingCardYOffset = -25
 sSWFPath='moreHUDIE/baseLargeItemCard.swf'
 
 [ItemCard]
 ;Vanilla is 60
 fAlpha=60
+; Set to true for debugging, adds a border around all textfields
+bDebugDrawBorders = false
 
 [Icons]
 sSWFPath='moreHUDIE/baseIcons.swf'

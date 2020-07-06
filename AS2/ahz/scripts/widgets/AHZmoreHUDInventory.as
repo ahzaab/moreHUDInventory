@@ -54,7 +54,7 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 	private static var hooksInstalled:Boolean = false;
 	private static var AHZ_XMargin:Number           = 15;
 	private static var AHZ_YMargin:Number           = 0;
-	private static var AHZ_YMargin_WithItems:Number = 35;
+	private static var AHZ_YMargin_WithItems:Number = 44;
 	private static var AHZ_YMargin_Crafting:Number  = 20;
 	private static var AHZ_FontScale:Number         = 0.90;
 	private static var AHZ_CraftingMenuYShift:Number = -25;
@@ -73,7 +73,8 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 	private static var ICT_FOOD: Number = 5;
 	private static var ICT_MISC: Number = 3;
 	private static var ICT_KEY: Number = 9;
-
+	private static var ICT_CRAFT_ENCHANTING: Number = 15;
+	private static var ICT_HOUSE_PART: Number = 16;
 
 	private static var BOOKFLAG_READ: Number        = 0x08;
 	private static var SHOW_PANEL                   = 1;
@@ -113,6 +114,16 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 
 	function GetBackgroundMovie():MovieClip
 	{
+		
+		if (itemCard.itemInfo.type == ICT_CRAFT_ENCHANTING || itemCard.itemInfo.type == ICT_HOUSE_PART)
+		{
+			if (itemCard.itemInfo.effects != undefined && itemCard.itemInfo.effects.length > 0) {
+				return itemCard.Enchanting_Background;
+			} else {
+				return itemCard.Enchanting_Slim_Background;
+			}	
+		}
+		
 		if (itemCard["background"])
 		{
 			return MovieClip(itemCard["background"]);
@@ -143,16 +154,16 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 			}
 		}
 		
+		if (itemCard["Enchanting_Background"])
+		{
+			return MovieClip(itemCard["Enchanting_Background"]);
+		}	
+		
 		if (itemCard["Enchanting_Slim_Background"])
 		{
 			return MovieClip(itemCard["Enchanting_Slim_Background"]);
 		}	
-				
-		if (itemCard["Enchanting_Background"])
-		{
-			return MovieClip(itemCard["Enchanting_Background"]);
-		}			
-		
+						
 		return undefined;
 	}
 
@@ -333,14 +344,17 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		if (!_config[AHZDefines.CFG_LIC_ALPHA])
 			_config[AHZDefines.CFG_LIC_ALPHA] = AHZ_NormalALPHA;
 
-		if (!_config[AHZDefines.CFG_LIC_DESCRIPTION_YMARGIN])
-			_config[AHZDefines.CFG_LIC_DESCRIPTION_YMARGIN] = AHZ_YMargin;
+		if (!_config[AHZDefines.CFG_LIC_DESCRIPTION_BOTTOMMARGIN])
+			_config[AHZDefines.CFG_LIC_DESCRIPTION_BOTTOMMARGIN] = AHZ_YMargin;
 
-		if (!_config[AHZDefines.CFG_LIC_DESCRIPTION_XMARGIN])
-			_config[AHZDefines.CFG_LIC_DESCRIPTION_XMARGIN] = AHZ_XMargin;
+		if (!_config[AHZDefines.CFG_LIC_DESCRIPTION_LEFTMARGIN])
+			_config[AHZDefines.CFG_LIC_DESCRIPTION_LEFTMARGIN] = AHZ_XMargin;
 
-		if (!_config[AHZDefines.CFG_LIC_DESCRIPTION_EXTRADATA_HEIGHT])
-			_config[AHZDefines.CFG_LIC_DESCRIPTION_EXTRADATA_HEIGHT] = AHZ_YMargin_WithItems;
+		if (!_config[AHZDefines.CFG_LIC_DESCRIPTION_RIGHTMARGIN])
+			_config[AHZDefines.CFG_LIC_DESCRIPTION_RIGHTMARGIN] = AHZ_XMargin;
+
+		if (!_config[AHZDefines.CFG_LIC_DESCRIPTION_BOTTOMMARGIN_EXTRA])
+			_config[AHZDefines.CFG_LIC_DESCRIPTION_BOTTOMMARGIN_EXTRA] = AHZ_YMargin_WithItems;
 
 		if (!_config[AHZDefines.CFG_LIC_CRAFTING_YOFFSET])
 			_config[AHZDefines.CFG_LIC_CRAFTING_YOFFSET] = AHZ_CraftingMenuYShift;
@@ -358,11 +372,14 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 			_config[AHZDefines.CFG_ICON_PATH] = AHZ_IconsFile;
 		
 		// Kind of unnecessary if defaulting to false
-		if (_config[AHZDefines.CFG_ICON_DROP_SHADOW] == undefined ||
-			_config[AHZDefines.CFG_ICON_DROP_SHADOW] == null)
-		{	
+		if (!_config[AHZDefines.CFG_ICON_DROP_SHADOW])
 			_config[AHZDefines.CFG_ICON_DROP_SHADOW] = false;
-		}
+		
+		if (!_config[AHZDefines.CFG_LIC_DRAW_BORDERS])
+			_config[AHZDefines.CFG_LIC_DRAW_BORDERS] = false;
+			
+		if (!_config[AHZDefines.CFG_LIC_DESCRIPTION_EXTRADATA_PADDING])
+			_config[AHZDefines.CFG_LIC_DESCRIPTION_EXTRADATA_PADDING] = 5;			
 	}
 
 	function configLoaded(event:Object):Void
@@ -478,6 +495,53 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		this.onEnterFrame = ItemCardOnEnterFrame;
 	}
 
+	function DrawBorders():Void {
+		
+		for (var a in itemCard)
+		{
+			if (itemCard[a] instanceof TextField)
+			{
+				var target:TextField = TextField(itemCard[a]);
+				target.border = true;
+			}
+			else if (itemCard[a] instanceof MovieClip)
+			{
+				// Two levels is enough
+				for (var b in itemCard[a])
+				{
+					if (itemCard[a][b] instanceof TextField)
+					{
+						var target:TextField = TextField(itemCard[a][b]);
+						target.border = true;
+					}
+				}	
+			}
+		}
+		
+		for (var a in this)
+		{
+			if (this[a] instanceof TextField)
+			{
+				var target:TextField = TextField(this[a]);
+				target.border = true;
+			}
+			else if (this[a] instanceof MovieClip)
+			{
+				// Two levels is enough
+				for (var b in this[a])
+				{
+					if (this[a][b] instanceof TextField)
+					{
+						var target:TextField = TextField(this[a][b]);
+						target.border = true;
+					}
+				}	
+			}
+		}	
+		
+		IconContainer.textField.border = true;
+	}
+
 	function GetSelectedIndex():Number
 	{
 		var selectedItemIndex:Number;
@@ -519,6 +583,22 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 			return;
 		}
 
+		if (itemCard.itemInfo.type == ICT_CRAFT_ENCHANTING || itemCard.itemInfo.type == ICT_HOUSE_PART)
+		{
+			if (itemCard.itemInfo.effects != undefined && itemCard.itemInfo.effects.length > 0) {
+				itemCard.Enchanting_Background._alpha = _config[AHZDefines.CFG_LIC_ALPHA];
+				itemCard.Enchanting_Slim_Background._alpha = 0;
+			} else {
+				itemCard.Enchanting_Background._alpha = 0;
+				itemCard.Enchanting_Slim_Background ._alpha = _config[AHZDefines.CFG_LIC_ALPHA];
+			}	
+		}
+
+		if(_config[AHZDefines.CFG_LIC_DRAW_BORDERS])
+		{
+			DrawBorders();
+		}
+
 		if (_enableItemCardResize)
 		{
 			if (itemCard._currentframe != _lastFrame)
@@ -536,7 +616,7 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 			else
 			{
 				this._alpha = 0;
-				cardBackground._alpha = _config[AHZDefines.CFG_LIC_ALPHA];
+				SetVanillaAlpha();
 			}
 		}
 		else
@@ -545,11 +625,11 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 			// config
 			if (itemCard._currentframe != _lastFrame)
 			{
-				cardBackground = GetBackgroundMovie();
 				_lastFrame = itemCard._currentframe;
 				this._alpha = 0;
-				cardBackground._alpha = _config[AHZDefines.CFG_LIC_ALPHA];
-			}		
+				cardBackground = GetBackgroundMovie();
+				SetVanillaAlpha();
+			}
 		}
 
 		_selectedIndex = GetSelectedIndex();
@@ -655,6 +735,22 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		}
 	}
 
+	function SetVanillaAlpha():Void{
+		if (itemCard.itemInfo.type == ICT_CRAFT_ENCHANTING || itemCard.itemInfo.type == ICT_HOUSE_PART)
+		{
+			if (itemCard.itemInfo.effects != undefined && itemCard.itemInfo.effects.length > 0) {
+				itemCard.Enchanting_Background._alpha = _config[AHZDefines.CFG_LIC_ALPHA];
+				itemCard.Enchanting_Slim_Background._alpha = 0;
+			} else {
+				itemCard.Enchanting_Background._alpha = 0;
+				itemCard.Enchanting_Slim_Background ._alpha = _config[AHZDefines.CFG_LIC_ALPHA];
+			}	
+		}					
+		else{
+			cardBackground._alpha = _config[AHZDefines.CFG_LIC_ALPHA];
+		}		
+	}
+
 	function AdjustItemCard(itemCardFrame:Number):Void
 	{
 		var processedTextField:TextField = undefined;
@@ -728,30 +824,44 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 				{
 					processedTextField = undefined;
 					this._alpha = 0;
-					cardBackground._alpha = _config[AHZDefines.CFG_LIC_ALPHA];
+					SetVanillaAlpha();
 				}
 				break;
 		}
 
 		if (processedTextField)
-		{
+		{			
 			_itemCardOverride = true;
 			//this._alpha = AHZ_NormalALPHA;
 			cardBackground._alpha = 0;
-			processedTextField._width = this._width - (_config[AHZDefines.CFG_LIC_DESCRIPTION_XMARGIN] * 2);
-			processedTextField._x = newX + _config[AHZDefines.CFG_LIC_DESCRIPTION_XMARGIN];
+			processedTextField._width = this._width - (_config[AHZDefines.CFG_LIC_DESCRIPTION_RIGHTMARGIN] + _config[AHZDefines.CFG_LIC_DESCRIPTION_LEFTMARGIN]);
+			processedTextField._x = newX + _config[AHZDefines.CFG_LIC_DESCRIPTION_LEFTMARGIN];
 			oldDescrptionHeight = processedTextField._height;
 
 			if (marginRequired)
 			{
-				processedTextField._height = (itemCardBottom - processedTextField._y) - (_config[AHZDefines.CFG_LIC_DESCRIPTION_YMARGIN] + _config[AHZDefines.CFG_LIC_DESCRIPTION_EXTRADATA_HEIGHT]);
+				processedTextField._height = (itemCardBottom - processedTextField._y) - (_config[AHZDefines.CFG_LIC_DESCRIPTION_BOTTOMMARGIN_EXTRA] + _config[AHZDefines.CFG_LIC_DESCRIPTION_EXTRADATA_PADDING]);
 			}
 			else
 			{
-				processedTextField._height = (itemCardBottom - processedTextField._y) - _config[AHZDefines.CFG_LIC_DESCRIPTION_YMARGIN];
+				processedTextField._height = (itemCardBottom - processedTextField._y) - _config[AHZDefines.CFG_LIC_DESCRIPTION_BOTTOMMARGIN];
 			}
 
 			ShrinkToFit(processedTextField);
+
+			// Shift any control the is below the processedTextField, down to the new
+			// height
+			var itemsBelow:Array = GetItemsBelowDescription(itemCard, processedTextField);
+			var itemBelow:Number;
+			for (itemBelow = 0; itemBelow < itemsBelow.length; itemBelow++)
+			{
+				// If the height changed then move the controls down
+				if ((processedTextField._height - oldDescrptionHeight) != 0)
+				{
+					// add the margin back to preserve it
+					itemsBelow[itemBelow]._y = itemsBelow[itemBelow]._y + (processedTextField._height - oldDescrptionHeight) + _config[AHZDefines.CFG_LIC_DESCRIPTION_EXTRADATA_PADDING];
+				}
+			}
 
 			// Need to shift up to make room for the requied crafting materials
 			if (_currentMenu == "Crafting Menu" && !_craftingMenuCardShifted)
@@ -766,7 +876,7 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		{
 			_itemCardOverride = false;
 			this._alpha = 0;
-			cardBackground._alpha = _config[AHZDefines.CFG_LIC_ALPHA];			
+			SetVanillaAlpha();			
 			
 			// Shift back to normal
 			if (_currentMenu == "Crafting Menu" && _craftingMenuCardShifted)
@@ -775,18 +885,6 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 				this._y = this._y - _config[AHZDefines.CFG_LIC_CRAFTING_YOFFSET] ;
 				additionDescriptionHolder._y = additionDescriptionHolder._y + _config[AHZDefines.CFG_LIC_CRAFTING_YOFFSET] ;
 				_craftingMenuCardShifted = false;
-			}
-		}
-		
-		// Shift any control the is below the processedTextField, down to the new
-		// Width
-		if (_itemCardOverride)
-		{
-			var itemsBelow:Array = GetItemsBelowDescription(itemCard, processedTextField);
-			var itemBelow:Number;
-			for (itemBelow = 0; itemBelow < itemsBelow.length; itemBelow++)
-			{
-				itemsBelow[itemBelow]._y = itemsBelow[itemBelow]._y + (processedTextField._height - oldDescrptionHeight);
 			}
 		}
 	}
