@@ -903,6 +903,10 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		if (selectedItemIn.AHZdbmDisp)
 		{
 			IconContainer.appendImage("dbmDisp");
+		}	
+		if (selectedItemIn.AHZdbmFound)
+		{
+			IconContainer.appendImage("dbmFound");
 		}			
 	}
 

@@ -138,6 +138,7 @@ void CAHZScaleform::ExtendItemCard(GFxMovieView * view, GFxValue * object, Inven
 
 	RegisterBoolean(object, "AHZdbmNew", papyrusMoreHudIE::HasForm("dbmNew", item->type->formID));
 	RegisterBoolean(object, "AHZdbmDisp", papyrusMoreHudIE::HasForm("dbmDisp", item->type->formID));
+	RegisterBoolean(object, "AHZdbmFound", papyrusMoreHudIE::HasForm("dbmFound", item->type->formID));
 
 }
 
