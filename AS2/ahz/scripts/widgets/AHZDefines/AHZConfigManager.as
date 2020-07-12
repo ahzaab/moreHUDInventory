@@ -6,10 +6,12 @@ class AHZConfigManager
   /* CONSTANTS */
   
 	private static var CONFIG_PATH = "moreHUDIE/config.txt";
-
+	private static var EXPORTED_PATH = "exported/moreHUDIE/config.txt";
+	private static var EXPORTED_PREFIX = "exported/";
 	private static var eventObject: Object;
-
 	private static var configObject: Object;
+	private static var exportedTried:Boolean = false;
+	private static var lv:LoadVars;
 		
   /* INITIALIATZION */
   
@@ -17,7 +19,7 @@ class AHZConfigManager
   
 	public static function loadConfig(a_scope: Object, a_loadedCallBack: String, a_errorCallBack: String):Void
 	{		
-		_global.skse.plugins.AHZmoreHUDInventory.AHZLog("loadConfig start for '" + CONFIG_PATH + "'" , false);
+	_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("loadConfig start");
 		if (managerSetup){
 			return;
 		}
@@ -27,31 +29,57 @@ class AHZConfigManager
 		eventObject.addEventListener("configLoad", a_scope, a_loadedCallBack);
 		eventObject.addEventListener("configError", a_scope, a_errorCallBack);		
 		
-		var lv = new LoadVars();
+		lv = new LoadVars();
 		lv.onData = parseConfigData;
 		lv.onLoad = onLoadConfig;
 		lv.load(CONFIG_PATH);
-		_global.skse.plugins.AHZmoreHUDInventory.AHZLog("loadConfig end", false);
+		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("loadConfig end");
+	}
+		
+	public static function ResolvePath(path:String):String{
+		if (!path){
+			return undefined;
+		}
+		
+		if (configObject.useExported && path.toLowerCase().indexOf(EXPORTED_PREFIX)<0)
+		{
+			return EXPORTED_PREFIX + path;
+		}	
+		else
+		{
+			return path;
+		}
 	}
 		
 	private static function onLoadConfig(success:Boolean):Void {
 		if (success){
-			_global.skse.plugins.AHZmoreHUDInventory.AHZLog("loadConfig loaded successfully", false);
+			configObject["useExported"] = exportedTried;
+			_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("loadConfig loaded successfully");
+			_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("configObject.useExported: " + configObject.useExported);
 			eventObject.dispatchEvent({type: "configLoad", config: configObject});
 		}
 		else{
-			_global.skse.plugins.AHZmoreHUDInventory.AHZLog("loadConfig loaded with error", false);
-			eventObject.dispatchEvent({type: "configError", config: undefined});
+			if (!exportedTried){
+				_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("Loading Failed, trying: " + EXPORTED_PATH);
+				exportedTried = true;
+				lv.load(EXPORTED_PATH);
+			}
+			else
+			{
+				_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("loadConfig loaded with error");
+				eventObject.dispatchEvent({type: "configError", config: undefined});
+			}
 		}	
 	}
 		
 	private static function parseConfigData(a_data:String): Void
 	{
 		configObject = {};
-		_global.skse.plugins.AHZmoreHUDInventory.AHZLog("parseConfigData", false);
+		_global.skse.plugins.AHZmoreHUDPlugin.AHZLog("parseConfigData");
 		
 		if (!a_data){
-			eventObject.dispatchEvent({type: "configError", config: undefined});
+			//eventObject.dispatchEvent({type: "configError", config: undefined});
+			onLoadConfig(false);
 			return;
 		}
 		
@@ -89,7 +117,8 @@ class AHZConfigManager
 			configObject[key.toLowerCase() + ":" + section.toLowerCase()] = val;
 		}		
 		
-		eventObject.dispatchEvent({type: "configLoad", config: configObject});
+		onLoadConfig(true);
+		//eventObject.dispatchEvent({type: "configLoad", config: configObject});
 	}
 	
 	private static function extract(a_str: String, a_startChar: String, a_endChar: String): String

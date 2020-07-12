@@ -9,17 +9,18 @@ if (!$(Test-Path "$destinationDataPath\Interface"))
 }
 
 Copy-Item "$sourcePath\Source\Scripts\ahzMoreHudIE.psc" -Destination "$destinationDataPath\Source\Scripts"
+Copy-Item "$sourcePath\Scripts\ahzMoreHudIE.pex" -Destination "$destinationDataPath\Scripts"
 Copy-Item "$sourcePath\AHZmoreHUDInventory.esl" -Destination "$destinationDataPath"
 Copy-Item "$sourcePath\AHZmoreHUDInventory.esl" -Destination "$destinationDataPath"
 Copy-Item "$sourcePath\Interface\AHZmoreHUDInventory.swf" -Destination "$destinationDataPath\Interface"
 
-if ($(Test-Path "$sourcePath\Interface\moreHUDIE"))
+if ($(Test-Path "$sourcePath\Interface\exported\moreHUDIE"))
 {
-    if (!$(Test-Path "$destinationDataPath\Interface\moreHUDIE"))
+    if (!$(Test-Path "$destinationDataPath\Interface\exported\moreHUDIE"))
     {
-        New-Item -ItemType Directory "$destinationDataPath\Interface\moreHUDIE"
+        New-Item -ItemType Directory "$destinationDataPath\Interface\exported\moreHUDIE"
     }
-    Copy-Item "$sourcePath\Interface\moreHUDIE\*.*" -Destination "$destinationDataPath\Interface\moreHUDIE"
+    Copy-Item "$sourcePath\Interface\exported\moreHUDIE\*.*" -Destination "$destinationDataPath\Interface\exported\moreHUDIE"
 }
 
 

@@ -28,8 +28,10 @@
 	public static var CFT_ENCHANTING_ARMOR:Number		= 214;
 	public static var CFT_ENCHANTING_ENCHANTMENT:Number	= 215;
 	
+	public static var EMPTY:Number 					= 151;  //Used for keys
+	
 	// This range includes confirmation cards, we will ignore these
-	public static var EMPTY_LOW:Number 					= 150;	
+	public static var EMPTY_LOW:Number 					= 152;	
 	public static var EMPTY_HIGH:Number 				= 190;		
 	
 	public static var MAX_FRAMES:Number 				= 221;	

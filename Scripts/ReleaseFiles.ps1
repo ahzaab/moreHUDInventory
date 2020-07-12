@@ -23,7 +23,7 @@ $sourceSksePlugin = "$sourceDataDir\SKSE\Plugins\AHZmoreHUDInventory.dll"
 $destSksePluginIni = "$destDataDir\SKSE\Plugins\AHZmoreHUDInventory.ini"
 $sourceSksePluginIni = "$sourceDataDir\SKSE\Plugins\AHZmoreHUDInventory.ini"
 
-$requiredDataDirs = @("Interface","Source\Scripts", "SKSE\Plugins")
+$requiredDataDirs = @("Interface","Source\Scripts", "SKSE\Plugins", "Interface\exported\moreHUDIE", "Scripts")
 
 $requiredDataDirs | ForEach-Object{
     if (!$(Test-Path "$destDataDir\$_"))
@@ -41,8 +41,10 @@ if ($destSksePluginIni -and $sourceSksePluginIni){
 }
 
 $items = @(Get-ChildItem "$sourceDataDir\Source\Scripts" -Filter AhzMoreHudIE.psc)
-$items += Get-ChildItem "$sourceDataDir" -Filter "AHZmoreHUDInventory$pluginExtesion"
-$items += Get-ChildItem "$sourceDataDir\Interface" -Include @('AHZmoreHUDInventory.swf') -Recurse
+$items += @(Get-ChildItem "$sourceDataDir\Scripts" -Include @('AhzMoreHudIE.pex') -Recurse)
+$items += @(Get-ChildItem "$sourceDataDir\Interface\exported\moreHUDIE")
+$items += @(Get-ChildItem "$sourceDataDir" -Filter "AHZmoreHUDInventory$pluginExtesion")
+$items += @(Get-ChildItem "$sourceDataDir\Interface" -Include @('AHZmoreHUDInventory.swf') -Recurse)
 
 $filesToCopy = $items | Select-ObjecT -ExpandProperty FullName
 

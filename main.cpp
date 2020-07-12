@@ -112,6 +112,27 @@ public:
 	}
 };
 
+class SKSEScaleform_HasFormId : public GFxFunctionHandler
+{
+public:
+	virtual void	Invoke(Args* args)
+	{
+		if (args && args->args && args->numArgs > 1 && args->args[0].GetType() == GFxValue::kType_String && args->args[1].GetType() == GFxValue::kType_Number)
+		{
+			const char* iconName = args->args[0].GetString();
+
+			UInt32 formId = (UInt32)args->args[1].GetNumber();
+
+			if (!iconName)
+			{
+				return;
+			}
+
+			args->result->SetBool(papyrusMoreHudIE::HasForm(string(iconName), formId));
+		}
+	}
+};
+
 class SKSEScaleform_AHZLog : public GFxFunctionHandler
 {
 public:
@@ -138,7 +159,8 @@ bool RegisterScaleform(GFxMovieView * view, GFxValue * root)
 	RegisterFunction <SKSEScaleform_EnableItemCardResize>(root, view, "EnableItemCardResize");
 	RegisterFunction <SKSEScaleform_GetWasBookRead>(root, view, "GetWasBookRead");
 	RegisterFunction <SKSEScaleform_GetIconForItemId>(root, view, "GetIconForItemId");
-
+	RegisterFunction <SKSEScaleform_HasFormId>(root, view, "HasFormId");
+	
 
 
 	MenuManager::GetSingleton()->MenuOpenCloseEventDispatcher()->AddEventSink(&menuEvent);
