@@ -300,7 +300,8 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 			//tf.border = true;
 			_iconContainerTextFormat = new TextFormat();
 			_iconContainerTextFormat.align = "center";
-			_iconContainerTextFormat.color = 0x999999;
+			var withoutHash = _config[AHZDefines.CFG_ICON_TEXT_FIELD_COLOR].substr(1,_config[AHZDefines.CFG_ICON_TEXT_FIELD_COLOR].length-1);
+			_iconContainerTextFormat.color = parseInt(withoutHash, 16);
 			_iconContainerTextFormat.size = 24;
 			_iconContainerTextFormat.font = "$EverywhereMediumFont";
 			tf.setNewTextFormat(_iconContainerTextFormat);
@@ -380,6 +381,9 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 			
 		if (!_config[AHZDefines.CFG_LIC_DESCRIPTION_EXTRADATA_PADDING])
 			_config[AHZDefines.CFG_LIC_DESCRIPTION_EXTRADATA_PADDING] = 5;			
+			
+		if (!_config[AHZDefines.CFG_ICON_TEXT_FIELD_COLOR])
+			_config[AHZDefines.CFG_ICON_TEXT_FIELD_COLOR] = '#999999';
 	}
 
 	function configLoaded(event:Object):Void
@@ -683,7 +687,8 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		//IconContainer.textField.border = true;
 		_iconContainerTextFormat = new TextFormat();
 		_iconContainerTextFormat.align = "center";
-		_iconContainerTextFormat.color = 0x999999;
+		var withoutHash = _config[AHZDefines.CFG_ICON_TEXT_FIELD_COLOR].substr(1,_config[AHZDefines.CFG_ICON_TEXT_FIELD_COLOR].length-1);
+		_iconContainerTextFormat.color = parseInt(withoutHash, 16);
 		_iconContainerTextFormat.size = 24;
 		_iconContainerTextFormat.font = "$EverywhereMediumFont";
 		IconContainer.setNewTextFormat(_iconContainerTextFormat);

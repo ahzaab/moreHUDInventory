@@ -32,3 +32,6 @@ sPosEffectFontColorHex = '#189515'
 sNegEffectFontColorHex = '#FF0000'
 ;Set to true to enable drop shadow to any text in the icon container (Default is false)
 bEnableDropShadow = false
+;Default is '#999999'
+sTextFieldColorHex = '#999999'
+
