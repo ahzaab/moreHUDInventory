@@ -20,4 +20,5 @@
 	static var CFG_ICON_POS_EFFECT_COLOR: String = 'sposeffectfontcolorhex:icons';
 	static var CFG_ICON_NEG_EFFECT_COLOR: String = 'snegeffectfontcolorhex:icons';
 	static var CFG_ICON_DROP_SHADOW: String = 'benabledropshadow:icons';
+	static var CFG_ICON_TEXT_FIELD_COLOR: String = 'stextfieldcolorhex:icons';
 }
