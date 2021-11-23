@@ -1,14 +1,13 @@
 cmake_minimum_required(VERSION 3.19)
 
 set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
-#set(VCPKG_OVERLAY_PORTS "${CMAKE_CURRENT_SOURCE_DIR}/ports" CACHE STRING "")
 set(VCPKG_TARGET_TRIPLET "x64-windows-static-md" CACHE STRING "")
 
 # ---- Project ----
 
 project(
-	AHZmoreHUDPlugin
-	VERSION 5.0.0.1
+	AHZmoreHUDInventory
+	VERSION 2.0.0.1
 	LANGUAGES CXX
 )
 

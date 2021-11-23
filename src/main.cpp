@@ -1,18 +1,17 @@
-#include "skse64/PluginAPI.h"
-#include "skse64/skse64_common/skse_version.h"
+#include "PCH.h"
+
+#include <memory>
+#include <vector>
+
 #include "AHZScaleform.h"
 #include "AHZScaleformHook.h"
-#include <shlobj.h>
 #include "AHZConsole.h"
-#include "skse64/ScaleformCallbacks.h"          // for GFxFunctionHandler
-#include <stddef.h>                             // for NULL
 #include "AHZConfiguration.h"
 #include "AHZPapyrusMoreHudIE.h"
-#include "skse64/HashUtil.h"
 
-using namespace std;
+#include "RE/Skyrim.h"
+#include "SKSE/API.h"
 
-#define PLUGIN_NAME  ("AHZmoreHUDInventory") 
 
 IDebugLog	gLog;
 PluginHandle	g_pluginHandle = kPluginHandle_Invalid;

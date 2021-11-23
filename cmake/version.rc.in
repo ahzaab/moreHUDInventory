@@ -18,12 +18,12 @@ BEGIN
         BLOCK "040904b0"
         BEGIN 
             VALUE "CompanyName", "Ahzaab"
-            VALUE "FileDescription", "SKSE64 moreHUD plugin"
+            VALUE "FileDescription", "SKSE64 moreHUD Inventory plugin"
             VALUE "FileVersion", "@PROJECT_VERSION@"
-            VALUE "InternalName", "AHZmoreHUDPlugin.dll"
+            VALUE "InternalName", "AHZmoreHUDInventory.dll"
             VALUE "LegalCopyright", "MIT License" 
-            VALUE "OriginalFilename", "AHZmoreHUDPlugin.dll"
-            VALUE "ProductName", "moreHUD Plugin"
+            VALUE "OriginalFilename", "AHZmoreHUDInventory.dll"
+            VALUE "ProductName", "moreHUD Inventory Plugin"
             VALUE "ProductVersion", "@PROJECT_VERSION@"
         END
     END
