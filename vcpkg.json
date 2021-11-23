@@ -1,0 +1,13 @@
+{
+  "name": "morehudse",
+  "version-string": "1",
+  "description": "SKSE64 moreHUD plugin",
+  "homepage": "https://github.com/ahzaab/moreHUDSE",
+  "license": "MIT",
+  "dependencies": [
+    "boost-stl-interfaces",
+    "spdlog",
+    "xbyak",
+    "rsm-binary-io"
+  ]
+}

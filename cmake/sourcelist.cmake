@@ -1,0 +1,25 @@
+set(sources ${sources}
+    src/PCH.cpp
+    src/ActorValueList.cpp
+    src/AHZActorInfo.cpp
+    src/AHZArmorInfo.cpp
+    src/AHZConsole.cpp
+    src/AHZExternalFormTable.cpp   
+    src/AHZForEachScriptObjectFunctor.cpp
+    src/AHZFormLookup.cpp
+    src/AHZLUTObject.cpp
+    src/AHZPapyrusMoreHud.cpp      
+    src/AHZPlayerInfo.cpp
+    src/AHZScaleform.cpp
+    src/AHZScaleformHook.cpp       
+    src/AHZUtilities.cpp
+    src/AHZVanillaFormTable.cpp    
+    src/AHZWeaponInfo.cpp
+    src/Events.cpp
+    src/HashUtil.cpp
+    src/IForEachScriptObjectFunctor.cpp
+    src/main.cpp
+    src/Papyrus.cpp
+    src/Patches.cpp
+    src/Scaleform.cpp
+)
