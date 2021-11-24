@@ -7,4 +7,5 @@ set(sources ${sources}
     src/AHZScaleformHook.cpp
     src/AHZUtilities.cpp
     src/main.cpp
+    src/HashUtil.cpp
 )

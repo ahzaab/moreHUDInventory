@@ -9,280 +9,95 @@
 #include "AHZConfiguration.h"
 #include "AHZPapyrusMoreHudIE.h"
 
-#include "RE/Skyrim.h"
-#include "SKSE/API.h"
-
-
-IDebugLog	gLog;
-PluginHandle	g_pluginHandle = kPluginHandle_Invalid;
-CAHZConfiguration g_ahzConfiguration;
-CAHZScaleform m_ahzScaleForm;
-static UInt32 g_skseVersion = 0;
-SKSEScaleformInterface		* g_scaleform = NULL;
-SKSEMessagingInterface *g_skseMessaging = NULL;
-SKSEPapyrusInterface * g_sksePapyrus = NULL;
-AHZEventHandler menuEvent;
-static string s_lastIconName;
+using namespace moreHUD;
 
 // Just initialize to start routing to the console window
-CAHZDebugConsole theDebugConsole;
+Debug::CAHZDebugConsole theDebugConsole;
+CAHZConfiguration g_ahzConfiguration;
 
-/**** scaleform functions ****/
-
-class SKSEScaleform_InstallHooks : public GFxFunctionHandler
-{
-public:
-	virtual void	Invoke(Args * args)
-	{
-	}
-};
-
-class SKSEScaleform_GetCurrentMenu: public GFxFunctionHandler
-{
-public:
-	virtual void	Invoke(Args * args)
-	{
-		args->result->SetString(g_currentMenu.c_str());
-	}
-};
-
-class SKSEScaleform_ShowBookRead : public GFxFunctionHandler
-{
-public:
-	virtual void	Invoke(Args * args)
-	{
-		args->result->SetBool(m_ahzScaleForm.m_showBookRead);
-	} 
-};
-
-
-class SKSEScaleform_EnableItemCardResize : public GFxFunctionHandler
-{
-public:
-	virtual void	Invoke(Args * args)
-	{
-		args->result->SetBool(m_ahzScaleForm.m_enableItemCardResize);
-	}
-};
-
-class SKSEScaleform_GetWasBookRead : public GFxFunctionHandler
-{
-public:
-	virtual void	Invoke(Args * args)
-	{
-		if (args && args->args && args->numArgs > 0 && args->args[0].GetType() == GFxValue::kType_Number)
-		{
-			UInt32 formID = (UInt32)args->args[0].GetNumber();
-
-			TESForm* bookForm = LookupFormByID(formID);
-			args->result->SetBool(m_ahzScaleForm.GetWasBookRead(bookForm));
-		}
-	}
-};
-
-class SKSEScaleform_GetIconForItemId : public GFxFunctionHandler
-{
-public:
-	virtual void	Invoke(Args * args) 
-	{
-		if (args && args->args && args->numArgs > 1 && args->args[0].GetType() == GFxValue::kType_Number && args->args[1].GetType() == GFxValue::kType_String)
-		{
-			UInt32 formID = (UInt32)args->args[0].GetNumber();
-			
-			const char * name = args->args[1].GetString();
-			
-			if (!name)
-			{
-				return;
-			}
-
-			SInt32 itemId = (SInt32)HashUtil::CRC32(name, formID & 0x00FFFFFF);
-			s_lastIconName.clear();
-			s_lastIconName.append(papyrusMoreHudIE::GetIconName(itemId));
-			GFxValue obj;
-			args->movie->CreateObject(&obj);
-			GFxValue	fxValue;
-			fxValue.SetString(s_lastIconName.c_str());
-			obj.SetMember("iconName", &fxValue);
-
-			// Add the object to the scaleform function
-			args->args[2].SetMember("returnObject", &obj);
-		}
-	}
-};
-
-class SKSEScaleform_HasFormId : public GFxFunctionHandler
-{
-public:
-	virtual void	Invoke(Args* args)
-	{
-		if (args && args->args && args->numArgs > 1 && args->args[0].GetType() == GFxValue::kType_String && args->args[1].GetType() == GFxValue::kType_Number)
-		{
-			const char* iconName = args->args[0].GetString();
-
-			UInt32 formId = (UInt32)args->args[1].GetNumber();
-
-			if (!iconName)
-			{
-				return;
-			}
-
-			args->result->SetBool(papyrusMoreHudIE::HasForm(string(iconName), formId));
-		}
-	}
-};
-
-class SKSEScaleform_AHZLog : public GFxFunctionHandler
-{
-public:
-	virtual void	Invoke(Args * args)
-	{
-#if _DEBUG
-		_MESSAGE("%s", args->args[0].GetString());
-#else  // Only allow release verbosity for a release build
-		if (args && args->args && args->numArgs > 1 && args->args[1].GetType() == GFxValue::kType_Bool && args->args[1].GetBool())
-		{
-			_MESSAGE("%s", args->args[0].GetString());
-		}
-#endif
-	}
-};
-
-
-bool RegisterScaleform(GFxMovieView * view, GFxValue * root)
-{
-	RegisterFunction <SKSEScaleform_InstallHooks>(root, view, "InstallHooks");
-	RegisterFunction <SKSEScaleform_ShowBookRead>(root, view, "ShowBookRead");
-	RegisterFunction <SKSEScaleform_AHZLog>(root, view, "AHZLog");
-	RegisterFunction <SKSEScaleform_GetCurrentMenu>(root, view, "GetCurrentMenu");
-	RegisterFunction <SKSEScaleform_EnableItemCardResize>(root, view, "EnableItemCardResize");
-	RegisterFunction <SKSEScaleform_GetWasBookRead>(root, view, "GetWasBookRead");
-	RegisterFunction <SKSEScaleform_GetIconForItemId>(root, view, "GetIconForItemId");
-	RegisterFunction <SKSEScaleform_HasFormId>(root, view, "HasFormId");
-	
-
-
-	MenuManager::GetSingleton()->MenuOpenCloseEventDispatcher()->AddEventSink(&menuEvent);
-	return true;
-}
-
-// Listens to events dispatched by SKSE
-void EventListener(SKSEMessagingInterface::Message* msg)
-{
-	if (!msg)
-	{
-		return;
-	}
-
-	if (string(msg->sender) == "SKSE" && msg->type == SKSEMessagingInterface::kMessage_DataLoaded)
-	{
-  
-	}
-}
 
 extern "C"
 {
-	bool SKSEPlugin_Query(const SKSEInterface * skse, PluginInfo * info)
-	{
-		string logPath = "\\My Games\\Skyrim Special Edition\\SKSE\\";
-		logPath.append(PLUGIN_NAME);
-		logPath.append(".log");
+    DLLEXPORT constinit auto SKSEPlugin_Version = []() {
+        SKSE::PluginVersionData v{};
+        v.pluginVersion = Version::ASINT;
+        v.PluginName("Ahzaab's moreHUD Inventory Plugin"sv);
+        v.AuthorName("Ahzaab"sv);
+        v.CompatibleVersions({ SKSE::RUNTIME_LATEST });
+        v.UsesAddressLibrary(true);
+        return v;
+    }();
 
-		gLog.OpenRelative(CSIDL_MYDOCUMENTS, logPath.c_str());
-		gLog.SetPrintLevel(IDebugLog::kLevel_VerboseMessage);
-		gLog.SetLogLevel(IDebugLog::kLevel_Message);
+    DLLEXPORT auto SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse) -> bool
+    {
+        // while (!IsDebuggerPresent())
+        // {
+        //   Sleep(10);
+        // }
 
-		// populate info structure
-		info->infoVersion = PluginInfo::kInfoVersion;
-		info->name = "Ahzaab's moreHUD Inventory Plugin";
-		info->version = PLUGIN_VERSION;
+        // Sleep(1000 * 2);
 
-		// store plugin handle so we can identify ourselves later
-		g_pluginHandle = skse->GetPluginHandle();
+        try {
+#ifndef NDEBUG
+            auto                    msvc_sink = std::make_shared<spdlog::sinks::msvc_sink_mt>();
+            auto                    console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+            spdlog::sinks_init_list sink_list = { msvc_sink, console_sink };
+            auto                    log = std::make_shared<spdlog::logger>("multi_sink", sink_list.begin(), sink_list.end());
+            log->set_level(spdlog::level::trace);
+            spdlog::flush_every(std::chrono::seconds(3));
+            spdlog::set_default_logger(std::move(log));
+#else
+            auto path = logger::log_directory();
+            if (!path) {
+                //stl::report_and_fail("Failed to find standard logging directory"sv);
+                return false;
+            }
 
-		if (skse->isEditor)
-		{
-			_ERROR("loaded in editor, marking as incompatible");
+            *path /= "moreHUDIE.log"sv;
 
-			return false;
-		}
-		else if (skse->runtimeVersion < (MAKE_EXE_VERSION(1, 5, 97)))
-		{
-			_ERROR("unsupported runtime version %08X", skse->runtimeVersion);
+            auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(path->string(), true);
+            auto log = std::make_shared<spdlog::logger>("global log"s, std::move(sink));
+            log->set_level(spdlog::level::info);
+            log->flush_on(spdlog::level::info);
+            spdlog::set_default_logger(std::move(log));
+#endif
 
-			return false;
-		}
-		else if (SKSE_VERSION_RELEASEIDX < 53)
-		{
-			_ERROR("unsupported skse release index %08X", SKSE_VERSION_RELEASEIDX);
+            logger::info("moreHUD loading"sv);
+            logger::info("moreHUD v{}"sv, Version::NAME);
 
-			return false;
-		}
+            SKSE::Init(a_skse);
 
-		// get the scaleform interface and query its version
-		g_scaleform = (SKSEScaleformInterface *)skse->QueryInterface(kInterface_Scaleform);
-		if (!g_scaleform)
-		{
-			_ERROR("couldn't get scaleform interface");
-			return false;
-		}
+            SKSE::AllocTrampoline(1 << 6);
 
-		if (g_scaleform->interfaceVersion < SKSEScaleformInterface::kInterfaceVersion)
-		{
-			_ERROR("scaleform interface too old (%d expected %d)", g_scaleform->interfaceVersion, SKSEScaleformInterface::kInterfaceVersion);
-			return false;
-		}
+            auto messaging = SKSE::GetMessagingInterface();
+            if (!messaging->RegisterListener("SKSE", MessageHandler)) {
+                logger::critical("Could not register MessageHandler"sv);
+                return false;
+            }
+            logger::info("registered listener"sv);
 
-		// ### do not do anything else in this callback
-		// ### only fill out PluginInfo and return true/false
 
-		g_skseMessaging = (SKSEMessagingInterface *)skse->QueryInterface(kInterface_Messaging);
-		if (!g_skseMessaging)
-		{
-			_ERROR("couldn't get messaging interface");
-			return false;
-		}
+            if (!moreHUD::Papyrus::Register()) {
+                logger::critical("Could not register papyrus functions"sv);
+                return false;
+            }
 
-	  g_sksePapyrus = (SKSEPapyrusInterface *)skse->QueryInterface(kInterface_Papyrus);
-	  if (!g_skseMessaging)
-	  {
-		  _ERROR("couldn't get Papyrus interface");
-		  return false;
-	  }
+            logger::info("Installing patched"sv);
+            Patches::Install();
 
-		// supported runtime version
-		return true;
-	}
+            logger::info("Registering Callbacks"sv);
+            Scaleform::RegisterCallbacks();
 
-	void RegisterForIventory(GFxMovieView * view, GFxValue * object, InventoryEntryData * item)
-	{
-		m_ahzScaleForm.ExtendItemCard(view, object, item);
-	}
+            logger::info("moreHUD loaded"sv);
 
-	bool SKSEPlugin_Load(const SKSEInterface * skse)
-	{
-		//while (!IsDebuggerPresent())
-		//{
-		//   Sleep(10);
-		//}
+        } catch (const std::exception& e) {
+            logger::critical(e.what());
+            return false;
+        } catch (...) {
+            logger::critical("caught unknown exception"sv);
+            return false;
+        }
 
-		//Sleep(1000 * 2);
-
-		g_ahzConfiguration.Initialize(PLUGIN_NAME);
-		m_ahzScaleForm.Initialize();
-
-		// register scaleform callbacks
-		g_scaleform->Register("AHZmoreHUDInventory", RegisterScaleform);
-
-		g_scaleform->RegisterForInventory(RegisterForIventory);
-
-		// Register listener for the gme loaded event
-		g_skseMessaging->RegisterListener(skse->GetPluginHandle(), "SKSE", EventListener);
-
-	  // Register Papyrus functions
-	  g_sksePapyrus->Register(papyrusMoreHudIE::RegisterFuncs);
-
-		_MESSAGE("%s -v%d Loaded", PLUGIN_NAME, PLUGIN_VERSION);
-		return true;
-	}
+        return true;
+    }
 };

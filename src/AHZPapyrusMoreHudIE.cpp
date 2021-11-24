@@ -1,236 +1,172 @@
+#include "PCH.h"
 #include "AHZPapyrusMoreHudIE.h"
-#include "skse64/PluginManager.h"
-
-#include "skse64_common/skse_version.h"
-#include "common/ICriticalSection.h"
+#include "version.h"
 #include <mutex>
 
-namespace papyrusMoreHudIE {
+using AhzIconItemCache = std::map<uint32_t, RE::BSFixedString>;
+using AhzIconFormListCache = std::map<std::string, RE::BGSListForm*>;
+static AhzIconItemCache     s_ahzRegisteredIcons;
+static AhzIconFormListCache s_ahzRegisteredIconFormLists;
+static std::recursive_mutex mtx;
 
-	class FormVisitor: public BGSListForm::Visitor
-	{
-	public:
-
-		FormVisitor::FormVisitor(TESForm* form) :m_form(form) {}
-
-		virtual bool Accept(TESForm* form)
-		{
-			if (!m_form || !form)
-				return false;
-
-			auto found = ((m_form->formID) == (form->formID));
-
-			return found;
-		}
-
-	private:
-		TESForm* m_form;
-
-	};
-
-	typedef std::map<UInt32, BSFixedString> AhzIconItemCache;
-	typedef std::map<std::string, BGSListForm*> AhzIconFormListCache;
-	static AhzIconItemCache s_ahzRegisteredIcons;
-	static AhzIconFormListCache s_ahzRegisteredIconFormLists;
-	static std::recursive_mutex mtx;
-
-	UInt32 GetVersion(StaticFunctionTag* base)
-	{
-		return PLUGIN_VERSION;
-	}
-
-	void RegisterIconFormList(StaticFunctionTag* base, BSFixedString iconName, BGSListForm* list)
-	{
-		//_MESSAGE("AddIconItem %d, %s", itemID, iconName.c_str());
-		std::lock_guard <recursive_mutex> lock(mtx);
-
-		if (!list)
-			return;
-
-		if (!IsIconFormListRegistered(base, iconName))
-		{
-			s_ahzRegisteredIconFormLists.insert(AhzIconFormListCache::value_type(iconName.c_str(), list));
-		}
-	}
-	void UnRegisterIconFormList(StaticFunctionTag* base, BSFixedString iconName)
-	{
-		//_MESSAGE("AddIconItem %d, %s", itemID, iconName.c_str());
-		std::lock_guard <recursive_mutex> lock(mtx);
-
-		if (IsIconFormListRegistered(base, iconName))
-		{
-			s_ahzRegisteredIconFormLists.erase(iconName.c_str());
-		}
-	}
-
-	bool IsIconFormListRegistered_Internal(std::string iconName)
-	{
-		//_MESSAGE("IsIconItemRegistered %d", itemID);
-		std::lock_guard <recursive_mutex> lock(mtx);
-		// Create an iterator of map
-		AhzIconFormListCache::iterator it;
-
-		if (s_ahzRegisteredIconFormLists.empty())
-			return false;
-
-		// Find the element with key itemID
-		it = s_ahzRegisteredIconFormLists.find(iconName);
-
-		// Check if element exists in map or not
-		return (it != s_ahzRegisteredIconFormLists.end());
-	}
-
-	bool IsIconFormListRegistered(StaticFunctionTag* base, BSFixedString iconName)
-	{
-		return IsIconFormListRegistered_Internal(iconName.c_str());
-	}
-
-	bool HasForm(std::string iconName, UInt32 formId)
-	{
-		std::lock_guard <recursive_mutex> lock(mtx);
-		if (IsIconFormListRegistered_Internal(iconName))
-		{
-			auto formList = s_ahzRegisteredIconFormLists[iconName];
-
-			if (!formId)
-				return false;
-
-			auto formFromId = LookupFormByID(formId);
-
-			if (!formFromId)
-				return false;
-
-			FormVisitor visitor(formFromId);
-			return formList->Visit(visitor);
-		}	
-		return false;
-	}
-
-	bool IsIconItemRegistered(StaticFunctionTag* base, UInt32 itemID)
-	{
-		//_MESSAGE("IsIconItemRegistered %d", itemID);
-		std::lock_guard <recursive_mutex> lock(mtx);
-		// Create an iterator of map
-		AhzIconItemCache::iterator it;
-
-		// Find the element with key itemID
-		it = s_ahzRegisteredIcons.find(itemID);
-
-		// Check if element exists in map or not
-		return (it != s_ahzRegisteredIcons.end());
-	}
-
-
-
-	void AddIconItem(StaticFunctionTag* base, UInt32 itemID, BSFixedString iconName)
-	{
-		//_MESSAGE("AddIconItem %d, %s", itemID, iconName.c_str());
-		std::lock_guard <recursive_mutex> lock(mtx);
-		if (!IsIconItemRegistered(base, itemID))
-		{
-			s_ahzRegisteredIcons.insert(AhzIconItemCache::value_type(itemID, iconName));
-		}
-	}
-
-	void RemoveIconItem(StaticFunctionTag* base, UInt32 itemID)
-	{
-		//_MESSAGE("RemoveIconItem %d", itemID);
-		std::lock_guard <recursive_mutex> lock(mtx);
-		if (IsIconItemRegistered(base, itemID))
-		{
-			s_ahzRegisteredIcons.erase(itemID);
-		}
-	}
-
-	void AddIconItems(StaticFunctionTag* base, VMArray<UInt32> itemIDs, VMArray<BSFixedString> iconNames)
-	{
-		std::lock_guard <recursive_mutex> lock(mtx);
-		if (itemIDs.Length() != iconNames.Length())
-		{
-			return;
-		}
-
-		for (UInt32 i = 0; i < itemIDs.Length(); i++)
-		{
-			UInt32 itemID;
-			BSFixedString iconName;
-			itemIDs.Get(&itemID, i);
-			iconNames.Get(&iconName, i);
-			AddIconItem(base, itemID, iconName);
-		}
-	}
-
-	void RemoveIconItems(StaticFunctionTag* base, VMArray<UInt32> itemIDs)
-	{
-		std::lock_guard <recursive_mutex> lock(mtx);
-		for (UInt32 i = 0; i < itemIDs.Length(); i++)
-		{
-			UInt32 itemID;
-			itemIDs.Get(&itemID, i);
-			if (itemID)
-			{
-				RemoveIconItem(base, itemID);
-			}
-		}
-	}
-
-	string GetIconName(UInt32 itemID)
-	{
-		string iconName("");
-		std::lock_guard <recursive_mutex> lock(mtx);
-
-		if (IsIconItemRegistered(NULL, itemID))
-		{
-			iconName.append(s_ahzRegisteredIcons[itemID].c_str());
-		}
-
-		return iconName;
-	}
+auto PapyrusMoreHudIE::GetVersion([[maybe_unused]] RE::StaticFunctionTag* base) -> uint32_t
+{
+    auto version = Version::ASINT;
+    logger::trace("GetVersion: {}", version);
+    return version;
 }
 
-#include "skse64/PapyrusVM.h"
-#include "skse64/PapyrusNativeFunctions.h"
-
-bool papyrusMoreHudIE::RegisterFuncs(VMClassRegistry* registry)
+void PapyrusMoreHudIE::RegisterIconFormList(RE::StaticFunctionTag* base, RE::BSFixedString iconName, RE::BGSListForm* list)
 {
-	registry->RegisterFunction(
-		new NativeFunction0<StaticFunctionTag, UInt32>("GetVersion", "AhzMoreHudIE", papyrusMoreHudIE::GetVersion, registry));
+    logger::trace("RegisterIconFormList");
+    std::lock_guard<std::recursive_mutex> lock(mtx);
 
-	registry->RegisterFunction(
-		new NativeFunction1<StaticFunctionTag, bool, UInt32>("IsIconItemRegistered", "AhzMoreHudIE", papyrusMoreHudIE::IsIconItemRegistered, registry));
+    if (!list)
+        return;
 
-	registry->RegisterFunction(
-		new NativeFunction2<StaticFunctionTag, void, UInt32, BSFixedString>("AddIconItem", "AhzMoreHudIE", papyrusMoreHudIE::AddIconItem, registry));
+    if (!IsIconFormListRegistered(base, iconName)) {
+        s_ahzRegisteredIconFormLists.insert(AhzIconFormListCache::value_type(iconName.c_str(), list));
+    }
+}
 
-	registry->RegisterFunction(
-		new NativeFunction1<StaticFunctionTag, void, UInt32>("RemoveIconItem", "AhzMoreHudIE", papyrusMoreHudIE::RemoveIconItem, registry));
+void PapyrusMoreHudIE::UnRegisterIconFormList(RE::StaticFunctionTag* base, RE::BSFixedString iconName)
+{
+    logger::trace("UnRegisterIconFormList");
+    std::lock_guard<std::recursive_mutex> lock(mtx);
 
-	registry->RegisterFunction(
-		new NativeFunction2<StaticFunctionTag, void, VMArray<UInt32>, VMArray<BSFixedString>>("AddIconItems", "AhzMoreHudIE", papyrusMoreHudIE::AddIconItems, registry));
+    if (IsIconFormListRegistered(base, iconName)) {
+        s_ahzRegisteredIconFormLists.erase(iconName.c_str());
+    }
+}
 
-	registry->RegisterFunction(
-		new NativeFunction1<StaticFunctionTag, void, VMArray<UInt32>>("RemoveIconItems", "AhzMoreHudIE", papyrusMoreHudIE::RemoveIconItems, registry));
+auto PapyrusMoreHudIE::IsIconFormListRegistered_Internal(std::string iconName) -> bool
+{
+    logger::trace("IsIconFormListRegistered_Internal");
+    std::lock_guard<std::recursive_mutex> lock(mtx);
+    // Create an iterator of map
+    AhzIconFormListCache::iterator it;
 
-	registry->RegisterFunction(
-		new NativeFunction2<StaticFunctionTag, void, BSFixedString, BGSListForm*>("RegisterIconFormList", "AhzMoreHudIE", papyrusMoreHudIE::RegisterIconFormList, registry));
+    if (s_ahzRegisteredIconFormLists.empty())
+        return false;
 
-	registry->RegisterFunction(
-		new NativeFunction1<StaticFunctionTag, void, BSFixedString>("UnRegisterIconFormList", "AhzMoreHudIE", papyrusMoreHudIE::UnRegisterIconFormList, registry));
+    // Find the element with key itemID
+    it = s_ahzRegisteredIconFormLists.find(iconName);
 
-	registry->RegisterFunction(
-		new NativeFunction1<StaticFunctionTag, bool, BSFixedString>("IsIconFormListRegistered", "AhzMoreHudIE", papyrusMoreHudIE::IsIconFormListRegistered, registry));
+    // Check if element exists in map or not
+    return (it != s_ahzRegisteredIconFormLists.end());
+}
+
+auto PapyrusMoreHudIE::IsIconFormListRegistered([[maybe_unused]] RE::StaticFunctionTag* base, RE::BSFixedString iconName) -> bool
+{
+    return IsIconFormListRegistered_Internal(iconName.c_str());
+}
+
+auto PapyrusMoreHudIE::HasForm(std::string iconName, uint32_t formId) -> bool
+{
+    logger::trace("HasForm");
+    std::lock_guard<std::recursive_mutex> lock(mtx);
+    if (IsIconFormListRegistered_Internal(iconName)) {
+        auto formList = s_ahzRegisteredIconFormLists[iconName];
+
+        if (!formId)
+            return false;
+
+        auto formFromId = RE::TESForm::LookupByID(formId);
+
+        if (!formFromId)
+            return false;
+
+        return formList->HasForm(formFromId);
+    }
+    return false;
+}
+
+auto PapyrusMoreHudIE::IsIconItemRegistered([[maybe_unused]] RE::StaticFunctionTag* base, uint32_t itemID) -> bool
+{
+    logger::trace("IsIconItemRegistered");
+    std::lock_guard<std::recursive_mutex> lock(mtx);
+    // Create an iterator of map
+    AhzIconItemCache::iterator it;
+
+    // Find the element with key itemID
+    it = s_ahzRegisteredIcons.find(itemID);
+
+    // Check if element exists in map or not
+    return (it != s_ahzRegisteredIcons.end());
+}
 
 
-	registry->SetFunctionFlags("AhzMoreHudIE", "GetVersion", VMClassRegistry::kFunctionFlag_NoWait);
-	registry->SetFunctionFlags("AhzMoreHudIE", "IsIconItemRegistered", VMClassRegistry::kFunctionFlag_NoWait);
-	registry->SetFunctionFlags("AhzMoreHudIE", "AddIconItem", VMClassRegistry::kFunctionFlag_NoWait);
-	registry->SetFunctionFlags("AhzMoreHudIE", "RemoveIconItem", VMClassRegistry::kFunctionFlag_NoWait);
-	registry->SetFunctionFlags("AhzMoreHudIE", "AddIconItems", VMClassRegistry::kFunctionFlag_NoWait);
-	registry->SetFunctionFlags("AhzMoreHudIE", "RemoveIconItems", VMClassRegistry::kFunctionFlag_NoWait);
+void PapyrusMoreHudIE::AddIconItem(RE::StaticFunctionTag* base, uint32_t itemID, RE::BSFixedString iconName)
+{
+    logger::trace("AddIconItem");
+    std::lock_guard<std::recursive_mutex> lock(mtx);
+    if (!IsIconItemRegistered(base, itemID)) {
+        s_ahzRegisteredIcons.insert(AhzIconItemCache::value_type(itemID, iconName));
+    }
+}
 
-	registry->SetFunctionFlags("AhzMoreHudIE", "RegisterIconFormList", VMClassRegistry::kFunctionFlag_NoWait);
-	registry->SetFunctionFlags("AhzMoreHudIE", "UnRegisterIconFormList", VMClassRegistry::kFunctionFlag_NoWait);
-	registry->SetFunctionFlags("AhzMoreHudIE", "IsIconFormListRegistered", VMClassRegistry::kFunctionFlag_NoWait);
+void PapyrusMoreHudIE::RemoveIconItem(RE::StaticFunctionTag* base, uint32_t itemID)
+{
+    logger::trace("RemoveIconItem");
+    std::lock_guard<std::recursive_mutex> lock(mtx);
+    if (IsIconItemRegistered(base, itemID)) {
+        s_ahzRegisteredIcons.erase(itemID);
+    }
+}
 
-	return true;
+void PapyrusMoreHudIE::AddIconItems(RE::StaticFunctionTag* base, std::vector<uint32_t> itemIDs, std::vector<RE::BSFixedString> iconNames)
+{
+    logger::trace("AddIconItems");
+    std::lock_guard<std::recursive_mutex> lock(mtx);
+    if (itemIDs.size() != iconNames.size()) {
+        return;
+    }
+
+    for (uint32_t i = 0; i < itemIDs.size(); i++) {
+        uint32_t          itemID;
+        RE::BSFixedString iconName;
+        itemID = itemIDs[i];
+        iconName = iconNames[i];
+        AddIconItem(base, itemID, iconName);
+    }
+}
+
+void PapyrusMoreHudIE::RemoveIconItems(RE::StaticFunctionTag* base, std::vector<uint32_t> itemIDs)
+{
+    logger::trace("RemoveIconItem");
+    std::lock_guard<std::recursive_mutex> lock(mtx);
+    for (uint32_t i = 0; i < itemIDs.size(); i++) {
+        uint32_t itemID;
+        itemID = itemIDs[i];
+        if (itemID) {
+            RemoveIconItem(base, itemID);
+        }
+    }
+}
+
+auto PapyrusMoreHudIE::GetIconName(uint32_t itemID) -> std::string
+{
+    logger::trace("GetIconName");
+    std::string                           iconName("");
+    std::lock_guard<std::recursive_mutex> lock(mtx);
+
+    if (IsIconItemRegistered(nullptr, itemID)) {
+        iconName.append(s_ahzRegisteredIcons[itemID].c_str());
+    }
+
+    return iconName;
+}
+
+auto PapyrusMoreHudIE::RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm) -> bool
+{
+    a_vm->RegisterFunction("GetVersion", "AhzMoreHudIe", GetVersion);
+    a_vm->RegisterFunction("IsIconItemRegistered", "AhzMoreHudIe", IsIconItemRegistered);
+    a_vm->RegisterFunction("AddIconItem", "AhzMoreHudIe", AddIconItem);
+    a_vm->RegisterFunction("RemoveIconItem", "AhzMoreHudIe", RemoveIconItem);
+    a_vm->RegisterFunction("AddIconItems", "AhzMoreHudIe", AddIconItems);
+    a_vm->RegisterFunction("RemoveIconItems", "AhzMoreHudIe", RemoveIconItems);
+    a_vm->RegisterFunction("RegisterIconFormList", "AhzMoreHudIe", RegisterIconFormList);
+    a_vm->RegisterFunction("UnRegisterIconFormList", "AhzMoreHudIe", UnRegisterIconFormList);
+    a_vm->RegisterFunction("IsIconFormListRegistered", "AhzMoreHudIe", IsIconFormListRegistered);
+    return true;
 }

@@ -6,4 +6,6 @@ set(headers ${headers}
     include/AHZScaleform.h
     include/AHZScaleformHook.h
     include/AHZUtilities.h
+    include/HashUtil.h
+    include/ActorValueList.h
 )

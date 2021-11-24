@@ -1,28 +1,26 @@
-class VMClassRegistry;
-struct StaticFunctionTag;
 
-#include "skse64/GameTypes.h"
-#include "skse64/PapyrusArgs.h"
-#include "skse64/GameForms.h"
+#include "PCH.h"
 #include <string.h>
 #include <map>
 
-using namespace std;
+//using namespace std;
 
-namespace papyrusMoreHudIE
+class PapyrusMoreHudIE
 {
-	bool RegisterFuncs(VMClassRegistry* registry);
+	public:
+		static bool   RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm);
+		static bool   HasForm(std::string iconName, uint32_t formId);
+		static std::string GetIconName(uint32_t itemID);
 
-	UInt32 GetVersion(StaticFunctionTag* base);
-	bool IsIconItemRegistered(StaticFunctionTag* base, UInt32);
-	void AddIconItem(StaticFunctionTag* base, UInt32 itemID, BSFixedString iconName);
-	void RemoveIconItem(StaticFunctionTag* base, UInt32 itemID);
-	void AddIconItems(StaticFunctionTag* base, VMArray<UInt32> itemIDs, VMArray<BSFixedString> iconNames);
-	void RemoveIconItems(StaticFunctionTag* base, VMArray<UInt32> itemIDs);
-	void RegisterIconFormList(StaticFunctionTag* base, BSFixedString iconName, BGSListForm *list);
-	void UnRegisterIconFormList(StaticFunctionTag* base, BSFixedString iconName);
-	bool IsIconFormListRegistered(StaticFunctionTag* base, BSFixedString iconName);
-	bool IsIconFormListRegistered_Internal(std::string iconName);
-	string GetIconName(UInt32 itemID);
-	bool HasForm(std::string iconName, UInt32 formId);
-}
+private:
+    static uint32_t GetVersion(RE::StaticFunctionTag* base);
+    static bool     IsIconItemRegistered(RE::StaticFunctionTag* base, uint32_t);
+    static void     AddIconItem(RE::StaticFunctionTag* base, uint32_t itemID, RE::BSFixedString iconName);
+    static void     RemoveIconItem(RE::StaticFunctionTag* base, uint32_t itemID);
+    static void     AddIconItems(RE::StaticFunctionTag* base, std::vector<uint32_t> itemIDs, std::vector<RE::BSFixedString> iconNames);
+    static void     RemoveIconItems(RE::StaticFunctionTag* base, std::vector<uint32_t> itemIDs);
+    static void     RegisterIconFormList(RE::StaticFunctionTag* base, RE::BSFixedString iconName, RE::BGSListForm* list);
+    static void     UnRegisterIconFormList(RE::StaticFunctionTag* base, RE::BSFixedString iconName);
+    static bool     IsIconFormListRegistered(RE::StaticFunctionTag* base, RE::BSFixedString iconName);
+    static bool     IsIconFormListRegistered_Internal(std::string iconName);
+};

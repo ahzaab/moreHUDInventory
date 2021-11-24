@@ -1,11 +1,12 @@
-﻿#include "AHZScaleform.h"
-#include "skse64\HashUtil.h"
+﻿#include "PCH.h"
+
+#include "AHZScaleform.h"
+#include "HashUtil.h"
 
 bool m_showBookRead;
 bool m_showBookSkill;
 bool m_showKnownEnchantment;
 bool m_showPosNegEffects;
-static TESGlobal *g_survivalModeEnabled = NULL;
 
 double CAHZScaleform::mRound(double r)
 {
@@ -22,7 +23,7 @@ CAHZScaleform::~CAHZScaleform()
 
 
 
-void CAHZScaleform::ExtendItemCard(GFxMovieView * view, GFxValue * object, InventoryEntryData * item)
+void CAHZScaleform::ExtendItemCard(RE::GFxMovieView * view, RE::GFxValue * object, RE::InventoryEntryData * item)
 {
 	if (!item || !object || !view || !item->type)
 	{
@@ -30,7 +31,7 @@ void CAHZScaleform::ExtendItemCard(GFxMovieView * view, GFxValue * object, Inven
 	}
 
 
-	GFxValue obj;
+	RE::GFxValue obj;
 	view->CreateObject(&obj);
 
 	if (item->type->GetFormType() == kFormType_Armor || item->type->GetFormType() == kFormType_Weapon && m_showKnownEnchantment)
@@ -57,20 +58,20 @@ void CAHZScaleform::ExtendItemCard(GFxMovieView * view, GFxValue * object, Inven
 	{
 		if (m_showPosNegEffects)
 		{
-			AlchemyItem *alchItem = DYNAMIC_CAST(item->type, TESForm, AlchemyItem);
+			auto alchItem = DYNAMIC_CAST(item->type, RE::TESForm, RE::AlchemyItem);
 			// Check the extra data for enchantments learned by the player
 			if (item->extendDataList && alchItem)
 			{
-				for (ExtendDataList::Iterator it = item->extendDataList->Begin(); !it.End(); ++it)
+				for (auto it = item->extendDataList->Begin(); !it.End(); ++it)
 				{
-					BaseExtraList * pExtraDataList = it.Get();
+					auto pExtraDataList = it.Get();
 
 					// Search extra data for player created poisons
 					if (pExtraDataList)
 					{
 						if (pExtraDataList->HasType(kExtraData_Poison))
 						{
-							if (ExtraPoison* extraPoison = static_cast<ExtraPoison*>(pExtraDataList->GetByType(kExtraData_Poison)))
+							if (ExtraPoison* extraPoison = static_cast<RE::ExtraPoison*>(pExtraDataList->GetByType(kExtraData_Poison)))
 							{
 								alchItem = extraPoison->poison;
 							}
@@ -81,12 +82,12 @@ void CAHZScaleform::ExtendItemCard(GFxMovieView * view, GFxValue * object, Inven
 
 			if (alchItem && alchItem->effectItemList.count)
 			{
-				UInt32 effectCount = alchItem->effectItemList.count;
-				UInt32 negEffects = 0;
-				UInt32 posEffects = 0;
+				uint32_t effectCount = alchItem->effectItemList.count;
+				uint32_t negEffects = 0;
+				uint32_t posEffects = 0;
 				bool survivalMode = isSurvivalMode();
 
-				for (int i = 0; i < effectCount; i++)
+				for (auto i = 0; i < effectCount; i++)
 				{
 					if (alchItem->effectItemList[i]->mgef)
 					{
@@ -126,9 +127,9 @@ void CAHZScaleform::ExtendItemCard(GFxMovieView * view, GFxValue * object, Inven
 	}
 
 	// Static icons
-	const char* name = CALL_MEMBER_FN(item, GenerateName)();
-	SInt32 itemId = (SInt32)HashUtil::CRC32(name, item->type->formID & 0x00FFFFFF);
-	string iconName = papyrusMoreHudIE::GetIconName(itemId);
+	auto name = item->GetDisplayName();
+	auto itemId = std::static_cast<std::sint32_t>(HashUtil::CRC32(name, item->type->formID & 0x00FFFFFF));
+	auto iconName = papyrusMoreHudIE::GetIconName(itemId);
 
 	if (iconName.length())
 	{
@@ -144,24 +145,10 @@ void CAHZScaleform::ExtendItemCard(GFxMovieView * view, GFxValue * object, Inven
 
 bool CAHZScaleform::isSurvivalMode()
 {
-	if (!g_survivalModeEnabled)
-	{
-		tArray<TESForm*> temp = DataHandler::GetSingleton()->arrGLOB;
-		for (int i = 0; i < temp.count; i++)
-		{
-			TESGlobal *glob = DYNAMIC_CAST(temp[i], TESForm, TESGlobal);
-			if (glob) {
-				string globName(glob->unk20.Get());
-				if (globName == "Survival_ModeToggle")
-				{
-					g_survivalModeEnabled = glob;
-					break;
-				}
-			}
-		}
-	}
-
-	return (g_survivalModeEnabled && g_survivalModeEnabled->unk34);
+    using TESGlobal = RE::TESGlobal;
+    const auto dobj = RE::BGSDefaultObjectManager::GetSingleton();
+    const auto survival = dobj ? dobj->GetObject<TESGlobal>(RE::DEFAULT_OBJECT::kSurvivalModeEnabled) : nullptr;
+    return survival ? survival->value == 1.0F : false;
 }
 
 void CAHZScaleform::Initialize()
@@ -173,68 +160,137 @@ void CAHZScaleform::Initialize()
    m_showPosNegEffects = g_ahzConfiguration.GetBooleanValue("General", "bShowPosNegEffects", true); 
 }
 
-bool CAHZScaleform::GetWasBookRead(TESForm *form)
+bool CAHZScaleform::GetWasBookRead(TESForm *theObject)
 {
-   if (!form)
-      return false;
+    if (!theObject)
+        return false;
 
-   if (form->GetFormType() != kFormType_Book)
-      return false;
+    if (theObject->GetFormType() != RE::FormType::Book)
+        return false;
 
-   TESObjectBOOK *item = DYNAMIC_CAST(form, TESForm, TESObjectBOOK);
-   if (item && ((item->data.flags & TESObjectBOOK::Data::kType_Read) == TESObjectBOOK::Data::kType_Read))
-   {
-      return true;
-   }
-   else
-   {
-      return false;
-   }
+    auto item = DYNAMIC_CAST(theObject, RE::TESForm, RE::TESObjectBOOK);
+    if (item && (item->IsRead())) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 string CAHZScaleform::GetBookSkill(TESForm * form)
 {
-   string desc;
-   if (form->GetFormType() == kFormType_Book)
-   {
-      TESObjectBOOK *item = DYNAMIC_CAST(form, TESForm, TESObjectBOOK);
+    string desc;
+    if (theObject->->GetFormType() == RE::FormType::Book) {
+        auto item = DYNAMIC_CAST(theObject, RE::TESForm, RE::TESObjectBOOK);
 
-      if (!item)
-         return desc;
+        if (!item)
+            return desc;
 
-      // If this is a spell book, then it is not a skill book
-      if ((item->data.flags & TESObjectBOOK::Data::kType_Spell) == TESObjectBOOK::Data::kType_Spell)
-         return desc;
+        // If this is a spell book, then it is not a skill book
+        if ((item->data.flags & RE::OBJ_BOOK::Flag::kTeachesSpell) == RE::OBJ_BOOK::Flag::kTeachesSpell)
+            return desc;
 
-      if (((item->data.flags & TESObjectBOOK::Data::kType_Skill) == TESObjectBOOK::Data::kType_Skill) &&
-         item->data.teaches.skill)
-      {
-         ActorValueList * avList = ActorValueList::GetSingleton();
-         if (avList)
-         {
-            ActorValueInfo * info = avList->GetActorValue(item->data.teaches.skill);
-            if (info)
-            {
-               TESFullName *fname = DYNAMIC_CAST(info, ActorValueInfo, TESFullName);
-               if (fname && fname->name.data)
-               {
-                  desc.append(fname->name.data);
-               }
+        if (((item->data.flags & RE::OBJ_BOOK::Flag::kAdvancesActorValue) == RE::OBJ_BOOK::Flag::kAdvancesActorValue) &&
+            item->data.teaches.actorValueToAdvance != RE::ActorValue::kNone) {
+            auto avList = SKSE::ActorValueList::GetSingleton();
+            if (avList) {
+                auto info = avList->GetActorValue(item->data.teaches.actorValueToAdvance);
+                if (info) {
+					auto fname = DYNAMIC_CAST(info, RE::ActorValueInfo, RE::TESFullName);
+					if (fname && fname->name.data)
+					{
+						desc.append(fname->name.data);
+					}
+                }
             }
-         }
-      }
-   }
-   return desc;
+        }
+    }
+    return desc;
 }
 
-bool CAHZScaleform::GetIsKnownEnchantment(InventoryEntryData * item)
+bool CAHZScaleform::GetIsKnownEnchantment(RE::InventoryEntryData * item)
+{
+	return GetIsKnownEnchantment_Impl(item) > 0;
+}
+
+uint32_t CAHZScaleform::GetIsKnownEnchantment_Impl(RE::InventoryEntryData * item)
 {
    bool enchantmentKnown = false;
 
-   if (!item || !item->type)
+   if (!item || !item->object)
    {
-      return false;
+      return 0;
    }
+
+    //auto pPC = RE::PlayerCharacter::GetSingleton();
+    auto baseForm = item->object;
+
+    if ((baseForm) &&
+        (baseForm->GetFormType() == RE::FormType::Weapon ||
+            baseForm->GetFormType() == RE::FormType::Armor ||
+            baseForm->GetFormType() == RE::FormType::Ammo ||
+            baseForm->GetFormType() == RE::FormType::Projectile)) {
+        RE::EnchantmentItem* enchantment = nullptr;
+        auto                 keyWordForm = baseForm->As<RE::BGSKeywordForm>();
+        auto                 enchantable = baseForm->As<RE::TESEnchantableForm>();
+        if (baseForm->GetFormType() == RE::FormType::Projectile) {
+            enchantable = baseForm->As<RE::TESEnchantableForm>();
+            keyWordForm = baseForm->As<RE::BGSKeywordForm>();
+        }
+
+        bool wasExtra = false;
+        if (enchantable) {  // Check the item for a base enchantment
+            enchantment = enchantable->formEnchanting;
+        }
+
+		if (item->extraLists){
+			for (auto& list: *item->extraLists){
+				auto extraEnchant = static_cast<RE::ExtraEnchantment*>(list->GetByType(RE::ExtraDataType::kEnchantment));
+				if (extraEnchant) {
+					wasExtra = true;
+					enchantment = extraEnchant->enchantment;
+				}
+			}
+		}
+
+        if (enchantment) {
+            if ((enchantment->formFlags & RE::TESForm::RecordFlags::kKnown) == RE::TESForm::RecordFlags::kKnown) {
+                return MagicDisallowEnchanting(enchantment) ? 2 : 1;
+            } else if (MagicDisallowEnchanting(enchantment)) {
+                return 2;
+            }
+
+            auto baseEnchantment = static_cast<RE::EnchantmentItem*>(enchantment->data.baseEnchantment);
+            if (baseEnchantment) {
+                if ((baseEnchantment->formFlags & RE::TESForm::RecordFlags::kKnown) == RE::TESForm::RecordFlags::kKnown) {
+                    return MagicDisallowEnchanting(baseEnchantment) ? 2 : 1;
+                } else if (MagicDisallowEnchanting(baseEnchantment)) {
+                    return 2;
+                }
+            }
+        }
+
+        // Its safe to assume that if it not a base enchanted item, that it was enchanted by the player and therefore, they
+        // know the enchantment
+        if (wasExtra) {
+            return 1;
+        } else if (enchantable) {
+            return MagicDisallowEnchanting(keyWordForm) ? 2 : 0;
+        }
+    }
+    return 0;
+
+
+
+
+
+
+
+
+
+
+
+
+
 
    if (item->type->GetFormType() == kFormType_Armor || item->type->GetFormType() == kFormType_Weapon)
    {

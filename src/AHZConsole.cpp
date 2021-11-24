@@ -1,32 +1,38 @@
+#include "PCH.h"
+
 #include "AHZConsole.h"
 #include <iostream> 
+#include "windows.h"
 using namespace std;
 
-static FILE *p_stream;
-
-CAHZDebugConsole::CAHZDebugConsole()
+namespace Debug
 {
-#if _DEBUG
-   if (!p_stream)
+   static FILE *p_stream;
+
+   CAHZDebugConsole::CAHZDebugConsole()
    {
-      AllocConsole();
-      //SetConsoleOutputCP(CP_UTF8);
-      freopen_s(&p_stream, "CONOUT$", "w", stdout);
-      printf("Hello console on\n");
-      std::cout.clear();
+   #if _DEBUG
+      if (!p_stream)
+      {
+         AllocConsole();
+         //SetConsoleOutputCP(CP_UTF8);
+         freopen_s(&p_stream, "CONOUT$", "w", stdout);
+         printf("Hello console on\n");
+         std::cout.clear();
+      }
+   #endif
    }
-#endif
-}
 
 
-CAHZDebugConsole::~CAHZDebugConsole() 
-{
-#if _DEBUG
-   if (p_stream)
+   CAHZDebugConsole::~CAHZDebugConsole() 
    {
-      fclose(p_stream);
-      p_stream = nullptr;
-      FreeConsole();
+   #if _DEBUG
+      if (p_stream)
+      {
+         fclose(p_stream);
+         p_stream = nullptr;
+         FreeConsole();
+      }
+   #endif
    }
-#endif
 }
