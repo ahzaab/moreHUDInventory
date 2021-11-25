@@ -2,8 +2,9 @@
 
 #include "AHZConfiguration.h"
 #include "AHZUtilities.h"
+#include "windows.h"
 
-string m_pluginPath;
+std::string m_pluginPath;
 
 void CAHZConfiguration::Initialize(const char * pluginName)
 {
@@ -28,10 +29,10 @@ int CAHZConfiguration::GetIntValue(const char * section, const char * key, int d
 
 float CAHZConfiguration::GetFloatValue(const char * section, const char * key, float defaultValue)
 {
-   string strDefault;
+   std::string strDefault;
    char szDefault[255];
    szDefault[0] = 0;
-   float fltResult;
+   float_t fltResult;
    sprintf_s(szDefault, (size_t)255, "%f", defaultValue);
    strDefault.append(szDefault);
    string result = GetStringValue(section, key, strDefault);
@@ -47,16 +48,16 @@ bool CAHZConfiguration::GetBooleanValue(const char * section, const char * key, 
    return result == "1" ? true : false;
 }
 
-string CAHZConfiguration::GetStringValue(const char * section, const char * key, string& defaultValue)
+std::string CAHZConfiguration::GetStringValue(const char * section, const char * key, std::string& defaultValue)
 {
-   string result = defaultValue;
+   std::string result = defaultValue;
 
    char	resultBuf[256];
    resultBuf[0] = 0;
 
    if (_access_s(m_pluginPath.c_str(), 0) == 0)
    {
-      UInt32	resultLen = GetPrivateProfileString(section, key, defaultValue.c_str(), resultBuf, sizeof(resultBuf), m_pluginPath.c_str());
+      uint32_t	resultLen = GetPrivateProfileStringA(section, key, defaultValue.c_str(), resultBuf, sizeof(resultBuf), m_pluginPath.c_str());
       result = resultBuf;
    }
    return result;

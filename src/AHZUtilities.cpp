@@ -1,4 +1,7 @@
+#include "PCH.h"
+
 #include "AHZUtilities.h"
+#include "windows.h"
 
 vector<string> CAHZUtilities::SplitString(string& str, string& token) {
    vector<string>result;
@@ -23,14 +26,14 @@ string & CAHZUtilities::GetSkyrimDataPath()
 
    if (s_dataPath.empty())
    {
-      HMODULE hModule = GetModuleHandle(NULL);
-      if (hModule != NULL)
+      auto hModule = GetModuleHandle(nullptr);
+      if (hModule != nullptr)
       {
          char skyrimPath[_MAX_PATH];
          char skyrimDir[_MAX_DIR];
          char skyrimDrive[_MAX_DRIVE];
          // Use GetModuleFileName() with module handle to get the path
-         GetModuleFileName(hModule, skyrimPath, (sizeof(skyrimPath)));
+         GetModuleFileNameA(hModule, skyrimPath, (sizeof(skyrimPath)));
 
          _splitpath_s(
             (const char*)skyrimPath,

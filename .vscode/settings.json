@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "mutex": "cpp"
+        "mutex": "cpp",
+        "xstring": "cpp",
+        "filesystem": "cpp"
     }
 }

@@ -1,4 +1,6 @@
 
+#pragma once
+
 #include "PCH.h"
 #include <string.h>
 #include <map>

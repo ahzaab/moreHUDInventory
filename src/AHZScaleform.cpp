@@ -1,5 +1,6 @@
 ﻿#include "PCH.h"
 
+#include "ActorValueList.h"
 #include "AHZScaleform.h"
 #include "HashUtil.h"
 
@@ -25,7 +26,7 @@ CAHZScaleform::~CAHZScaleform()
 
 void CAHZScaleform::ExtendItemCard(RE::GFxMovieView * view, RE::GFxValue * object, RE::InventoryEntryData * item)
 {
-	if (!item || !object || !view || !item->type)
+	if (!item || !object || !view || !item->object)
 	{
 		return;
 	}
@@ -34,17 +35,17 @@ void CAHZScaleform::ExtendItemCard(RE::GFxMovieView * view, RE::GFxValue * objec
 	RE::GFxValue obj;
 	view->CreateObject(&obj);
 
-	if (item->type->GetFormType() == kFormType_Armor || item->type->GetFormType() == kFormType_Weapon && m_showKnownEnchantment)
+	if (item->object->GetFormType() == RE::FormType::Armor || item->object->GetFormType() == RE::FormType::Weapon && m_showKnownEnchantment)
 	{
 		RegisterBoolean(&obj, "enchantmentKnown", GetIsKnownEnchantment(item));
 		// Add the object to the scaleform function
 		object->SetMember("AHZItemCardObj", &obj);
 	}
-	else if (item->type->GetFormType() == kFormType_Book)
+	else if (item->object->GetFormType() == RE::FormType::Book)
 	{
 		if (m_showBookSkill)
 		{
-			string bookSkill = GetBookSkill(item->type);
+			std::string bookSkill = GetBookSkill(item->object);
 			if (bookSkill.length())
 			{
 				RegisterString(&obj, "bookSkill", bookSkill.c_str());
@@ -54,24 +55,24 @@ void CAHZScaleform::ExtendItemCard(RE::GFxMovieView * view, RE::GFxValue * objec
 		// Add the object to the scaleform function
 		object->SetMember("AHZItemCardObj", &obj);
 	}
-	else if (item->type->GetFormType() == kFormType_Potion)
+	else if (item->object->GetFormType() == RE::FormType::AlchemyItem)
 	{
 		if (m_showPosNegEffects)
 		{
-			auto alchItem = DYNAMIC_CAST(item->type, RE::TESForm, RE::AlchemyItem);
+			auto alchItem = DYNAMIC_CAST(item->object, RE::TESForm, RE::AlchemyItem);
 			// Check the extra data for enchantments learned by the player
-			if (item->extendDataList && alchItem)
+			if (item->extraLists && alchItem)
 			{
-				for (auto it = item->extendDataList->Begin(); !it.End(); ++it)
+				for (auto& list : *item->extraLists)
 				{
-					auto pExtraDataList = it.Get();
+					auto pExtraDataList = list;
 
 					// Search extra data for player created poisons
 					if (pExtraDataList)
 					{
-						if (pExtraDataList->HasType(kExtraData_Poison))
+						if (pExtraDataList->HasType(RE::ExtraDataType::kPoison))
 						{
-							if (ExtraPoison* extraPoison = static_cast<RE::ExtraPoison*>(pExtraDataList->GetByType(kExtraData_Poison)))
+							if (RE::ExtraPoison* extraPoison = static_cast<RE::ExtraPoison*>(pExtraDataList->GetByType(RE::ExtraDataType::kPoison)))
 							{
 								alchItem = extraPoison->poison;
 							}
@@ -80,25 +81,22 @@ void CAHZScaleform::ExtendItemCard(RE::GFxMovieView * view, RE::GFxValue * objec
 				}
 			}
 
-			if (alchItem && alchItem->effectItemList.count)
+			if (alchItem && alchItem->effects.size())
 			{
-				uint32_t effectCount = alchItem->effectItemList.count;
 				uint32_t negEffects = 0;
 				uint32_t posEffects = 0;
 				bool survivalMode = isSurvivalMode();
 
-				for (auto i = 0; i < effectCount; i++)
+				for (auto& mgef: alchItem->effects)
 				{
-					if (alchItem->effectItemList[i]->mgef)
+					if (mgef)
 					{
-						string effectName = string(alchItem->effectItemList[i]->mgef->description.c_str());
+						std::string effectName = std::string(mgef->baseEffect->magicItemDescription.c_str());
 						size_t found = effectName.find("[SURV=");
-						bool surVivalDescFound = (found != string::npos);
-
-						if (((alchItem->effectItemList[i]->mgef->properties.flags & EffectSetting::Properties::kEffectType_Detrimental) == EffectSetting::Properties::kEffectType_Detrimental) ||
-							((alchItem->effectItemList[i]->mgef->properties.flags & EffectSetting::Properties::kEffectType_Hostile) == EffectSetting::Properties::kEffectType_Hostile))
+						bool surVivalDescFound = (found != std::string::npos);
+                        //RE::EffectSetting::EffectSettingData::Flag::kDetrimental
+						if (mgef->baseEffect->data.flags.any(RE::EffectSetting::EffectSettingData::Flag::kDetrimental, RE::EffectSetting::EffectSettingData::Flag::kHostile))
 						{
-
 							// Do not include the survival mode effects when not in survival mode
 							if (!survivalMode && surVivalDescFound)
 							{
@@ -128,8 +126,8 @@ void CAHZScaleform::ExtendItemCard(RE::GFxMovieView * view, RE::GFxValue * objec
 
 	// Static icons
 	auto name = item->GetDisplayName();
-	auto itemId = std::static_cast<std::sint32_t>(HashUtil::CRC32(name, item->type->formID & 0x00FFFFFF));
-	auto iconName = papyrusMoreHudIE::GetIconName(itemId);
+	auto itemId = static_cast<std::int32_t>(SKSE::HashUtil::CRC32(name, item->object->formID & 0x00FFFFFF));
+	auto iconName = PapyrusMoreHudIE::GetIconName(itemId);
 
 	if (iconName.length())
 	{
@@ -137,9 +135,9 @@ void CAHZScaleform::ExtendItemCard(RE::GFxMovieView * view, RE::GFxValue * objec
 	}
 
 
-	RegisterBoolean(object, "AHZdbmNew", papyrusMoreHudIE::HasForm("dbmNew", item->type->formID));
-	RegisterBoolean(object, "AHZdbmDisp", papyrusMoreHudIE::HasForm("dbmDisp", item->type->formID));
-	RegisterBoolean(object, "AHZdbmFound", papyrusMoreHudIE::HasForm("dbmFound", item->type->formID));
+	RegisterBoolean(object, "AHZdbmNew", PapyrusMoreHudIE::HasForm("dbmNew", item->object->formID));
+	RegisterBoolean(object, "AHZdbmDisp", PapyrusMoreHudIE::HasForm("dbmDisp", item->object->formID));
+	RegisterBoolean(object, "AHZdbmFound", PapyrusMoreHudIE::HasForm("dbmFound", item->object->formID));
 
 }
 
@@ -160,7 +158,7 @@ void CAHZScaleform::Initialize()
    m_showPosNegEffects = g_ahzConfiguration.GetBooleanValue("General", "bShowPosNegEffects", true); 
 }
 
-bool CAHZScaleform::GetWasBookRead(TESForm *theObject)
+bool CAHZScaleform::GetWasBookRead(RE::TESForm *theObject)
 {
     if (!theObject)
         return false;
@@ -176,11 +174,11 @@ bool CAHZScaleform::GetWasBookRead(TESForm *theObject)
     }
 }
 
-string CAHZScaleform::GetBookSkill(TESForm * form)
+std::string CAHZScaleform::GetBookSkill(RE::TESForm * form)
 {
-    string desc;
-    if (theObject->->GetFormType() == RE::FormType::Book) {
-        auto item = DYNAMIC_CAST(theObject, RE::TESForm, RE::TESObjectBOOK);
+    std::string desc;
+    if (form->GetFormType() == RE::FormType::Book) {
+        auto item = DYNAMIC_CAST(form, RE::TESForm, RE::TESObjectBOOK);
 
         if (!item)
             return desc;
@@ -196,9 +194,9 @@ string CAHZScaleform::GetBookSkill(TESForm * form)
                 auto info = avList->GetActorValue(item->data.teaches.actorValueToAdvance);
                 if (info) {
 					auto fname = DYNAMIC_CAST(info, RE::ActorValueInfo, RE::TESFullName);
-					if (fname && fname->name.data)
+					if (fname && fname->GetFullName())
 					{
-						desc.append(fname->name.data);
+						desc.append(fname->GetFullName());
 					}
                 }
             }
@@ -210,6 +208,27 @@ string CAHZScaleform::GetBookSkill(TESForm * form)
 bool CAHZScaleform::GetIsKnownEnchantment(RE::InventoryEntryData * item)
 {
 	return GetIsKnownEnchantment_Impl(item) > 0;
+}
+
+auto CAHZScaleform::MagicDisallowEnchanting(RE::BGSKeywordForm* pKeywords) -> bool
+{
+    if (pKeywords) {
+        for (uint32_t k = 0; k < pKeywords->numKeywords; k++) {
+            if (pKeywords->keywords[k]) {
+                auto keyword = pKeywords->GetKeywordAt(k).value_or(nullptr);
+                if (keyword) {
+                    // Had to add this check because https://www.nexusmods.com/skyrimspecialedition/mods/34175?
+                    // sets the editor ID for 'MagicDisallowEnchanting' to null (╯°□°）╯︵ ┻━┻
+                    auto   asCstr = keyword->GetFormEditorID();
+                    std::string keyWordName = asCstr ? asCstr : "";
+                    if (keyWordName == "MagicDisallowEnchanting") {
+                        return true;  // Is enchanted, but cannot be enchanted by player
+                    }
+                }
+            }
+        }
+    }
+    return false;
 }
 
 uint32_t CAHZScaleform::GetIsKnownEnchantment_Impl(RE::InventoryEntryData * item)
@@ -278,68 +297,6 @@ uint32_t CAHZScaleform::GetIsKnownEnchantment_Impl(RE::InventoryEntryData * item
         }
     }
     return 0;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-   if (item->type->GetFormType() == kFormType_Armor || item->type->GetFormType() == kFormType_Weapon)
-   {
-      EnchantmentItem * enchantment = NULL;
-      TESEnchantableForm * enchantable = DYNAMIC_CAST(item->type, TESForm, TESEnchantableForm);
-
-      if (enchantable) { // Check the item for a base enchantment
-         enchantment = enchantable->enchantment;
-      }
-
-      // Check the extra data for enchantments learned by the player
-      if (item->extendDataList && enchantable)
-      {
-         for (ExtendDataList::Iterator it = item->extendDataList->Begin(); !it.End(); ++it)
-         {
-            BaseExtraList * pExtraDataList = it.Get();
-
-            if (pExtraDataList)
-            {
-               if (pExtraDataList->HasType(kExtraData_Enchantment))
-               {
-                  if (ExtraEnchantment* extraEnchant = static_cast<ExtraEnchantment*>(pExtraDataList->GetByType(kExtraData_Enchantment)))
-                  {
-                     enchantment = extraEnchant->enchant;
-
-                     // For now, assume true since we have extra enchantment
-                     enchantmentKnown = true;
-                  }
-               }
-            }
-         }
-      }
-
-      if (enchantment)
-      {
-         if ((enchantment->flags & TESForm::kFlagPlayerKnows) == TESForm::kFlagPlayerKnows) {
-            enchantmentKnown = true;
-         }
-
-         if (enchantment->data.baseEnchantment)
-         {
-            if ((enchantment->data.baseEnchantment->flags & TESForm::kFlagPlayerKnows) == TESForm::kFlagPlayerKnows) {
-               enchantmentKnown = true;
-            }
-         }
-      }
-   }
-
-   return enchantmentKnown;
 }
 
 void CAHZScaleform::ReplaceStringInPlace(std::string& subject, const std::string& search,
@@ -353,23 +310,23 @@ void CAHZScaleform::ReplaceStringInPlace(std::string& subject, const std::string
    }
 };
 
-void CAHZScaleform::RegisterString(GFxValue * dst, const char * name, const char * str)
+void CAHZScaleform::RegisterString(RE::GFxValue * dst, const char * name, const char * str)
 {
-   GFxValue	fxValue;
+   RE::GFxValue	fxValue;
    fxValue.SetString(str);
    dst->SetMember(name, &fxValue);
 };
 
-void CAHZScaleform::RegisterNumber(GFxValue * dst, const char * name, double value)
+void CAHZScaleform::RegisterNumber(RE::GFxValue * dst, const char * name, double value)
 {
-   GFxValue	fxValue;
+   RE::GFxValue	fxValue;
    fxValue.SetNumber(value);
    dst->SetMember(name, &fxValue);
 };
 
-void CAHZScaleform::RegisterBoolean(GFxValue * dst, const char * name, bool value)
+void CAHZScaleform::RegisterBoolean(RE::GFxValue * dst, const char * name, bool value)
 {
-   GFxValue	fxValue;
-   fxValue.SetBool(value);
+   RE::GFxValue	fxValue;
+   fxValue.SetBoolean(value);
    dst->SetMember(name, &fxValue);
 };

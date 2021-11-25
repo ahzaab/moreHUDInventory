@@ -19,12 +19,12 @@ public:
 private:
    static void ReplaceStringInPlace(std::string& subject, const std::string& search,
       const std::string& replace);
-
+   static auto MagicDisallowEnchanting(RE::BGSKeywordForm* pKeywords) -> bool;
    static void RegisterString(RE::GFxValue * dst, const char * name, const char * str);
    static void RegisterNumber(RE::GFxValue * dst, const char * name, double value);
    static void RegisterBoolean(RE::GFxValue * dst, const char * name, bool value);
    static double mRound(double d);
-   string GetBookSkill(RE::TESForm *form);
+   std::string GetBookSkill(RE::TESForm *form);
    bool GetIsKnownEnchantment(RE::InventoryEntryData * item);
    uint32_t GetIsKnownEnchantment_Impl(RE::InventoryEntryData * item);
 

@@ -1,10 +1,12 @@
 #pragma once
 
-
-class CAHZDebugConsole
+namespace Debug
 {
-public:
-   ~CAHZDebugConsole();
-   CAHZDebugConsole();
-};
+   class CAHZDebugConsole
+   {
+   public:
+      ~CAHZDebugConsole();
+      CAHZDebugConsole();
+   };
+}
 

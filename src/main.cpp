@@ -4,16 +4,33 @@
 #include <vector>
 
 #include "AHZScaleform.h"
-#include "AHZScaleformHook.h"
 #include "AHZConsole.h"
 #include "AHZConfiguration.h"
 #include "AHZPapyrusMoreHudIE.h"
-
-using namespace moreHUD;
+#include "Events.h"
+#include "Papyrus.h"
+#include "Scaleform.h"
+//using namespace moreHUD;
 
 // Just initialize to start routing to the console window
 Debug::CAHZDebugConsole theDebugConsole;
 CAHZConfiguration g_ahzConfiguration;
+CAHZScaleform g_ahzScaleform;
+
+
+namespace
+{
+    void MessageHandler(SKSE::MessagingInterface::Message* a_msg)
+    {
+        switch (a_msg->type) {
+        case SKSE::MessagingInterface::kDataLoaded:
+        {
+            logger::info("Registering Events"sv);
+            Events::Install();
+        } break;
+        }
+    }
+}
 
 
 extern "C"
@@ -76,14 +93,14 @@ extern "C"
             }
             logger::info("registered listener"sv);
 
+            logger::info("Registering Inventory Extension");
+            auto scaleform = SKSE::GetScaleformInterface();
+            scaleform->Register(&g_ahzScaleform.ExtendItemCard);
 
             if (!moreHUD::Papyrus::Register()) {
                 logger::critical("Could not register papyrus functions"sv);
                 return false;
             }
-
-            logger::info("Installing patched"sv);
-            Patches::Install();
 
             logger::info("Registering Callbacks"sv);
             Scaleform::RegisterCallbacks();

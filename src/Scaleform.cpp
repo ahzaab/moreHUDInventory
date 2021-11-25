@@ -2,7 +2,7 @@
 #include "Scaleform.h"
 #include "AHZScaleform.h"
 #include "SKSE/API.h"
-#include "AHZPapyrusMoreHud.h"
+#include "AHZPapyrusMoreHudIE.h"
 #include "HashUtil.h"
 
 namespace Scaleform
@@ -33,7 +33,7 @@ namespace Scaleform
         public:
             void Call(Params& a_params) override
         {
-            a_params.retVal->SetBool(m_ahzScaleForm.m_showBookRead);
+            a_params.retVal->SetBoolean(m_ahzScaleForm.m_showBookRead);
         } 
     };
 
@@ -43,7 +43,7 @@ namespace Scaleform
         public:
             void Call(Params& a_params) override
         {
-            a_params.retVal->SetBool(m_ahzScaleForm.m_enableItemCardResize);
+            a_params.retVal->SetBoolean(m_ahzScaleForm.m_enableItemCardResize);
         }
     };
 
@@ -54,10 +54,10 @@ namespace Scaleform
         {
             if (a_params.args && a_params.argCount && a_params.args[0].IsNumber())
             {
-                std::uint32_t formID = std::static_cast<std::uint32_t>(a_params.args[0].GetNumber());
+                auto formID = static_cast<std::uint32_t>(a_params.args[0].GetNumber());
 
-                RE::TESForm* bookForm = RE::LookupFormByID(formID);
-                a_params.retVal->SetBool(m_ahzScaleForm.GetWasBookRead(bookForm));
+                auto bookForm = RE::TESForm::LookupByID(formID);
+                a_params.retVal->SetBoolean(m_ahzScaleForm.GetWasBookRead(bookForm));
             }
         }
     };
@@ -68,28 +68,28 @@ class SKSEScaleform_GetIconForItemId : public RE::GFxFunctionHandler
         public:
             void Call(Params& a_params) override
 	{
-		if (args && args->args && args->numArgs > 1 && args->args[0].GetType() == GFxValue::kType_Number && args->args[1].GetType() == GFxValue::kType_String)
+		if (a_params.args && a_params.argCount > 1 && a_params.args[0].IsNumber() && a_params.args[1].IsString())
 		{
-			UInt32 formID = (UInt32)args->args[0].GetNumber();
+			auto formID = static_cast<std::uint32_t>(a_params.args[0].GetNumber());
 			
-			const char * name = args->args[1].GetString();
+			const char * name = a_params.args[1].GetString();
 			
 			if (!name)
 			{
 				return;
 			}
 
-			SInt32 itemId = (SInt32)HashUtil::CRC32(name, formID & 0x00FFFFFF);
+			int32_t itemId = static_cast<int32_t>(HashUtil::CRC32(name, formID & 0x00FFFFFF));
 			s_lastIconName.clear();
 			s_lastIconName.append(papyrusMoreHudIE::GetIconName(itemId));
-			GFxValue obj;
-			args->movie->CreateObject(&obj);
-			GFxValue	fxValue;
+			RE::GFxValue obj;
+			a_params.movie->CreateObject(&obj);
+			RE::GFxValue	fxValue;
 			fxValue.SetString(s_lastIconName.c_str());
 			obj.SetMember("iconName", &fxValue);
 
 			// Add the object to the scaleform function
-			args->args[2].SetMember("returnObject", &obj);
+			a_params.args[2].SetMember("returnObject", &obj);
 		}
 	}
 };
@@ -109,7 +109,7 @@ class SKSEScaleform_HasFormId : public RE::GFxFunctionHandler
 				return;
 			}
 
-			args->result->SetBool(papyrusMoreHudIE::HasForm(string(iconName), formId));
+			args->result->SetBoolean(papyrusMoreHudIE::HasForm(string(iconName), formId));
 		}
 	}
 };
@@ -120,11 +120,11 @@ class SKSEScaleform_AHZLog : public RE::GFxFunctionHandler
             void Call(Params& a_params) override
 	{
 #if _DEBUG
-		_MESSAGE("%s", a_params.args[0].GetString());
+		logger::info("{}", a_params.args[0].GetString());
 #else  // Only allow release verbosity for a release build
 		if (a_params.args && a_params.argCount > 1 && a_params.args[1].IsBool() && a_params.args[1].GetBool())
 		{
-			_MESSAGE("%s", a_params.args[0].GetString());
+			logger::info("{}", a_params.args[0].GetString());
 		}
 #endif
 	}
@@ -170,6 +170,9 @@ class SKSEScaleform_AHZLog : public RE::GFxFunctionHandler
         RegisterFunction<SKSEScaleform_ShowBookRead>(a_root, a_view, "ShowBookRead");
         RegisterFunction<SKSEScaleform_EnableItemCardResize>(a_root, a_view, "EnableItemCardResize");
         RegisterFunction<SKSEScaleform_GetWasBookRead>(a_root, a_view, "GetWasBookRead");
+        RegisterFunction<SKSEScaleform_GetIconForItemId>(a_root, a_view, "GetIconForItemId");
+        RegisterFunction<SKSEScaleform_HasFormId>(a_root, a_view, "HasFormId");
+        RegisterFunction<SKSEScaleform_AHZLog>(a_root, a_view, "AHZLog");
         return true;
     }
 
