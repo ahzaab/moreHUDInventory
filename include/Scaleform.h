@@ -33,4 +33,5 @@ namespace Scaleform
 
 
 	void RegisterCallbacks();
+	void RegisterInventory(RE::GFxMovieView * view, RE::GFxValue * object, RE::InventoryEntryData * item);
 }

@@ -8,7 +8,6 @@
 
 namespace Scaleform
 {
-    CAHZScaleform m_ahzScaleForm;
     std::string s_lastIconName;
 
     /**** scaleform functions ****/
@@ -26,6 +25,7 @@ namespace Scaleform
         public:
             void Call(Params& a_params) override
         {
+            logger::trace("Current Menu: {}", Events::g_currentMenu.c_str());
             a_params.retVal->SetString(Events::g_currentMenu.c_str());
         }
     };
@@ -35,7 +35,8 @@ namespace Scaleform
         public:
             void Call(Params& a_params) override
         {
-            a_params.retVal->SetBoolean(m_ahzScaleForm.m_showBookRead);
+            logger::trace("ShowBookRead: {}", g_ahzScaleform.m_showBookRead);
+            a_params.retVal->SetBoolean(g_ahzScaleform.m_showBookRead);
         } 
     };
 
@@ -45,7 +46,7 @@ namespace Scaleform
         public:
             void Call(Params& a_params) override
         {
-            a_params.retVal->SetBoolean(m_ahzScaleForm.m_enableItemCardResize);
+            a_params.retVal->SetBoolean(g_ahzScaleform.m_enableItemCardResize);
         }
     };
 
@@ -57,9 +58,10 @@ namespace Scaleform
             if (a_params.args && a_params.argCount && a_params.args[0].IsNumber())
             {
                 auto formID = static_cast<std::uint32_t>(a_params.args[0].GetNumber());
-
                 auto bookForm = RE::TESForm::LookupByID(formID);
-                a_params.retVal->SetBoolean(m_ahzScaleForm.GetWasBookRead(bookForm));
+                auto isReadBook = g_ahzScaleform.GetWasBookRead(bookForm);
+                logger::trace("GetWasBookRead: {}", isReadBook);
+                a_params.retVal->SetBoolean(isReadBook);
             }
         }
     };
@@ -122,7 +124,7 @@ class SKSEScaleform_AHZLog : public RE::GFxFunctionHandler
             void Call(Params& a_params) override
 	{
 #if _DEBUG
-		logger::info("{}", a_params.args[0].GetString());
+		logger::trace("{}", a_params.args[0].GetString());
 #else  // Only allow release verbosity for a release build
 		if (a_params.args && a_params.argCount > 1 && a_params.args[1].IsBool() && a_params.args[1].GetBool())
 		{
@@ -183,6 +185,10 @@ class SKSEScaleform_AHZLog : public RE::GFxFunctionHandler
         auto scaleform = SKSE::GetScaleformInterface();
         scaleform->Register(RegisterScaleformFunctions, "AHZmoreHUDInventory");
         logger::info("Registered all scaleform callbacks");
+    }
+
+    void RegisterInventory(RE::GFxMovieView * view, RE::GFxValue * object, RE::InventoryEntryData * item){
+        g_ahzScaleform.ExtendItemCard(view, object, item);
     }
 
 }

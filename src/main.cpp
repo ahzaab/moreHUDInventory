@@ -86,6 +86,9 @@ extern "C"
 
             SKSE::AllocTrampoline(1 << 6);
 
+            g_ahzConfiguration.Initialize("AHZmoreHUDInventory");
+            g_ahzScaleform.Initialize();
+
             auto messaging = SKSE::GetMessagingInterface();
             if (!messaging->RegisterListener("SKSE", MessageHandler)) {
                 logger::critical("Could not register MessageHandler"sv);
@@ -95,7 +98,7 @@ extern "C"
 
             logger::info("Registering Inventory Extension");
             auto scaleform = SKSE::GetScaleformInterface();
-            scaleform->Register(g_ahzScaleform.ExtendItemCard);
+            scaleform->Register(Scaleform::RegisterInventory);
 
             if (!moreHUD::Papyrus::Register()) {
                 logger::critical("Could not register papyrus functions"sv);
@@ -105,7 +108,7 @@ extern "C"
             logger::info("Registering Callbacks"sv);
             Scaleform::RegisterCallbacks();
 
-            logger::info("moreHUD loaded"sv);
+            logger::info("moreHUDIE loaded"sv);
 
         } catch (const std::exception& e) {
             logger::critical(e.what());

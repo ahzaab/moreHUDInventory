@@ -4,26 +4,23 @@
 #include "AHZScaleform.h"
 #include "HashUtil.h"
 
-bool CAHZScaleform::m_showBookRead;
-bool CAHZScaleform::m_showBookSkill;
-bool CAHZScaleform::m_showKnownEnchantment;
-bool CAHZScaleform::m_showPosNegEffects;
-bool CAHZScaleform::m_enableItemCardResize;
-
 double CAHZScaleform::mRound(double r)
 {
    return (r >= 0.0) ? floor(r + 0.5) : ceil(r - 0.5);
 }
 
-CAHZScaleform::CAHZScaleform()
+CAHZScaleform::CAHZScaleform(): 
+m_showBookRead(false), 
+m_showBookSkill(false),
+m_showKnownEnchantment{false}, 
+m_showPosNegEffects{false}, 
+m_enableItemCardResize(false)
 {
 }
 
 CAHZScaleform::~CAHZScaleform()
 {
 }
-
-
 
 void CAHZScaleform::ExtendItemCard(RE::GFxMovieView * view, RE::GFxValue * object, RE::InventoryEntryData * item)
 {
@@ -35,12 +32,12 @@ void CAHZScaleform::ExtendItemCard(RE::GFxMovieView * view, RE::GFxValue * objec
 
 	RE::GFxValue obj;
 	view->CreateObject(&obj);
-
+    
 	if (item->object->GetFormType() == RE::FormType::Armor || item->object->GetFormType() == RE::FormType::Weapon && m_showKnownEnchantment)
 	{
 		RegisterBoolean(&obj, "enchantmentKnown", GetIsKnownEnchantment(item));
 		// Add the object to the scaleform function
-		object->SetMember("AHZItemCardObj", &obj);
+		object->SetMember("AHZItemCardObj", obj);
 	}
 	else if (item->object->GetFormType() == RE::FormType::Book)
 	{
@@ -54,7 +51,7 @@ void CAHZScaleform::ExtendItemCard(RE::GFxMovieView * view, RE::GFxValue * objec
 		}
 
 		// Add the object to the scaleform function
-		object->SetMember("AHZItemCardObj", &obj);
+		object->SetMember("AHZItemCardObj", obj);
 	}
 	else if (item->object->GetFormType() == RE::FormType::AlchemyItem)
 	{
@@ -122,7 +119,7 @@ void CAHZScaleform::ExtendItemCard(RE::GFxMovieView * view, RE::GFxValue * objec
 			}
 		}
 		// Add the object to the scaleform function
-		object->SetMember("AHZItemCardObj", &obj);
+		object->SetMember("AHZItemCardObj", obj);
 	}
 
 	// Static icons
@@ -313,19 +310,19 @@ void CAHZScaleform::RegisterString(RE::GFxValue * dst, const char * name, const 
 {
    RE::GFxValue	fxValue;
    fxValue.SetString(str);
-   dst->SetMember(name, &fxValue);
+   dst->SetMember(name, fxValue);
 };
 
 void CAHZScaleform::RegisterNumber(RE::GFxValue * dst, const char * name, double value)
 {
    RE::GFxValue	fxValue;
    fxValue.SetNumber(value);
-   dst->SetMember(name, &fxValue);
+   dst->SetMember(name, fxValue);
 };
 
 void CAHZScaleform::RegisterBoolean(RE::GFxValue * dst, const char * name, bool value)
 {
    RE::GFxValue	fxValue;
    fxValue.SetBoolean(value);
-   dst->SetMember(name, &fxValue);
+   dst->SetMember(name, fxValue);
 };
