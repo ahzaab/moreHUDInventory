@@ -4,10 +4,11 @@
 #include "AHZScaleform.h"
 #include "HashUtil.h"
 
-bool m_showBookRead;
-bool m_showBookSkill;
-bool m_showKnownEnchantment;
-bool m_showPosNegEffects;
+bool CAHZScaleform::m_showBookRead;
+bool CAHZScaleform::m_showBookSkill;
+bool CAHZScaleform::m_showKnownEnchantment;
+bool CAHZScaleform::m_showPosNegEffects;
+bool CAHZScaleform::m_enableItemCardResize;
 
 double CAHZScaleform::mRound(double r)
 {
@@ -233,8 +234,6 @@ auto CAHZScaleform::MagicDisallowEnchanting(RE::BGSKeywordForm* pKeywords) -> bo
 
 uint32_t CAHZScaleform::GetIsKnownEnchantment_Impl(RE::InventoryEntryData * item)
 {
-   bool enchantmentKnown = false;
-
    if (!item || !item->object)
    {
       return 0;

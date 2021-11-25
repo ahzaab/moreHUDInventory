@@ -95,7 +95,7 @@ extern "C"
 
             logger::info("Registering Inventory Extension");
             auto scaleform = SKSE::GetScaleformInterface();
-            scaleform->Register(&g_ahzScaleform.ExtendItemCard);
+            scaleform->Register(g_ahzScaleform.ExtendItemCard);
 
             if (!moreHUD::Papyrus::Register()) {
                 logger::critical("Could not register papyrus functions"sv);

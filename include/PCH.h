@@ -27,6 +27,7 @@
 #include <variant>
 #include <vector>
 
+
 #include <spdlog/sinks/basic_file_sink.h>
 
 namespace WinAPI = SKSE::WinAPI;

@@ -16,13 +16,13 @@ void CAHZConfiguration::Initialize(const char * pluginName)
 
 int CAHZConfiguration::GetIntValue(const char * section, const char * key, int defaultValue)
 {
-   string strDefault;
+   std::string strDefault;
    char szDefault[255];
    szDefault[0] = 0;
    int intResult;
    sprintf_s(szDefault, (size_t)255, "%d", defaultValue);
    strDefault.append(szDefault);
-   string result = GetStringValue(section, key, strDefault);
+   std::string result = GetStringValue(section, key, strDefault);
    intResult = atoi(result.c_str());
    return intResult;
 }
@@ -35,16 +35,16 @@ float CAHZConfiguration::GetFloatValue(const char * section, const char * key, f
    float_t fltResult;
    sprintf_s(szDefault, (size_t)255, "%f", defaultValue);
    strDefault.append(szDefault);
-   string result = GetStringValue(section, key, strDefault);
+   std::string result = GetStringValue(section, key, strDefault);
    fltResult = atof(result.c_str());
    return fltResult;
 }
 
 bool CAHZConfiguration::GetBooleanValue(const char * section, const char * key, bool defaultValue)
 {
-   string strDefault;
+   std::string strDefault;
    strDefault.append(defaultValue ? "1" : "0");
-   string result = GetStringValue(section, key, strDefault);
+   std::string result = GetStringValue(section, key, strDefault);
    return result == "1" ? true : false;
 }
 

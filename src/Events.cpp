@@ -4,6 +4,7 @@
 
 namespace Events
 {
+    std::string g_currentMenu;
     auto MenuHandler::GetSingleton() -> MenuHandler*
     {
         static MenuHandler singleton;
@@ -20,6 +21,11 @@ namespace Events
     {
         if (a_event == nullptr) {
             return RE::BSEventNotifyControl::kContinue;
+        }
+
+        if (a_event->opening)
+        {
+            g_currentMenu = std::string(a_event->menuName);
         }
 
         if ((a_event->menuName == RE::InventoryMenu::MENU_NAME ||

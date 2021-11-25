@@ -3,7 +3,7 @@
 #include "AHZConsole.h"
 #include <iostream> 
 #include "windows.h"
-using namespace std;
+//using namespace std;
 
 namespace Debug
 {

@@ -4,6 +4,7 @@
 
 namespace Events
 {
+    extern std::string g_currentMenu;
     using EventResult = RE::BSEventNotifyControl;
 
     class MenuHandler : public RE::BSTEventSink<RE::MenuOpenCloseEvent>

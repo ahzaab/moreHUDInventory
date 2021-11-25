@@ -4,11 +4,13 @@
 #include "SKSE/API.h"
 #include "AHZPapyrusMoreHudIE.h"
 #include "HashUtil.h"
+#include "Events.h"
 
 namespace Scaleform
 {
     CAHZScaleform m_ahzScaleForm;
-    
+    std::string s_lastIconName;
+
     /**** scaleform functions ****/
 
     class SKSEScaleform_InstallHooks : public RE::GFxFunctionHandler
@@ -24,7 +26,7 @@ namespace Scaleform
         public:
             void Call(Params& a_params) override
         {
-            a_params.retVal->SetString(g_currentMenu.c_str());
+            a_params.retVal->SetString(Events::g_currentMenu.c_str());
         }
     };
 
@@ -79,9 +81,9 @@ class SKSEScaleform_GetIconForItemId : public RE::GFxFunctionHandler
 				return;
 			}
 
-			int32_t itemId = static_cast<int32_t>(HashUtil::CRC32(name, formID & 0x00FFFFFF));
+			int32_t itemId = static_cast<int32_t>(SKSE::HashUtil::CRC32(name, formID & 0x00FFFFFF));
 			s_lastIconName.clear();
-			s_lastIconName.append(papyrusMoreHudIE::GetIconName(itemId));
+			s_lastIconName.append(PapyrusMoreHudIE::GetIconName(itemId));
 			RE::GFxValue obj;
 			a_params.movie->CreateObject(&obj);
 			RE::GFxValue	fxValue;
@@ -102,14 +104,14 @@ class SKSEScaleform_HasFormId : public RE::GFxFunctionHandler
 		if (a_params.args && a_params.argCount > 1 && a_params.args[0].IsString() && a_params.args[1].IsNumber())
 		{
 			auto iconName = a_params.args[0].GetString();
-			auto formId = std::static_cast<std::uint32_t>(a_params.args[1].GetNumber());
+			auto formId = static_cast<uint32_t>(a_params.args[1].GetNumber());
 
 			if (!iconName)
 			{
 				return;
 			}
 
-			args->result->SetBoolean(papyrusMoreHudIE::HasForm(string(iconName), formId));
+			a_params.retVal->SetBoolean(PapyrusMoreHudIE::HasForm(std::string(iconName), formId));
 		}
 	}
 };
