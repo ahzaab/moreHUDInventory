@@ -25,7 +25,7 @@ private:
    void RegisterBoolean(RE::GFxValue * dst, const char * name, bool value);
    double mRound(double d);
    std::string GetBookSkill(RE::TESForm *form);
-   bool GetIsKnownEnchantment(RE::InventoryEntryData * item);
+   uint32_t GetIsKnownEnchantment(RE::InventoryEntryData * item);
    uint32_t GetIsKnownEnchantment_Impl(RE::InventoryEntryData * item);
 
    bool m_showBookSkill;

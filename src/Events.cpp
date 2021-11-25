@@ -23,11 +23,6 @@ namespace Events
             return RE::BSEventNotifyControl::kContinue;
         }
 
-        if (a_event->opening)
-        {
-            g_currentMenu = std::string(a_event->menuName);
-        }
-
         if ((a_event->menuName == RE::InventoryMenu::MENU_NAME ||
             a_event->menuName == RE::CraftingMenu::MENU_NAME ||
             a_event->menuName == RE::ContainerMenu::MENU_NAME ||
@@ -36,6 +31,9 @@ namespace Events
             a_event->menuName == RE::MainMenu::MENU_NAME) // Load it in the main menu to sneak in and flip the extendData flag
             && a_event->opening) {
             auto view = RE::UI::GetSingleton()->GetMovieView(a_event->menuName);
+
+            g_currentMenu.clear();
+            g_currentMenu.append(a_event->menuName.c_str());
 
             if (view) {
                 RE::GFxValue hudComponent;

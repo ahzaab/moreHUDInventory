@@ -35,7 +35,7 @@ void CAHZScaleform::ExtendItemCard(RE::GFxMovieView * view, RE::GFxValue * objec
     
 	if (item->object->GetFormType() == RE::FormType::Armor || item->object->GetFormType() == RE::FormType::Weapon && m_showKnownEnchantment)
 	{
-		RegisterBoolean(&obj, "enchantmentKnown", GetIsKnownEnchantment(item));
+		RegisterNumber(&obj, "enchantmentKnown", GetIsKnownEnchantment(item));
 		// Add the object to the scaleform function
 		object->SetMember("AHZItemCardObj", obj);
 	}
@@ -203,11 +203,6 @@ std::string CAHZScaleform::GetBookSkill(RE::TESForm * form)
     return desc;
 }
 
-bool CAHZScaleform::GetIsKnownEnchantment(RE::InventoryEntryData * item)
-{
-	return GetIsKnownEnchantment_Impl(item) > 0;
-}
-
 auto CAHZScaleform::MagicDisallowEnchanting(RE::BGSKeywordForm* pKeywords) -> bool
 {
     if (pKeywords) {
@@ -229,7 +224,7 @@ auto CAHZScaleform::MagicDisallowEnchanting(RE::BGSKeywordForm* pKeywords) -> bo
     return false;
 }
 
-uint32_t CAHZScaleform::GetIsKnownEnchantment_Impl(RE::InventoryEntryData * item)
+uint32_t CAHZScaleform::GetIsKnownEnchantment(RE::InventoryEntryData * item)
 {
    if (!item || !item->object)
    {

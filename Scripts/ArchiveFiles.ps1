@@ -1,6 +1,6 @@
-﻿$sourcePath = "$($Env:Skyrim64Path)\Data"
-$destinationDataPath = "$($Env:ModDevPath)\MODS\SkyrimSE\moreHUDInventory\SKSE64\skse64\moreHUDInventory\Data"
-$destinationAS2Path = "$($Env:ModDevPath)\MODS\SkyrimSE\moreHUDInventory\SKSE64\skse64\moreHUDInventory\AS2"
+﻿$sourcePath = "$($Env:Skyrim64AEPath)\Data"
+$destinationDataPath = "$($Env:ModDevPath)\MODS\SkyrimSE\moreHUDInventory\Plugin\Data"
+$destinationAS2Path = "$($Env:ModDevPath)\MODS\SkyrimSE\moreHUDInventory\Plugin\AS2"
 
 if (!$(Test-Path "$destinationDataPath\Interface"))
 {

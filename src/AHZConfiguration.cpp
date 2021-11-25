@@ -36,7 +36,7 @@ float CAHZConfiguration::GetFloatValue(const char * section, const char * key, f
    sprintf_s(szDefault, (size_t)255, "%f", defaultValue);
    strDefault.append(szDefault);
    std::string result = GetStringValue(section, key, strDefault);
-   fltResult = atof(result.c_str());
+   fltResult = std::stof(result.c_str());
    return fltResult;
 }
 
@@ -57,7 +57,7 @@ std::string CAHZConfiguration::GetStringValue(const char * section, const char *
 
    if (_access_s(m_pluginPath.c_str(), 0) == 0)
    {
-      uint32_t	resultLen = GetPrivateProfileStringA(section, key, defaultValue.c_str(), resultBuf, sizeof(resultBuf), m_pluginPath.c_str());
+      GetPrivateProfileStringA(section, key, defaultValue.c_str(), resultBuf, sizeof(resultBuf), m_pluginPath.c_str());
       result = resultBuf;
    }
    return result;

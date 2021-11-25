@@ -23,4 +23,4 @@ The compiled .swf is installed in the Skyrim Data Folder (through a bsa file) to
 No.  Processing is in the SKSE64 plugin and the ActionScript code
 
 ## Configuration
-Starting in version 1.0.15 Mod authors can change parameters and load custom large item card backgrounds as shown [here](https://github.com/ahzaab/moreHUDInventory/tree/master/Data/Interface/moreHUDIE).
+Starting in version 1.0.15 Mod authors can change parameters and load custom large item card backgrounds as shown [here](https://github.com/ahzaab/moreHUDInventory/tree/master/Data/Interface/exported/moreHUDIE).

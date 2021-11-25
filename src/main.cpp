@@ -10,7 +10,6 @@
 #include "Events.h"
 #include "Papyrus.h"
 #include "Scaleform.h"
-//using namespace moreHUD;
 
 // Just initialize to start routing to the console window
 Debug::CAHZDebugConsole theDebugConsole;
@@ -79,8 +78,8 @@ extern "C"
             spdlog::set_default_logger(std::move(log));
 #endif
 
-            logger::info("moreHUD loading"sv);
-            logger::info("moreHUD v{}"sv, Version::NAME);
+            logger::info("moreHUDIE loading"sv);
+            logger::info("moreHUDIE v{}"sv, Version::NAME);
 
             SKSE::Init(a_skse);
 
