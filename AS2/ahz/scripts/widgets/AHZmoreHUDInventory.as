@@ -4,7 +4,6 @@ import ahz.scripts.widgets.AHZDefines.AHZVanillaFrames;
 import flash.display.BitmapData;
 import flash.filters.DropShadowFilter;
 import mx.managers.DepthManager;
-import gfx.io.GameDelegate;
 
 class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 {
@@ -402,20 +401,8 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		initializeClips();
 	}
 
-	function SetPlayerInfo(): Void
-	{
-		_global.skse.plugins.AHZmoreHUDInventory.AHZLog("SetPlayerInfo", false);
-		for (var i: Number = 0 ; i < 15; i++)
-		{
-			_global.skse.plugins.AHZmoreHUDInventory.AHZLog("arguments[" + i +  "]: " + arguments[i], false);
-		}
-	}
-
 	function clipReady():Void
 	{
-		_global.skse.plugins.AHZmoreHUDInventory.AHZLog("RequestPlayerInfo", false);
-		GameDelegate.call("RequestPlayerInfo", [], this, "SetPlayerInfo");
-		
 		if (!LoadedLargeItemCard_mc)
 		{
 			LoadedLargeItemCard_mc = ICBackground_mc;
@@ -940,17 +927,7 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		type = itemCard.itemInfo.type;
 		ResetIconText();
 		var iconName:String;
-/*
-        for(var id in _selectedItem) {
-			_global.skse.plugins.AHZmoreHUDInventory.AHZLog(id + "=" + _selectedItem[id], true);
-				for(var id2 in _selectedItem[id]) {
-					_global.skse.plugins.AHZmoreHUDInventory.AHZLog("     " + id2 + "=" + _selectedItem[id][id2], true);
-					for(var id3 in _selectedItem[id][id2]) {
-						_global.skse.plugins.AHZmoreHUDInventory.AHZLog("          " + id3 + "=" + _selectedItem[id][id2][id3], true);
-					}							
-				}			
-		}
-*/
+
 		IconContainer._x = itemCard.ItemText._x + itemCard.ItemText.ItemTextField._x;
 		IconContainer.textWidth = itemCard.ItemText.ItemTextField._width;		
 		IconContainer._y = ((itemCard.ItemText._y + itemCard.ItemText.ItemTextField._y) - IconContainer.textHeight) + 10;

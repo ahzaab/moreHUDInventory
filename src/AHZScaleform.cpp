@@ -33,7 +33,7 @@ void CAHZScaleform::ExtendItemCard(RE::GFxMovieView * view, RE::GFxValue * objec
 	RE::GFxValue obj;
 	view->CreateObject(&obj);
     
-	if (item->object->GetFormType() == RE::FormType::Armor || item->object->GetFormType() == RE::FormType::Weapon && m_showKnownEnchantment)
+	if ((item->object->GetFormType() == RE::FormType::Armor || item->object->GetFormType() == RE::FormType::Weapon) && m_showKnownEnchantment)
 	{
 		RegisterNumber(&obj, "enchantmentKnown", GetIsKnownEnchantment(item));
 		// Add the object to the scaleform function
