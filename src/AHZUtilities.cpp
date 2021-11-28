@@ -1,10 +1,13 @@
-#include "AHZUtilities.h"
+#include "PCH.h"
 
-vector<string> CAHZUtilities::SplitString(string& str, string& token) {
-   vector<string>result;
+#include "AHZUtilities.h"
+#include "windows.h"
+
+std::vector<std::string> CAHZUtilities::SplitString(std::string& str, std::string& token) {
+   std::vector<std::string>result;
    while (str.size()) {
-      int index = str.find(token);
-      if (index != string::npos) {
+      auto index = str.find(token);
+      if (index != std::string::npos) {
          result.push_back(str.substr(0, index));
          str = str.substr(index + token.size());
          if (str.size() == 0)result.push_back(str);
@@ -17,20 +20,20 @@ vector<string> CAHZUtilities::SplitString(string& str, string& token) {
    return result;
 }
 
-string & CAHZUtilities::GetSkyrimDataPath()
+std::string & CAHZUtilities::GetSkyrimDataPath()
 {
-   static string s_dataPath;
+   static std::string s_dataPath;
 
    if (s_dataPath.empty())
    {
-      HMODULE hModule = GetModuleHandle(NULL);
-      if (hModule != NULL)
+      auto hModule = GetModuleHandle(nullptr);
+      if (hModule != nullptr)
       {
          char skyrimPath[_MAX_PATH];
          char skyrimDir[_MAX_DIR];
          char skyrimDrive[_MAX_DRIVE];
          // Use GetModuleFileName() with module handle to get the path
-         GetModuleFileName(hModule, skyrimPath, (sizeof(skyrimPath)));
+         GetModuleFileNameA(hModule, skyrimPath, (sizeof(skyrimPath)));
 
          _splitpath_s(
             (const char*)skyrimPath,
@@ -52,9 +55,9 @@ string & CAHZUtilities::GetSkyrimDataPath()
    return s_dataPath;
 }
 
-string & CAHZUtilities::GetPluginPath()
+std::string & CAHZUtilities::GetPluginPath()
 {
-   static string s_pluginPath;
+   static std::string s_pluginPath;
 
    if (s_pluginPath.empty())
    {
@@ -65,21 +68,21 @@ string & CAHZUtilities::GetPluginPath()
 }
 
 // trim from end of string (right)
-string& CAHZUtilities::rtrim(string& s)
+std::string& CAHZUtilities::rtrim(std::string& s)
 {
    s.erase(s.find_last_not_of(" \t\n\r\f\v") + 1);
    return s;
 }
 
 // trim from beginning of string (left)
-string& CAHZUtilities::ltrim(string& s)
+std::string& CAHZUtilities::ltrim(std::string& s)
 {
    s.erase(0, s.find_first_not_of(" \t\n\r\f\v"));
    return s;
 }
 
 // trim from both ends of string (left & right)
-string& CAHZUtilities::trim(string& s)
+std::string& CAHZUtilities::trim(std::string& s)
 {
    return ltrim(rtrim(s));
 }

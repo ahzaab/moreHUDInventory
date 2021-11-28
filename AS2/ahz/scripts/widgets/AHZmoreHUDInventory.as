@@ -968,7 +968,12 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		
 		if (_selectedItem.AHZItemCardObj.enchantmentKnown)
 		{
-			IconContainer.appendImage("ahzKnown");
+			if (_selectedItem.AHZItemCardObj.enchantmentKnown == 1){
+				IconContainer.appendImage("ahzKnown");
+			}
+			if (_selectedItem.AHZItemCardObj.enchantmentKnown == 2){
+				IconContainer.appendImage("ahzEnch");
+			}			
 		}
 		// Fortunately, extraData is not required for getting the Book Read Status.  This allows us to check
 		// it in real time and make sure the read status is accurate

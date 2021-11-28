@@ -2,7 +2,7 @@
 
 #include <string>
 
-using namespace std;
+//using namespace std;
 
 class CAHZConfiguration
 {
@@ -12,12 +12,12 @@ public:
    int GetIntValue(const char* section, const char * key, int defaultValue = 0);
    float GetFloatValue(const char* section, const char * key, float defaultValue = 0.0);
    bool GetBooleanValue(const char* section, const char * key, bool defaultValue = false);
-   string GetStringValue(const char* section, const char * key, string& defaultValue = string(""));
+   std::string GetStringValue(const char* section, const char * key, std::string& defaultValue);
    CAHZConfiguration();
    ~CAHZConfiguration();
 
 private:
-   string m_pluginPath;
+   std::string m_pluginPath;
 
 };
 

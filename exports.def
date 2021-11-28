@@ -1,4 +1,4 @@
-LIBRARY	"AHZmoreHUDInventory"
+LIBRARY	"AHZmoreHUDPlugin"
 EXPORTS
-SKSEPlugin_Query
+SKSEPlugin_Version
 SKSEPlugin_Load
