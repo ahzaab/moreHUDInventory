@@ -117,11 +117,16 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		
 		if (itemCard.itemInfo.type == ICT_CRAFT_ENCHANTING || itemCard.itemInfo.type == ICT_HOUSE_PART)
 		{
+			var background_mc:MovieClip;
 			if (itemCard.itemInfo.effects != undefined && itemCard.itemInfo.effects.length > 0) {
-				return itemCard.Enchanting_Background;
+				background_mc = itemCard.Enchanting_Background;
 			} else {
-				return itemCard.Enchanting_Slim_Background;
+				background_mc = itemCard.Enchanting_Slim_Background;
 			}	
+			if (background_mc)
+			{
+				return background_mc;
+			}
 		}
 		
 		if (itemCard["background"])
