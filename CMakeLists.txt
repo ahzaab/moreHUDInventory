@@ -7,7 +7,7 @@ set(VCPKG_TARGET_TRIPLET "x64-windows-static-md" CACHE STRING "")
 
 project(
 	AHZmoreHUDInventory
-	VERSION 2.0.1.0
+	VERSION 2.0.2.0
 	LANGUAGES CXX
 )
 
