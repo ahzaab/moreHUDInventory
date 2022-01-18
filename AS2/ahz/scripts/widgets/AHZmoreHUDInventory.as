@@ -30,7 +30,6 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 	private var newWidth:Number;
 	private var newX:Number;
 	private var prevHeight:Number;
-	private var itemCardWidth:Number;
 	private var _lastFrame:Number = -1;
 	private var _itemCardOverride:Boolean = false;
 	private var _enableItemCardResize:Boolean = false;
@@ -494,7 +493,6 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 			originalX = cardBackground._x;
 			originalWidth = cardBackground._width;
 			newX = ((originalX - (newWidth - originalWidth)) / 2);
-			itemCardWidth = itemCard._width;
 		}
 
 		var t = this;
@@ -591,7 +589,7 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		{
 			return;
 		}
-
+		
 		if (itemCard.itemInfo.type == ICT_CRAFT_ENCHANTING || itemCard.itemInfo.type == ICT_HOUSE_PART)
 		{
 			if (itemCard.itemInfo.effects != undefined && itemCard.itemInfo.effects.length > 0) {
@@ -772,7 +770,7 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		itemCardX = itemCard._parent._x + itemCard._x;
 		itemCardY = itemCard._parent._y + itemCard._y;
 		this._y = itemCardY + _config[AHZDefines.CFG_LIC_YOFFSET];
-		this._x = (itemCardX - ((this._width - itemCardWidth) / 2)) + _config[AHZDefines.CFG_LIC_XOFFSET];
+		this._x = (itemCardX - ((this._width - originalWidth) / 2)) + _config[AHZDefines.CFG_LIC_XOFFSET];
 		itemCardBottom = this._height;
 		var oldDescrptionHeight:Number;
 
