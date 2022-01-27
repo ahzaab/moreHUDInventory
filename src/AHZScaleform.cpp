@@ -132,10 +132,25 @@ void CAHZScaleform::ExtendItemCard(RE::GFxMovieView * view, RE::GFxValue * objec
 		RegisterString(object, "AHZItemIcon", iconName.c_str());
 	}
 
-
 	RegisterBoolean(object, "AHZdbmNew", PapyrusMoreHudIE::HasForm("dbmNew", item->object->formID));
 	RegisterBoolean(object, "AHZdbmDisp", PapyrusMoreHudIE::HasForm("dbmDisp", item->object->formID));
 	RegisterBoolean(object, "AHZdbmFound", PapyrusMoreHudIE::HasForm("dbmFound", item->object->formID));
+
+    auto customIcons = PapyrusMoreHudIE::GetFormIcons(item->object->formID);
+
+    if (!customIcons.empty()){
+        RE::GFxValue          entry;
+        RE::GFxValue          customIconArray;
+        view->CreateArray(std::addressof(customIconArray));
+        customIconArray.SetArraySize(static_cast<uint32_t>(customIcons.size()));
+        auto idx = 0;
+        for (auto& ci: customIcons)
+        {
+            entry.SetString(ci);
+            customIconArray.SetElement(idx++, entry);
+        }  
+        object->SetMember("AHZCustomIcons", customIconArray);
+    }
 
 }
 

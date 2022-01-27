@@ -18,14 +18,15 @@ auto PapyrusMoreHudIE::GetVersion([[maybe_unused]] RE::StaticFunctionTag* base) 
 
 void PapyrusMoreHudIE::RegisterIconFormList(RE::StaticFunctionTag* base, RE::BSFixedString iconName, RE::BGSListForm* list)
 {
-    logger::trace("RegisterIconFormList");
+    logger::trace("RegisterIconFormList: {}...", iconName.data());
     std::lock_guard<std::recursive_mutex> lock(mtx);
 
     if (!list)
         return;
 
     if (!IsIconFormListRegistered(base, iconName)) {
-        s_ahzRegisteredIconFormLists.insert(AhzIconFormListCache::value_type(iconName.c_str(), list));
+        logger::trace("RegisterIconFormList: {}", iconName.data());
+        s_ahzRegisteredIconFormLists.emplace(AhzIconFormListCache::value_type(iconName.c_str(), list));
     }
 }
 
@@ -43,22 +44,33 @@ auto PapyrusMoreHudIE::IsIconFormListRegistered_Internal(std::string iconName) -
 {
     logger::trace("IsIconFormListRegistered_Internal");
     std::lock_guard<std::recursive_mutex> lock(mtx);
-    // Create an iterator of map
-    AhzIconFormListCache::iterator it;
 
     if (s_ahzRegisteredIconFormLists.empty())
         return false;
 
-    // Find the element with key itemID
-    it = s_ahzRegisteredIconFormLists.find(iconName);
-
     // Check if element exists in map or not
-    return (it != s_ahzRegisteredIconFormLists.end());
+    return (s_ahzRegisteredIconFormLists.contains(iconName));
 }
 
 auto PapyrusMoreHudIE::IsIconFormListRegistered([[maybe_unused]] RE::StaticFunctionTag* base, RE::BSFixedString iconName) -> bool
 {
     return IsIconFormListRegistered_Internal(iconName.c_str());
+}
+
+std::vector<std::string_view> PapyrusMoreHudIE::GetFormIcons(RE::FormID formId)
+{
+    std::lock_guard<std::recursive_mutex> lock(mtx);
+    std::vector<std::string_view> results;
+    for (auto& kvp: s_ahzRegisteredIconFormLists)
+    {
+        auto list = s_ahzRegisteredIconFormLists[kvp.first];
+
+        if (list && list->HasForm(formId))   
+        {
+            results.emplace_back(kvp.first);
+        }
+    }
+    return results;
 }
 
 auto PapyrusMoreHudIE::HasForm(std::string iconName, uint32_t formId) -> bool

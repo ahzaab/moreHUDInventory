@@ -81,6 +81,7 @@ extern "C"
             logger::info("moreHUDIE loading"sv);
             logger::info("moreHUDIE v{}"sv, Version::NAME);
 
+            
             SKSE::Init(a_skse);
 
             SKSE::AllocTrampoline(1 << 6);

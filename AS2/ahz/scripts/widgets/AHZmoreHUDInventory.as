@@ -915,7 +915,16 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		if (selectedItemIn.AHZdbmFound)
 		{
 			IconContainer.appendImage("dbmFound");
-		}			
+		}
+		
+		if (selectedItemIn.AHZCustomIcons && selectedItemIn.AHZCustomIcons.length)
+		{
+			var i:Number;
+			for (i = 0; i < selectedItemIn.AHZCustomIcons.length; i++)
+			{
+				IconContainer.appendImage(selectedItemIn.AHZCustomIcons[i]);
+			}		
+		}
 	}
 
 	// A hook to update the item card with extended items
