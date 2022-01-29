@@ -131,11 +131,7 @@ void CAHZScaleform::ExtendItemCard(RE::GFxMovieView * view, RE::GFxValue * objec
 	{
 		RegisterString(object, "AHZItemIcon", iconName.c_str());
 	}
-
-	RegisterBoolean(object, "AHZdbmNew", PapyrusMoreHudIE::HasForm("dbmNew", item->object->formID));
-	RegisterBoolean(object, "AHZdbmDisp", PapyrusMoreHudIE::HasForm("dbmDisp", item->object->formID));
-	RegisterBoolean(object, "AHZdbmFound", PapyrusMoreHudIE::HasForm("dbmFound", item->object->formID));
-
+    
     auto customIcons = PapyrusMoreHudIE::GetFormIcons(item->object->formID);
 
     if (!customIcons.empty()){

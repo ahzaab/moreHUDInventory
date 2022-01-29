@@ -2,6 +2,7 @@
 #include "AHZPapyrusMoreHudIE.h"
 #include "version.h"
 #include <mutex>
+#include "HashUtil.h"
 
 using AhzIconItemCache = std::map<uint32_t, RE::BSFixedString>;
 using AhzIconFormListCache = std::map<std::string, RE::BGSListForm*>;
@@ -14,6 +15,16 @@ auto PapyrusMoreHudIE::GetVersion([[maybe_unused]] RE::StaticFunctionTag* base) 
     auto version = Version::ASINT;
     logger::trace("GetVersion: {}", version);
     return version;
+}
+
+auto PapyrusMoreHudIE::GetFormItemId([[maybe_unused]] RE::StaticFunctionTag* base, RE::TESForm* form) -> uint32_t
+{
+    if (!form)
+    {
+        return 0;
+    }
+    auto crc = SKSE::HashUtil::CRC32(form->GetName() , form->formID & 0x00FFFFFF);
+    return crc;
 }
 
 void PapyrusMoreHudIE::RegisterIconFormList(RE::StaticFunctionTag* base, RE::BSFixedString iconName, RE::BGSListForm* list)
@@ -180,5 +191,7 @@ auto PapyrusMoreHudIE::RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm) ->
     a_vm->RegisterFunction("RegisterIconFormList", "AhzMoreHudIe", RegisterIconFormList);
     a_vm->RegisterFunction("UnRegisterIconFormList", "AhzMoreHudIe", UnRegisterIconFormList);
     a_vm->RegisterFunction("IsIconFormListRegistered", "AhzMoreHudIe", IsIconFormListRegistered);
+    a_vm->RegisterFunction("GetFormItemId", "AhzMoreHudIe", GetFormItemId);
+    
     return true;
 }

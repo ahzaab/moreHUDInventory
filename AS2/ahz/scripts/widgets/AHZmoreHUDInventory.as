@@ -897,24 +897,11 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		}
 	}
 
-	function checkDbm(selectedItemIn:Object):Void
+	function checkCustomIcons(selectedItemIn:Object):Void
 	{
 		if (!selectedItemIn)
 		{
 			return;
-		}
-		
-		if (selectedItemIn.AHZdbmNew)
-		{
-			IconContainer.appendImage("dbmNew");
-		}		
-		if (selectedItemIn.AHZdbmDisp)
-		{
-			IconContainer.appendImage("dbmDisp");
-		}	
-		if (selectedItemIn.AHZdbmFound)
-		{
-			IconContainer.appendImage("dbmFound");
 		}
 		
 		if (selectedItemIn.AHZCustomIcons && selectedItemIn.AHZCustomIcons.length)
@@ -939,6 +926,7 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		type = itemCard.itemInfo.type;
 		ResetIconText();
 		var iconName:String;
+		var formIcons:Array;
 
 		IconContainer._x = itemCard.ItemText._x + itemCard.ItemText.ItemTextField._x;
 		IconContainer.textWidth = itemCard.ItemText.ItemTextField._width;		
@@ -955,17 +943,17 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 			return;
 		}
 
-		// Magic Menu cannot be extended by plugins so call a function to get the iconName
+		// Magic Menu cannot be extended by plugins so call functions to get the custom icons
 		if (_currentMenu == "MagicMenu")
 		{
-			// Only for iEquip 
-			var returnValue:Object = {returnObject:{itemIcon:""}}
-									 _global.skse.plugins.AHZmoreHUDInventory.GetIconForItemId(_selectedItem.formId, _selectedItem.text, returnValue);
-			iconName = returnValue.returnObject.iconName;
-			if (!iconName || !iconName.length)
-			{
-				return
-			}
+			// Only for iEquip  
+			_selectedItem.AHZItemIcon = _global.skse.plugins.AHZmoreHUDInventory.GetIconForItemId(_selectedItem.formId, _selectedItem.text);
+			_global.skse.plugins.AHZmoreHUDInventory.AHZLog("Magic Menu iEquip Icon: " + _selectedItem.AHZItemIcon, false);
+			
+			// For all other custom icons
+			_selectedItem.AHZCustomIcons = _global.skse.plugins.AHZmoreHUDInventory.GetFormIcons(_selectedItem.formId);
+			_global.skse.plugins.AHZmoreHUDInventory.AHZLog("Magic Menu Custom Icons: " + _selectedItem.AHZCustomIcons.length, false);			
+			
 		}
 		else if (type != ICT_BOOK &&
 				 type != ICT_ARMOR && 
@@ -974,7 +962,7 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 				 type != ICT_FOOD && !_selectedItem.AHZItemIcon)
 		{
 			// Allow for checking Misc and Keys (Empty Frame)
-			checkDbm(_selectedItem);
+			checkCustomIcons(_selectedItem);
 			return;
 		}
 		
@@ -1018,24 +1006,13 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 				IconContainer.appendHtml("<font face=\'$EverywhereBoldFont\' size=\'18\' color=\'"+_config[AHZDefines.CFG_ICON_POS_EFFECT_COLOR]+"\'>&nbsp;&nbsp;&nbsp;</font>");	
 			}
 		}
-
-		// If coming from the Magic Menu (No extended data) or other menus (the name is part of the extended data for all other menus
-		if (_selectedItem.AHZItemIcon || (iconName && iconName.length))
+		
+		if (_selectedItem.AHZItemIcon && _selectedItem.AHZItemIcon.length)
 		{
-			var customIcon:String;
-			if (iconName && iconName.length)
-			{
-				customIcon = string(iconName);
-				IconContainer.appendImage(customIcon);
-			}
-			else
-			{
-				customIcon = string(_selectedItem.AHZItemIcon);
-				IconContainer.appendImage(customIcon);
-			}
+			IconContainer.appendImage(_selectedItem.AHZItemIcon);	
 		}
 
-		checkDbm(_selectedItem);
+		checkCustomIcons(_selectedItem);
 	}
 
 	function interpolate(pBegin:Number, pEnd:Number, pMax:Number, pStep:Number):Number

@@ -80,40 +80,46 @@ class SKSEScaleform_GetIconForItemId : public RE::GFxFunctionHandler
 			
 			if (!name)
 			{
+                s_lastIconName.clear();
+                a_params.retVal->SetString(s_lastIconName.c_str());
 				return;
 			}
 
 			int32_t itemId = static_cast<int32_t>(SKSE::HashUtil::CRC32(name, formID & 0x00FFFFFF));
 			s_lastIconName.clear();
 			s_lastIconName.append(PapyrusMoreHudIE::GetIconName(itemId));
-			RE::GFxValue obj;
-			a_params.movie->CreateObject(&obj);
-			RE::GFxValue	fxValue;
-			fxValue.SetString(s_lastIconName.c_str());
-			obj.SetMember("iconName", &fxValue);
+			a_params.retVal->SetString(s_lastIconName.c_str());
 
-			// Add the object to the scaleform function
-			a_params.args[2].SetMember("returnObject", &obj);
 		}
 	}
 };
 
-class SKSEScaleform_HasFormId : public RE::GFxFunctionHandler
+class SKSEScaleform_GetFormIcons : public RE::GFxFunctionHandler
 {
-        public:
-            void Call(Params& a_params) override
+    public:
+    void Call(Params& a_params) override
 	{
-		if (a_params.args && a_params.argCount > 1 && a_params.args[0].IsString() && a_params.args[1].IsNumber())
+		if (a_params.args && a_params.argCount && a_params.args[0].IsNumber())
 		{
-			auto iconName = a_params.args[0].GetString();
-			auto formId = static_cast<uint32_t>(a_params.args[1].GetNumber());
+			auto formId = static_cast<RE::FormID>(a_params.args[0].GetNumber());
 
-			if (!iconName)
-			{
-				return;
-			}
+            auto customIcons = PapyrusMoreHudIE::GetFormIcons(formId);
+            RE::GFxValue          customIconArray;
+            a_params.movie->CreateArray(a_params.retVal);
 
-			a_params.retVal->SetBoolean(PapyrusMoreHudIE::HasForm(std::string(iconName), formId));
+            if (!customIcons.empty()){
+                RE::GFxValue          entry;
+                a_params.retVal->SetArraySize(static_cast<uint32_t>(customIcons.size()));
+                auto idx = 0;
+                for (auto& ci: customIcons)
+                {
+                    entry.SetString(ci);
+                    a_params.retVal->SetElement(idx++, entry);
+                }  
+            }
+            else{
+                a_params.retVal->SetArraySize(0);
+            }
 		}
 	}
 };
@@ -175,7 +181,7 @@ class SKSEScaleform_AHZLog : public RE::GFxFunctionHandler
         RegisterFunction<SKSEScaleform_EnableItemCardResize>(a_root, a_view, "EnableItemCardResize");
         RegisterFunction<SKSEScaleform_GetWasBookRead>(a_root, a_view, "GetWasBookRead");
         RegisterFunction<SKSEScaleform_GetIconForItemId>(a_root, a_view, "GetIconForItemId");
-        RegisterFunction<SKSEScaleform_HasFormId>(a_root, a_view, "HasFormId");
+        RegisterFunction<SKSEScaleform_GetFormIcons>(a_root, a_view, "GetFormIcons");
         RegisterFunction<SKSEScaleform_AHZLog>(a_root, a_view, "AHZLog");
         return true;
     }

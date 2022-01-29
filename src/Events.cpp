@@ -23,7 +23,8 @@ namespace Events
             return RE::BSEventNotifyControl::kContinue;
         }
 
-        if ((a_event->menuName == RE::InventoryMenu::MENU_NAME ||
+        if ((a_event->menuName == RE::GiftMenu::MENU_NAME ||
+            a_event->menuName == RE::InventoryMenu::MENU_NAME ||
             a_event->menuName == RE::CraftingMenu::MENU_NAME ||
             a_event->menuName == RE::ContainerMenu::MENU_NAME ||
             a_event->menuName == RE::BarterMenu::MENU_NAME ||
