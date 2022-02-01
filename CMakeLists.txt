@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.21)
 
 set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
 set(VCPKG_TARGET_TRIPLET "x64-windows-static-md" CACHE STRING "")
@@ -7,7 +7,7 @@ set(VCPKG_TARGET_TRIPLET "x64-windows-static-md" CACHE STRING "")
 
 project(
 	AHZmoreHUDInventory
-	VERSION 2.0.4.0
+	VERSION 0.1.0.19
 	LANGUAGES CXX
 )
 
@@ -35,7 +35,7 @@ endif()
 # ---- Globals ----
 
 add_compile_definitions(
-	SKSE_SUPPORT_XBYAK
+	#SKSE_SUPPORT_XBYAK
 )
 
 if (MSVC)
@@ -137,7 +137,6 @@ add_subdirectory(external/CommonLibSSE)
 # )
 
 find_package(spdlog REQUIRED)
-find_package(xbyak REQUIRED)
 
 # ---- Add source files ----
 
@@ -196,7 +195,6 @@ target_link_libraries(
 	PUBLIC
 		CommonLibSSE::CommonLibSSE
 		spdlog::spdlog
-		xbyak::xbyak
 )
 
 target_precompile_headers(
@@ -225,6 +223,6 @@ endif()
 add_custom_command(
 	TARGET ${PROJECT_NAME}
 	POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> $ENV{Skyrim64AEPath}/Data/SKSE/Plugins/
-	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PDB_FILE:${PROJECT_NAME}> $ENV{Skyrim64AEPath}/Data/SKSE/Plugins/
+	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> $ENV{Skyrim64SEPath}/Data/SKSE/Plugins/
+	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PDB_FILE:${PROJECT_NAME}> $ENV{Skyrim64SEPath}/Data/SKSE/Plugins/
 )

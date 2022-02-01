@@ -11,10 +11,10 @@ $pluginExtesion = '.esl'
 
 $executingPath = split-path $SCRIPT:MyInvocation.MyCommand.Path -parent
 
-$sourceDir = "$($Env:Skyrim64AEPath)"
+$sourceDir = "$($Env:Skyrim64SEPath)"
 $archiveToolDir = "$sourceDir\Tools\Archive"
 $sourceDataDir = "$sourceDir\Data"
-$releaseDir = "$($Env:ModDevPath)\MODS\SkyrimSE\moreHUDInventory\Release"
+$releaseDir = "$($Env:ModDevPath)\MODS\SkyrimSE\moreHUDInventory\PreAE\Release"
 $versionDir = "$releaseDir\$Version"
 $tempDir = "$versionDir\.tmp"
 $destDataDir = "$versionDir\Data"

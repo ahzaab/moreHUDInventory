@@ -1,6 +1,6 @@
-﻿$sourcePath = "$($Env:Skyrim64AEPath)\Data"
-$destinationDataPath = "$($Env:ModDevPath)\MODS\SkyrimSE\moreHUDInventory\Plugin\Data"
-$destinationAS2Path = "$($Env:ModDevPath)\MODS\SkyrimSE\moreHUDInventory\Plugin\AS2"
+﻿$sourcePath = "$($Env:Skyrim64SEPath)\Data"
+$destinationDataPath = "$($Env:ModDevPath)\MODS\SkyrimSE\moreHUDInventory\PreAE\Plugin\Data"
+$destinationAS2Path = "$($Env:ModDevPath)\MODS\SkyrimSE\moreHUDInventory\PreAE\Plugin\AS2"
 
 if (!$(Test-Path "$destinationDataPath\Interface"))
 {
@@ -27,4 +27,4 @@ if ($(Test-Path "$sourcePath\Interface\exported\moreHUDIE"))
 #AS2
 
 
-Copy-Item "$($Env:ModDevPath)\MODS\SkyrimSE\moreHUDInventory\ScaleForm\src\HUDWidgets\*" -Destination $destinationAS2Path -Exclude .git* -Recurse -Force
+Copy-Item "$($Env:ModDevPath)\MODS\SkyrimSE\moreHUDInventory\PreAE\ScaleForm\src\HUDWidgets\*" -Destination $destinationAS2Path -Exclude .git* -Recurse -Force

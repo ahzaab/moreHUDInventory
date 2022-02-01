@@ -34,15 +34,61 @@ namespace
 
 extern "C"
 {
-    DLLEXPORT constinit auto SKSEPlugin_Version = []() {
-        SKSE::PluginVersionData v{};
-        v.pluginVersion = Version::ASINT;
-        v.PluginName("Ahzaab's moreHUD Inventory Plugin"sv);
-        v.AuthorName("Ahzaab"sv);
-        v.CompatibleVersions({ SKSE::RUNTIME_LATEST });
-        v.UsesAddressLibrary(true);
-        return v;
-    }();
+    DLLEXPORT auto SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info) -> bool
+    {
+        try {
+#ifndef NDEBUG
+            auto                    msvc_sink = std::make_shared<spdlog::sinks::msvc_sink_mt>();
+            auto                    console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+            spdlog::sinks_init_list sink_list = { msvc_sink, console_sink };
+            auto                    log = std::make_shared<spdlog::logger>("multi_sink", sink_list.begin(), sink_list.end());
+            log->set_level(spdlog::level::trace);
+            spdlog::flush_every(std::chrono::seconds(3));
+            spdlog::register_logger(log);
+#else
+            auto path = logger::log_directory();
+            if (!path) {
+                return false;
+            }
+
+            *path /= "AHZmoreHUDInventory.log"sv;
+
+            auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(path->string(), true);
+            auto log = std::make_shared<spdlog::logger>("global log"s, std::move(sink));
+            log->set_level(spdlog::level::info);
+            log->flush_on(spdlog::level::info);
+#endif
+
+            spdlog::set_default_logger(std::move(log));
+            spdlog::set_pattern("%s(%#): [%^%l%$] %v");
+
+            logger::info("moreHUD Inventory Edition v{}"sv, Version::NAME);
+
+            a_info->infoVersion = SKSE::PluginInfo::kVersion;
+            a_info->name = "Ahzaab's moreHUD Inventory Plugin";
+            a_info->version = Version::ASINT;
+
+            if (a_skse->IsEditor()) {
+                logger::critical("Loaded in editor, marking as incompatible!"sv);
+                return false;
+            }
+
+            const auto ver = a_skse->RuntimeVersion();
+            if (ver <= SKSE::RUNTIME_1_5_39) {
+                logger::critical("Unsupported runtime version {}!"sv, ver.string().c_str());
+                return false;
+            }
+
+        } catch (const std::exception& e) {
+            logger::critical(e.what());
+            return false;
+        } catch (...) {
+            logger::critical("caught unknown exception"sv);
+            return false;
+        }
+
+        return true;
+    }
 
     DLLEXPORT auto SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse) -> bool
     {
@@ -52,36 +98,9 @@ extern "C"
         // }
 
         // Sleep(1000 * 2);
-
-        try {
-#ifndef NDEBUG
-            auto                    msvc_sink = std::make_shared<spdlog::sinks::msvc_sink_mt>();
-            auto                    console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-            spdlog::sinks_init_list sink_list = { msvc_sink, console_sink };
-            auto                    log = std::make_shared<spdlog::logger>("multi_sink", sink_list.begin(), sink_list.end());
-            log->set_level(spdlog::level::trace);
-            spdlog::flush_every(std::chrono::seconds(3));
-            spdlog::set_default_logger(std::move(log));
-#else
-            auto path = logger::log_directory();
-            if (!path) {
-                //stl::report_and_fail("Failed to find standard logging directory"sv);
-                return false;
-            }
-
-            *path /= "moreHUDIE.log"sv;
-
-            auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(path->string(), true);
-            auto log = std::make_shared<spdlog::logger>("global log"s, std::move(sink));
-            log->set_level(spdlog::level::info);
-            log->flush_on(spdlog::level::info);
-            spdlog::set_default_logger(std::move(log));
-#endif
-
-            logger::info("moreHUDIE loading"sv);
-            logger::info("moreHUDIE v{}"sv, Version::NAME);
-
-            
+        try
+        {
+            logger::info("moreHUD Inventory Edition loading"sv);            
             SKSE::Init(a_skse);
 
             SKSE::AllocTrampoline(1 << 6);
