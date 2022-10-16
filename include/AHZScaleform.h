@@ -2,13 +2,18 @@
 #include "AHZConfiguration.h"
 #include "AHZPapyrusMoreHudIE.h"
 
-//using namespace std;
-
 class CAHZScaleform
 {
 public:
-   CAHZScaleform();
-   ~CAHZScaleform();
+   static CAHZScaleform& Singleton()
+   {
+      static CAHZScaleform theInstance;
+      return theInstance;
+   };
+
+   CAHZScaleform(CAHZScaleform& other) = delete;
+   void operator=(const CAHZScaleform&) = delete;
+
    void ExtendItemCard(RE::GFxMovieView * view, RE::GFxValue * object, RE::InventoryEntryData * item);
    void Initialize();
    bool m_showBookRead;
@@ -17,6 +22,7 @@ public:
    bool isSurvivalMode();
 
 private:
+   CAHZScaleform();
    static void ReplaceStringInPlace(std::string& subject, const std::string& search,
       const std::string& replace);
    auto MagicDisallowEnchanting(RE::BGSKeywordForm* pKeywords) -> bool;
@@ -31,6 +37,18 @@ private:
    bool m_showBookSkill;
    bool m_showKnownEnchantment;
    bool m_showPosNegEffects;
+
+   struct CompletionistRequest
+   {
+      RE::FormID m_formId;
+   };
+   struct CompletionistResponse {
+      RE::FormID m_formID;
+      bool m_icontype; // false = New, true = Found
+      bool m_display;
+   };  
+
+   std::optional<CompletionistResponse> m_completionistResponse{std::nullopt};
 };
 
-extern CAHZScaleform g_ahzScaleform;
+//extern CAHZScaleform g_ahzScaleform;

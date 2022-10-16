@@ -14,9 +14,6 @@
 // Just initialize to start routing to the console window
 Debug::CAHZDebugConsole theDebugConsole;
 CAHZConfiguration g_ahzConfiguration;
-CAHZScaleform g_ahzScaleform;
-
-
 namespace
 {
     void MessageHandler(SKSE::MessagingInterface::Message* a_msg)
@@ -88,7 +85,7 @@ extern "C"
             SKSE::AllocTrampoline(1 << 6);
 
             g_ahzConfiguration.Initialize("AHZmoreHUDInventory");
-            g_ahzScaleform.Initialize();
+            CAHZScaleform::Singleton().Initialize();
 
             auto messaging = SKSE::GetMessagingInterface();
             if (!messaging->RegisterListener("SKSE", MessageHandler)) {

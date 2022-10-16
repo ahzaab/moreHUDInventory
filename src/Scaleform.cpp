@@ -35,8 +35,8 @@ namespace Scaleform
         public:
             void Call(Params& a_params) override
         {
-            logger::trace("ShowBookRead: {}", g_ahzScaleform.m_showBookRead);
-            a_params.retVal->SetBoolean(g_ahzScaleform.m_showBookRead);
+            logger::trace("ShowBookRead: {}", CAHZScaleform::Singleton().m_showBookRead);
+            a_params.retVal->SetBoolean(CAHZScaleform::Singleton().m_showBookRead);
         } 
     };
 
@@ -46,7 +46,7 @@ namespace Scaleform
         public:
             void Call(Params& a_params) override
         {
-            a_params.retVal->SetBoolean(g_ahzScaleform.m_enableItemCardResize);
+            a_params.retVal->SetBoolean(CAHZScaleform::Singleton().m_enableItemCardResize);
         }
     };
 
@@ -59,7 +59,7 @@ namespace Scaleform
             {
                 auto formID = static_cast<std::uint32_t>(a_params.args[0].GetNumber());
                 auto bookForm = RE::TESForm::LookupByID(formID);
-                auto isReadBook = g_ahzScaleform.GetWasBookRead(bookForm);
+                auto isReadBook = CAHZScaleform::Singleton().GetWasBookRead(bookForm);
                 logger::trace("GetWasBookRead: {}", isReadBook);
                 a_params.retVal->SetBoolean(isReadBook);
             }
@@ -194,7 +194,7 @@ class SKSEScaleform_AHZLog : public RE::GFxFunctionHandler
     }
 
     void RegisterInventory(RE::GFxMovieView * view, RE::GFxValue * object, RE::InventoryEntryData * item){
-        g_ahzScaleform.ExtendItemCard(view, object, item);
+        CAHZScaleform::Singleton().ExtendItemCard(view, object, item);
     }
 
 }
