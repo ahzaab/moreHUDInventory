@@ -4,6 +4,22 @@
 #include "AHZScaleform.h"
 #include "HashUtil.h"
 
+namespace
+{
+    struct CompletionistRequest
+    {
+        RE::FormID m_formId;
+    };
+	struct CompletionistResponse {
+
+		RE::FormID m_formID;
+		bool m_icontype; // false = New, true = Found
+		bool m_display;
+	};  
+
+    std::optional<CompletionistResponse> s_completionistResponse{std::nullopt};
+}
+
 double CAHZScaleform::mRound(double r)
 {
    return (r >= 0.0) ? floor(r + 0.5) : ceil(r - 0.5);
@@ -29,10 +45,28 @@ void CAHZScaleform::ExtendItemCard(RE::GFxMovieView * view, RE::GFxValue * objec
 		return;
 	}
 
-
 	RE::GFxValue obj;
 	view->CreateObject(&obj);
+
     
+    if (auto* messageInterface = SKSE::GetMessagingInterface())
+    {
+        CompletionistRequest request{item->object->GetFormID()};
+        if (messageInterface->Dispatch(1, &request, sizeof(request), "Completionist"))
+        {
+            s_completionistResponse = std::nullopt;
+            messageInterface->RegisterListener([](SKSE::MessagingInterface::Message* a_msg)
+            {
+                if (!a_msg || a_msg->type != 1 || !a_msg->data)
+                {
+                    return;
+                }              
+                s_completionistResponse = *static_cast<CompletionistResponse*>(a_msg->data);
+            });
+        }
+    }
+
+
 	if ((item->object->GetFormType() == RE::FormType::Armor || item->object->GetFormType() == RE::FormType::Weapon) && m_showKnownEnchantment)
 	{
 		RegisterNumber(&obj, "enchantmentKnown", GetIsKnownEnchantment(item));
@@ -133,6 +167,12 @@ void CAHZScaleform::ExtendItemCard(RE::GFxMovieView * view, RE::GFxValue * objec
 	}
     
     auto customIcons = PapyrusMoreHudIE::GetFormIcons(item->object->formID);
+
+    if (s_completionistResponse && s_completionistResponse->m_display && s_completionistResponse->m_formID == item->object->formID)
+    {
+        customIcons.emplace_back(s_completionistResponse->m_icontype ? "cmpFound"sv : "cmpNew"sv);
+    }
+    s_completionistResponse = std::nullopt;
 
     if (!customIcons.empty()){
         RE::GFxValue          entry;
