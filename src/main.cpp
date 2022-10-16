@@ -10,23 +10,26 @@
 #include "Events.h"
 #include "Papyrus.h"
 #include "Scaleform.h"
+#include "Windows.h"
 
 // Just initialize to start routing to the console window
 Debug::CAHZDebugConsole theDebugConsole;
 CAHZConfiguration g_ahzConfiguration;
-CAHZScaleform g_ahzScaleform;
-
-
 namespace
 {
     void MessageHandler(SKSE::MessagingInterface::Message* a_msg)
     {
         switch (a_msg->type) {
-        case SKSE::MessagingInterface::kDataLoaded:
-        {
-            logger::info("Registering Events"sv);
-            Events::Install();
-        } break;
+            case SKSE::MessagingInterface::kDataLoaded:
+            {
+                logger::info("Registering Events"sv);
+                Events::Install();
+            } break;
+            case SKSE::MessagingInterface::kPostPostLoad:
+            {
+                Scaleform::RegisterListener();
+            }
+            break;
         }
     }
 }
@@ -106,7 +109,7 @@ extern "C"
             SKSE::AllocTrampoline(1 << 6);
 
             g_ahzConfiguration.Initialize("AHZmoreHUDInventory");
-            g_ahzScaleform.Initialize();
+            CAHZScaleform::Singleton().Initialize();
 
             auto messaging = SKSE::GetMessagingInterface();
             if (!messaging->RegisterListener("SKSE", MessageHandler)) {
