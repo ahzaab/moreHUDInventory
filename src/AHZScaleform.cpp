@@ -28,24 +28,12 @@ void CAHZScaleform::ExtendItemCard(RE::GFxMovieView * view, RE::GFxValue * objec
 	RE::GFxValue obj;
 	view->CreateObject(&obj);
 
-    
     if (auto* messageInterface = SKSE::GetMessagingInterface())
     {
         CompletionistRequest request{item->object->GetFormID()};
-        if (messageInterface->Dispatch(1, &request, sizeof(request), "Completionist"))
-        {
-            m_completionistResponse = std::nullopt;
-            messageInterface->RegisterListener([](SKSE::MessagingInterface::Message* a_msg)
-            {
-                if (!a_msg || a_msg->type != 1 || !a_msg->data)
-                {
-                    return;
-                }            
-                CAHZScaleform::Singleton().m_completionistResponse = *static_cast<CompletionistResponse*>(a_msg->data);
-            });
-        }
+        m_completionistResponse = std::nullopt;
+        messageInterface->Dispatch(1, &request, sizeof(request), "Completionist");
     }
-
 
 	if ((item->object->GetFormType() == RE::FormType::Armor || item->object->GetFormType() == RE::FormType::Weapon) && m_showKnownEnchantment)
 	{
@@ -352,3 +340,18 @@ void CAHZScaleform::RegisterBoolean(RE::GFxValue * dst, const char * name, bool 
    fxValue.SetBoolean(value);
    dst->SetMember(name, fxValue);
 };
+namespace Scaleform
+{
+    void RegisterListener()
+    {
+        auto* messageInterface = SKSE::GetMessagingInterface();
+        messageInterface->RegisterListener("Completionist", [](SKSE::MessagingInterface::Message* a_msg)
+        {
+            if (!a_msg || a_msg->type != 2 || !a_msg->data)
+            {
+                return;
+            }            
+            CAHZScaleform::Singleton().m_completionistResponse = *static_cast<CompletionistResponse*>(a_msg->data);
+        });
+    }
+}

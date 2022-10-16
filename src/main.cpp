@@ -10,6 +10,7 @@
 #include "Events.h"
 #include "Papyrus.h"
 #include "Scaleform.h"
+#include "Windows.h"
 
 // Just initialize to start routing to the console window
 Debug::CAHZDebugConsole theDebugConsole;
@@ -19,11 +20,16 @@ namespace
     void MessageHandler(SKSE::MessagingInterface::Message* a_msg)
     {
         switch (a_msg->type) {
-        case SKSE::MessagingInterface::kDataLoaded:
-        {
-            logger::info("Registering Events"sv);
-            Events::Install();
-        } break;
+            case SKSE::MessagingInterface::kDataLoaded:
+            {
+                logger::info("Registering Events"sv);
+                Events::Install();
+            } break;
+            case SKSE::MessagingInterface::kPostPostLoad:
+            {
+                Scaleform::RegisterListener();
+            }
+            break;
         }
     }
 }

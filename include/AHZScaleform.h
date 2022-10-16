@@ -2,6 +2,16 @@
 #include "AHZConfiguration.h"
 #include "AHZPapyrusMoreHudIE.h"
 
+struct CompletionistRequest
+{
+   RE::FormID m_formId;
+};
+struct CompletionistResponse {
+   RE::FormID m_formID;
+   bool m_icontype; // false = New, true = Found
+   bool m_display;
+};  
+
 class CAHZScaleform
 {
 public:
@@ -20,7 +30,7 @@ public:
    bool m_enableItemCardResize;
    bool GetWasBookRead(RE::TESForm *form);
    bool isSurvivalMode();
-
+   std::optional<CompletionistResponse> m_completionistResponse{std::nullopt};
 private:
    CAHZScaleform();
    static void ReplaceStringInPlace(std::string& subject, const std::string& search,
@@ -37,18 +47,11 @@ private:
    bool m_showBookSkill;
    bool m_showKnownEnchantment;
    bool m_showPosNegEffects;
-
-   struct CompletionistRequest
-   {
-      RE::FormID m_formId;
-   };
-   struct CompletionistResponse {
-      RE::FormID m_formID;
-      bool m_icontype; // false = New, true = Found
-      bool m_display;
-   };  
-
-   std::optional<CompletionistResponse> m_completionistResponse{std::nullopt};
 };
+
+namespace Scaleform
+{
+   void RegisterListener();
+}
 
 //extern CAHZScaleform g_ahzScaleform;
