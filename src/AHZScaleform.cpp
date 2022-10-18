@@ -28,11 +28,15 @@ void CAHZScaleform::ExtendItemCard(RE::GFxMovieView * view, RE::GFxValue * objec
 	RE::GFxValue obj;
 	view->CreateObject(&obj);
 
-    if (auto* messageInterface = SKSE::GetMessagingInterface())
+    m_completionistResponse = std::nullopt;
+
+    if (m_completionistInstalled)
     {
-        CompletionistRequest request{item->object->GetFormID()};
-        m_completionistResponse = std::nullopt;
-        messageInterface->Dispatch(1, &request, sizeof(request), "Completionist");
+        if (auto* messageInterface = SKSE::GetMessagingInterface())
+        {
+            CompletionistRequest request{item->object->GetFormID()};
+            messageInterface->Dispatch(1, &request, sizeof(request), "Completionist");
+        }
     }
 
 	if ((item->object->GetFormType() == RE::FormType::Armor || item->object->GetFormType() == RE::FormType::Weapon) && m_showKnownEnchantment)
@@ -344,14 +348,19 @@ namespace Scaleform
 {
     void RegisterListener()
     {
-        auto* messageInterface = SKSE::GetMessagingInterface();
-        messageInterface->RegisterListener("Completionist", [](SKSE::MessagingInterface::Message* a_msg)
+        if (WinAPI::GetModuleHandle(L"Completionist"))
         {
-            if (!a_msg || a_msg->type != 2 || !a_msg->data)
+            CAHZScaleform::Singleton().m_completionistInstalled = true;
+            logger::info("Completionist is installed, registering listener"sv);
+            auto* messageInterface = SKSE::GetMessagingInterface();
+            messageInterface->RegisterListener("Completionist", [](SKSE::MessagingInterface::Message* a_msg)
             {
-                return;
-            }            
-            CAHZScaleform::Singleton().m_completionistResponse = *static_cast<CompletionistResponse*>(a_msg->data);
-        });
+                if (!a_msg || a_msg->type != 2 || !a_msg->data)
+                {
+                    return;
+                }            
+                CAHZScaleform::Singleton().m_completionistResponse = *static_cast<CompletionistResponse*>(a_msg->data);
+            });
+        }
     }
 }

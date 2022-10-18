@@ -31,6 +31,8 @@ public:
    bool GetWasBookRead(RE::TESForm *form);
    bool isSurvivalMode();
    std::optional<CompletionistResponse> m_completionistResponse{std::nullopt};
+   bool m_completionistInstalled{};
+   
 private:
    CAHZScaleform();
    static void ReplaceStringInPlace(std::string& subject, const std::string& search,
