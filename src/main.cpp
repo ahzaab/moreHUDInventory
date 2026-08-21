@@ -35,21 +35,10 @@ namespace
 }
 
 
-extern "C"
+// add_commonlibsse_plugin generates the version and query exports for every
+// enabled Skyrim runtime. This macro supplies the unified SE/AE load entry point.
+SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
 {
-    DLLEXPORT constinit auto SKSEPlugin_Version = []() {
-        SKSE::PluginVersionData v{};
-        v.pluginVersion = Version::ASINT;
-        v.PluginName("Ahzaab's moreHUD Inventory Plugin"sv);
-        v.AuthorName("Ahzaab"sv);
-        v.CompatibleVersions({ SKSE::RUNTIME_LATEST });
-        v.UsesAddressLibrary(true);
-        v.UsesStructsPost629(true);
-        return v;
-    }();
-
-    DLLEXPORT auto SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse) -> bool
-    {
         // while (!IsDebuggerPresent())
         // {
         //   Sleep(10);
@@ -85,7 +74,7 @@ extern "C"
             logger::info("moreHUDIE loading"sv);
             logger::info("moreHUDIE v{}"sv, Version::NAME);
 
-            
+
             SKSE::Init(a_skse);
 
             SKSE::AllocTrampoline(1 << 6);
@@ -115,7 +104,7 @@ extern "C"
             logger::info("moreHUDIE loaded"sv);
 
         } catch (const std::exception& e) {
-            logger::critical(e.what());
+            logger::critical("{}", e.what());
             return false;
         } catch (...) {
             logger::critical("caught unknown exception"sv);
@@ -123,5 +112,4 @@ extern "C"
         }
 
         return true;
-    }
-};
+}

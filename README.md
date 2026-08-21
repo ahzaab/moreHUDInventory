@@ -1,70 +1,73 @@
+# moreHUD Inventory Edition
 
-# Description
+This repository contains the SKSE64 plugin and Scaleform source used by [moreHUD Inventory Edition](https://www.nexusmods.com/skyrimspecialedition/mods/18619) for Skyrim Special Edition and Anniversary Edition.
 
-This Repositiory contains the source for the SKSE64 plugin used by the [moreHUD Inventory Edition](https://www.nexusmods.com/skyrimspecialedition/mods/18619) mod for Skyrim Special Edition.  
-The plugin works in conjunction with the [ahzaab/moreHUDInventoryAS2](https://github.com/ahzaab/moreHUDInventoryAS2) Scaleform Elements.  
+The plugin loads `AHZmoreHUDInventory.swf` into the Inventory, Crafting, Container, Barter, and Magic menus. Its C++ code extends item-card data with details such as known enchantments and positive/negative effect counts, while the ActionScript 2 code renders and resizes the cards.
 
-## How it Works
+## Runtime dependencies
 
-* The SKSE64 plugin is loaded by [SKSE64](http://skse.silverlock.org/) using the skse64_loader.exe
-* The plugin dynammically loads the Scaleform .swf movie clip into the following menus when the menu loads:
-  * "InventoryMenu"
-  * "Crafting Menu"
-  * "ContainerMenu"
-  * "BarterMenu"
-  * "MagicMenu"
+- [SKSE64](https://skse.silverlock.org/)
+- [Address Library for SKSE Plugins](https://www.nexusmods.com/skyrimspecialedition/mods/32444)
+- [SkyUI](https://www.nexusmods.com/skyrimspecialedition/mods/12604)
+- The current Microsoft Visual C++ Redistributable
 
-* The plugin registers Scaleform functions used by the ActionScript 2.0 code associated with the [moreHUD Inventory Edition swf file](https://github.com/ahzaab/moreHUDInventoryAS2) 
-* The plugin extends the data in the menu's entry list.  When a menu is open, the game transverses all items in the menu.  
-  During this time, this plugin extends the entries with information such as Known Enchantments, Number of Effects, etc.
+## Build dependencies
 
-## Installation
-The compiled .dll is installed in the Skyrim Data Folder to `Data/SKSE/Plugins`
+- Visual Studio 2022 with the x64 MSVC C++ toolchain
+- CMake and Ninja (the Visual Studio bundled copies are supported)
+- [vcpkg](https://github.com/microsoft/vcpkg), with `VCPKG_ROOT` set
+- [CommonLibSSE-NG v6.0.0](https://github.com/alandtse/CommonLibSSE-NG), included as a pinned submodule from the project fork
 
-## Does it need papyrus?
-No.  There is no papyrus.  All settings are made in the corresponding ini file.
+Clone recursively so the pinned CommonLibSSE-NG revision is available:
 
-## Configuration
-Starting in version 1.0.15 Mod authors can change parameters and load custom large item card backgrounds as shown [here](https://github.com/ahzaab/moreHUDInventory/tree/master/Data/Interface/exported/moreHUDIE).
-
----
-
-## Build Dependencies
-* [cmake](https://cmake.org)
-* [vcpkg](https://github.com/microsoft/vcpkg)
-* [CommonLibSSE](https://github.com/Ryan-rsm-McKenzie/CommonLibSSE)
-* [spdlog](https://github.com/gabime/spdlog) (Installed by vcpkg)
-* [Xbyak](https://github.com/herumi/xbyak) (Installed by vcpkg)
-* [Boost](https://www.boost.org/)
-	* Stl_interfaces  (Installed by vcpkg)
-* [binary_io](https://github.com/Ryan-rsm-McKenzie/binary_io) (Installed by vcpkg)
-
-
-## End User Dependencies
-* [Address Library for SKSE Plugins](https://www.nexusmods.com/skyrimspecialedition/mods/32444)
-* [Microsoft Visual C++ Redistributable for Visual Studio 2019](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads)
-* [SKSE64](https://skse.silverlock.org/)
-* [SkyUI](https://www.nexusmods.com/skyrimspecialedition/mods/12604)
-
-
-## Build Instructions
-I use [Visual Studio Code](https://code.visualstudio.com/) for Compilation and Debugging.
-The following environmental variable is required: `SkyrimAEPath` which points to your skyrim installation directory
-
-Run the following commands for the debug build
-```
-rm -R .\build
-mkdir build
-cd .\build
-cmake ..
-cmake --build .
+```powershell
+git clone --recurse-submodules https://github.com/ahzaab/moreHUDInventory.git
 ```
 
-For release build:
+## Building
+
+The PowerShell wrappers initialize MSVC only in their own process and explicitly select Visual Studio's CMake and Ninja when available. They do not depend on CLion and do not modify machine or user environment variables.
+
+```powershell
+# Optimized release DLL with a matching PDB
+.\build.ps1
+
+# Debug DLL and PDB
+.\build-debug.ps1
 ```
-rm -R .\build
-mkdir build
-cd .\build
-cmake ..
-cmake --build . --config Release
+
+If Visual Studio cannot be discovered, supply its x64 environment script with `-VsDevCmd`, or set the process-local `VCVARS64` variable. To deploy a build, pass the MO2 mod's Data directory explicitly:
+
+```powershell
+.\build.ps1 -DeployTarget '<MO2 mod Data directory>'
 ```
+
+The DLL and PDB are copied to `SKSE\Plugins` beneath that target. No Skyrim installation path is stored in the repository.
+
+## Scaleform
+
+The tracked FLA and AS2 sources are under `AS2`. Publishing uses the pinned `flc` npm package and resolves Adobe Flash/Animate through `-FlashExe`, `FLASH_EXE`, `FlashPath`, or `PATH`; no application installation path is hard-coded.
+
+```powershell
+.\Scripts\BuildScaleform.ps1 -FlashExe '<Flash or Animate executable>'
+```
+
+The main movie is placed in `Data\Interface`. The release staging step also installs it in `Data\Interface\exported` for vanilla UI and SkyUI compatibility. Author resources remain under `Data\Interface\exported\moreHUDIE`.
+
+## Nexus packages
+
+Install the current Creation Kit archive tool and 7-Zip, then run:
+
+```powershell
+.\Scripts\ReleaseFiles.ps1
+```
+
+You can supply `-ArchiveExe` and `-SevenZipExe`, or set `ARCHIVE_EXE` and `SEVENZIP_EXE`. `SKYRIM_AE_ROOT` may also point to a game installation containing `Tools\Archive\Archive.exe`.
+
+The script builds the Release preset, creates the BSA, and writes `moreHUD Inventory Edition - AE-<version>.7z` and `moreHUD Inventory Edition Loose Version - AE-<version>.7z` under `release\<version>`. Nexus adds its mod and upload IDs to the downloaded filenames. Both packages include the optimized DLL and its matching PDB so crash loggers can resolve plugin symbols. Generated DLL, PDB, BSA, and 7z artifacts remain ignored by Git.
+
+The separate Skyrim VR variant is intentionally outside this migration and will be integrated later.
+
+## License
+
+moreHUD Inventory Edition is licensed under the GNU General Public License v3.0 or later. See `LICENSE` and `COPYING`.

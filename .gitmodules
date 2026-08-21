@@ -1,4 +1,4 @@
-[submodule "external/CommonLibSSE"]
-	path = external/CommonLibSSE
-	url = https://github.com/Ryan-rsm-McKenzie/CommonLibSSE.git
-	branch = master
+[submodule "external/CommonLibSSE-NG"]
+	path = external/CommonLibSSE-NG
+	url = https://github.com/ahzaab/CommonLibSSE-NG.git
+	branch = feature/skyrim-1.7.99

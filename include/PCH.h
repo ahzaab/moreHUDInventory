@@ -2,6 +2,11 @@
 #include "RE/Skyrim.h"
 #include "SKSE/SKSE.h"
 
+// Windows defines GetObject as GetObjectW; CommonLibSSE-NG exposes a GetObject method.
+#ifdef GetObject
+#    undef GetObject
+#endif
+
 #include <algorithm>
 #include <array>
 #include <atomic>
@@ -30,7 +35,6 @@
 
 #include <spdlog/sinks/basic_file_sink.h>
 
-namespace WinAPI = SKSE::WinAPI;
 
 #ifndef NDEBUG
 #include <iostream>

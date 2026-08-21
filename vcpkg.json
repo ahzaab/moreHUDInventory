@@ -1,21 +1,19 @@
 {
-  "name": "morehudse",
-  "version-string": "1",
-  "description": "SKSE64 moreHUD plugin",
-  "homepage": "https://github.com/ahzaab/moreHUDSE",
-  "license": "MIT",
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
+  "name": "morehudinventory",
+  "version-string": "2.2.0.0",
+  "port-version": 0,
+  "description": "SKSE64 moreHUD Inventory Edition plugin",
+  "homepage": "https://github.com/ahzaab/moreHUDInventory",
+  "license": "GPL-3.0-or-later",
   "dependencies": [
-    "boost-stl-interfaces",
+    "directxtk",
     "fmt",
+    "nlohmann-json",
+    "rapidcsv",
+    "simpleini",
     "spdlog",
-    "xbyak",
-    "rsm-binary-io"
-  ],
-  "builtin-baseline":"bba8794b82a0f44b8709f294850a2c8e96b61415",
-  "overrides":[
-    {
-       "name":"fmt",
-       "version":"8.0.1"
-    }
- ] 
+    "toml11",
+    "xbyak"
+  ]
 }
