@@ -1,30 +1,106 @@
-﻿$sourcePath = "$($Env:Skyrim64AEPath)\Data"
-$destinationDataPath = "$($Env:ModDevPath)\MODS\SkyrimSE\moreHUDInventory\Plugin\Data"
-$destinationAS2Path = "$($Env:ModDevPath)\MODS\SkyrimSE\moreHUDInventory\Plugin\AS2"
+﻿[CmdletBinding()]
+param(
+    [Parameter(Mandatory = $true)]
+    [string]$StagingDirectory,
+    [string]$ArchiveExe,
+    [string]$BsaName = 'AHZmoreHUDInventory.bsa'
+)
 
-if (!$(Test-Path "$destinationDataPath\Interface"))
+$ErrorActionPreference = 'Stop'
+
+# Resolve the Creation Kit archive tool without storing a workstation path.
+if (-not $ArchiveExe)
 {
-    New-Item -ItemType Directory "$destinationDataPath\Interface"
-    New-Item -ItemType Directory "$destinationDataPath\Source\Scripts"
+    $ArchiveExe = $env:ARCHIVE_EXE
 }
 
-Copy-Item "$sourcePath\Source\Scripts\ahzMoreHudIE.psc" -Destination "$destinationDataPath\Source\Scripts"
-Copy-Item "$sourcePath\Scripts\ahzMoreHudIE.pex" -Destination "$destinationDataPath\Scripts"
-Copy-Item "$sourcePath\AHZmoreHUDInventory.esl" -Destination "$destinationDataPath"
-Copy-Item "$sourcePath\AHZmoreHUDInventory.esl" -Destination "$destinationDataPath"
-Copy-Item "$sourcePath\Interface\AHZmoreHUDInventory.swf" -Destination "$destinationDataPath\Interface"
-
-if ($(Test-Path "$sourcePath\Interface\exported\moreHUDIE"))
+if (-not $ArchiveExe)
 {
-    if (!$(Test-Path "$destinationDataPath\Interface\exported\moreHUDIE"))
+    $gameRoot = $env:SKYRIM_AE_ROOT
+    if (-not $gameRoot)
     {
-        New-Item -ItemType Directory "$destinationDataPath\Interface\exported\moreHUDIE"
+        $gameRoot = $env:Skyrim64AEPath
     }
-    Copy-Item "$sourcePath\Interface\exported\moreHUDIE\*.*" -Destination "$destinationDataPath\Interface\exported\moreHUDIE"
+
+    if ($gameRoot)
+    {
+        $candidate = Join-Path $gameRoot 'Tools\Archive\Archive.exe'
+        if (Test-Path -LiteralPath $candidate -PathType Leaf)
+        {
+            $ArchiveExe = $candidate
+        }
+    }
 }
 
+if (-not $ArchiveExe)
+{
+    $archiveCommand = Get-Command Archive.exe -ErrorAction SilentlyContinue
+    if ($archiveCommand)
+    {
+        $ArchiveExe = $archiveCommand.Source
+    }
+}
 
-#AS2
+if (-not (Test-Path -LiteralPath $ArchiveExe -PathType Leaf))
+{
+    throw 'Archive.exe was not found. Supply -ArchiveExe, set ARCHIVE_EXE, or set SKYRIM_AE_ROOT.'
+}
 
+$dataDirectory = Join-Path $StagingDirectory 'Data'
+if (-not (Test-Path -LiteralPath $dataDirectory -PathType Container))
+{
+    throw "The staging Data directory does not exist: $dataDirectory"
+}
 
-Copy-Item "$($Env:ModDevPath)\MODS\SkyrimSE\moreHUDInventory\ScaleForm\src\HUDWidgets\*" -Destination $destinationAS2Path -Exclude .git* -Recurse -Force
+# Archive only game assets. The plugin, symbols, configuration, and ESL remain loose.
+$excludedExtensions = @('.dll', '.pdb', '.ini', '.esl', '.esp')
+$archiveFiles = Get-ChildItem -LiteralPath $dataDirectory -Recurse -File |
+    Where-Object { $excludedExtensions -notcontains $_.Extension.ToLowerInvariant() } |
+    ForEach-Object { $_.FullName.Substring($dataDirectory.Length).TrimStart('\') } |
+    Sort-Object
+
+if (-not $archiveFiles)
+{
+    throw 'No files were found for the BSA.'
+}
+
+# Bethesda's tool expects Windows paths and CRLF-delimited command files.
+$fileListPath = Join-Path $StagingDirectory 'bsafilelist.txt'
+$scriptPath = Join-Path $StagingDirectory 'bsascript.txt'
+$ascii = [Text.ASCIIEncoding]::new()
+[IO.File]::WriteAllText($fileListPath, ($archiveFiles -join "`r`n") + "`r`n", $ascii)
+
+$archiveScript = @(
+    'Log: Archive.log'
+    'New Archive'
+    'Check: Menus'
+    'Check: Misc'
+    'Check: Retain Directory Names'
+    'Check: Retain File Names'
+    'Set File Group Root: Data\'
+    'Add File Group: bsafilelist.txt'
+    "Save Archive: $BsaName"
+)
+[IO.File]::WriteAllText($scriptPath, ($archiveScript -join "`r`n") + "`r`n", $ascii)
+
+Push-Location $StagingDirectory
+try
+{
+    $archiveProcess = Start-Process -FilePath $ArchiveExe -ArgumentList 'bsascript.txt' -WorkingDirectory $StagingDirectory -Wait -PassThru -NoNewWindow
+    if ($archiveProcess.ExitCode -ne 0)
+    {
+        throw "Archive.exe failed with exit code $($archiveProcess.ExitCode)."
+    }
+}
+finally
+{
+    Pop-Location
+}
+
+$bsaPath = Join-Path $StagingDirectory $BsaName
+if (-not (Test-Path -LiteralPath $bsaPath -PathType Leaf))
+{
+    throw "Archive.exe did not produce $bsaPath."
+}
+
+Write-Output $bsaPath

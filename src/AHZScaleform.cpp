@@ -166,8 +166,8 @@ bool CAHZScaleform::isSurvivalMode()
 {
     using TESGlobal = RE::TESGlobal;
     const auto dobj = RE::BGSDefaultObjectManager::GetSingleton();
-    const auto survival = dobj ? dobj->GetObject<TESGlobal>(RE::DEFAULT_OBJECT::kSurvivalModeEnabled) : nullptr;
-    return survival ? survival->value == 1.0F : false;
+    const auto survival = dobj ? dobj->GetObject<TESGlobal>(RE::DefaultObjectID::kSurvivalModeEnabled) : nullptr;
+    return survival && *survival ? (*survival)->value == 1.0F : false;
 }
 
 void CAHZScaleform::Initialize()
@@ -348,7 +348,7 @@ namespace Scaleform
 {
     void RegisterListener()
     {
-        if (WinAPI::GetModuleHandle(L"Completionist"))
+        if (GetModuleHandle(L"Completionist"))
         {
             CAHZScaleform::Singleton().m_completionistInstalled = true;
             logger::info("Completionist is installed, registering listener"sv);
