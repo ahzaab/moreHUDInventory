@@ -16,7 +16,7 @@ The plugin loads `AHZmoreHUDInventory.swf` into the Inventory, Crafting, Contain
 - Visual Studio 2022 with the x64 MSVC C++ toolchain
 - CMake and Ninja (the Visual Studio bundled copies are supported)
 - [vcpkg](https://github.com/microsoft/vcpkg), with `VCPKG_ROOT` set
-- [CommonLibSSE-NG v6.0.0](https://github.com/alandtse/CommonLibSSE-NG), included as a pinned submodule from the project fork
+- [CommonLibSSE-NG v6.6.0](https://github.com/alandtse/CommonLibSSE-NG), included as a pinned submodule from the project fork
 
 Clone recursively so the pinned CommonLibSSE-NG revision is available:
 

@@ -721,6 +721,17 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 	// The Scaleform Extension is broken for center justify for Shrink so I rolled my own
 	function ShrinkToFit(tf:TextField):Void
 	{
+		// SkyUI Community applies its own overflow handler from TextField.SetText before
+		// moreHUD can expand the description field. Disable it for this field and
+		// restore moreHUD's starting size so the two shrink algorithms do not stack.
+		if (tf.enableShrinkToFit != undefined && tf.overflowMode != undefined)
+		{
+			tf.enableShrinkToFit = false;
+			tf.overflowMode = "none";
+			var originalTextFormat:TextFormat = tf.getTextFormat();
+			originalTextFormat.size = 20;
+			tf.setTextFormat(originalTextFormat);
+		}
 		tf.multiline = true;
 		tf.wordWrap = true
 		var tfText:String = tf.htmlText;
@@ -743,7 +754,21 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		}
 	}
 
+	function SetCommunitySeparatorAlpha(visible:Boolean):Void
+	{
+		var separator:Object = itemCard["line"];
+		if (separator != undefined)
+		{
+			if (separator.AHZOriginalAlpha == undefined)
+			{
+				separator.AHZOriginalAlpha = separator._alpha;
+			}
+			separator._alpha = visible ? separator.AHZOriginalAlpha : 0;
+		}
+	}
+
 	function SetVanillaAlpha():Void{
+		SetCommunitySeparatorAlpha(true);
 		if (itemCard.itemInfo.type == ICT_CRAFT_ENCHANTING || itemCard.itemInfo.type == ICT_HOUSE_PART)
 		{
 			if (itemCard.itemInfo.effects != undefined && itemCard.itemInfo.effects.length > 0) {
@@ -772,7 +797,6 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		this._y = itemCardY + _config[AHZDefines.CFG_LIC_YOFFSET];
 		this._x = (itemCardX - ((this._width - originalWidth) / 2)) + _config[AHZDefines.CFG_LIC_XOFFSET];
 		itemCardBottom = this._height;
-		var oldDescrptionHeight:Number;
 
 		_global.skse.plugins.AHZmoreHUDInventory.AHZLog("<<<FRAME>>>: " + itemCardFrame, false);
 
@@ -842,9 +866,13 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 			_itemCardOverride = true;
 			//this._alpha = AHZ_NormalALPHA;
 			cardBackground._alpha = 0;
+			SetCommunitySeparatorAlpha(false);
 			processedTextField._width = this._width - (_config[AHZDefines.CFG_LIC_DESCRIPTION_RIGHTMARGIN] + _config[AHZDefines.CFG_LIC_DESCRIPTION_LEFTMARGIN]);
 			processedTextField._x = newX + _config[AHZDefines.CFG_LIC_DESCRIPTION_LEFTMARGIN];
-			oldDescrptionHeight = processedTextField._height;
+			if (processedTextField.AHZOriginalHeight == undefined)
+			{
+				processedTextField.AHZOriginalHeight = processedTextField._height;
+			}
 
 			if (marginRequired)
 			{
@@ -863,12 +891,14 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 			var itemBelow:Number;
 			for (itemBelow = 0; itemBelow < itemsBelow.length; itemBelow++)
 			{
-				// If the height changed then move the controls down
-				if ((processedTextField._height - oldDescrptionHeight) != 0)
+				if (itemsBelow[itemBelow].AHZDescriptionGap == undefined)
 				{
-					// add the margin back to preserve it
-					itemsBelow[itemBelow]._y = itemsBelow[itemBelow]._y + (processedTextField._height - oldDescrptionHeight) + _config[AHZDefines.CFG_LIC_DESCRIPTION_EXTRADATA_PADDING];
+					itemsBelow[itemBelow].AHZDescriptionGap = itemsBelow[itemBelow]._y - (processedTextField._y + processedTextField.AHZOriginalHeight);
 				}
+
+				// Preserve the authored gap below the expanded description. The description's
+				// fixed bottom margin reserves the footer area even for very long text.
+				itemsBelow[itemBelow]._y = processedTextField._y + processedTextField._height + itemsBelow[itemBelow].AHZDescriptionGap + _config[AHZDefines.CFG_LIC_DESCRIPTION_EXTRADATA_PADDING];
 			}
 
 			// Need to shift up to make room for the requied crafting materials

@@ -47,7 +47,7 @@ if (-not $compilerCommand -or -not $env:INCLUDE)
 
     # Visual Studio may replace VCPKG_ROOT with its bundled copy, so preserve the caller's selection.
     $callerVcpkgRoot = $env:VCPKG_ROOT
-    $developerEnvironment = & $env:ComSpec /d /s /c "`"$VsDevCmd`" >nul && set"
+    $developerEnvironment = & $env:ComSpec /d /c "call `"$VsDevCmd`" -arch=x64 -host_arch=x64 >nul && set"
     if ($LASTEXITCODE -ne 0)
     {
         throw "Visual Studio developer environment initialization failed with exit code $LASTEXITCODE."
