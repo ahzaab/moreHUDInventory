@@ -30,6 +30,7 @@ public:
    bool m_enableItemCardResize;
    bool GetWasBookRead(RE::TESForm *form);
    bool isSurvivalMode();
+   bool GetCurrentAlchemyEffectCounts(std::uint32_t& a_posEffects, std::uint32_t& a_negEffects, bool& a_isAlchemyMenu);
    std::optional<CompletionistResponse> m_completionistResponse{std::nullopt};
    bool m_completionistInstalled{};
    
@@ -45,6 +46,7 @@ private:
    std::string GetBookSkill(RE::TESForm *form);
    uint32_t GetIsKnownEnchantment(RE::InventoryEntryData * item);
    uint32_t GetIsKnownEnchantment_Impl(RE::InventoryEntryData * item);
+   bool GetAlchemyEffectCounts(RE::AlchemyItem* a_alchemyItem, std::uint32_t& a_posEffects, std::uint32_t& a_negEffects);
 
    bool m_showBookSkill;
    bool m_showKnownEnchantment;

@@ -41,6 +41,8 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 	private var _selectedIndex:Number;
 	private var _selectedItem:Object;
 	private var _lastItemCardVisibility:Boolean;
+	private var _lastAlchemyResultSignature:String;
+	private var _alchemyResultEffects:Object;
 	private var _readyToUpdate:Boolean = false;
 	private var _imageSubs:Array;
 	private var LoadedLargeItemCard_mc:MovieClip;
@@ -640,13 +642,54 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		}
 
 		_selectedIndex = GetSelectedIndex();
-
-		if (_lastSelectedIndex != _selectedIndex ||
+		var selectionChanged:Boolean = (_lastSelectedIndex != _selectedIndex ||
 				_selectedItem.formId != _entryList[_selectedIndex].formId ||
-				_selectedItem.text != _entryList[_selectedIndex].text)
+				_selectedItem.text != _entryList[_selectedIndex].text);
+
+		if (selectionChanged)
 		{
 			_lastSelectedIndex = _selectedIndex;
 			_selectedItem = _entryList[_selectedIndex];
+		}
+
+		var alchemyResultChanged:Boolean = false;
+		if (_currentMenu == "Crafting Menu")
+		{
+			var alchemyEffects:Object = _global.skse.plugins.AHZmoreHUDInventory.GetAlchemyResultEffects();
+			var alchemyResultSignature:String = alchemyEffects.hasResult ?
+				String(alchemyEffects.PosEffects) + ":" + String(alchemyEffects.NegEffects) : "";
+
+			if (alchemyEffects.isAlchemyMenu && _lastAlchemyResultSignature != alchemyResultSignature)
+			{
+				_lastAlchemyResultSignature = alchemyResultSignature;
+				alchemyResultChanged = true;
+			}
+
+			if (alchemyEffects.isAlchemyMenu && alchemyEffects.hasResult)
+			{
+				_alchemyResultEffects = alchemyEffects;
+
+				// The known-potion pane can repopulate the item card without changing the
+				// ingredient list selection. Restore icons cleared by that card refresh.
+				if ((alchemyEffects.PosEffects > 0 && !IconContainer.GetImageSub("ahzHealth")) ||
+					(alchemyEffects.NegEffects > 0 && !IconContainer.GetImageSub("ahzPoison")))
+				{
+					alchemyResultChanged = true;
+				}
+			}
+			else if (alchemyEffects.isAlchemyMenu)
+			{
+				_alchemyResultEffects = undefined;
+			}
+			else if (!alchemyEffects.isAlchemyMenu)
+			{
+				_lastAlchemyResultSignature = undefined;
+				_alchemyResultEffects = undefined;
+			}
+		}
+
+		if (selectionChanged || alchemyResultChanged)
+		{
 			UpdateItemCardInfo();
 		}
 		else
@@ -957,6 +1000,11 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		ResetIconText();
 		var iconName:String;
 		var formIcons:Array;
+		var itemCardData:Object = _selectedItem.AHZItemCardObj;
+		if (_currentMenu == "Crafting Menu" && _alchemyResultEffects && _alchemyResultEffects.hasResult)
+		{
+			itemCardData = _alchemyResultEffects;
+		}
 
 		IconContainer._x = itemCard.ItemText._x + itemCard.ItemText.ItemTextField._x;
 		IconContainer.textWidth = itemCard.ItemText.ItemTextField._width;		
@@ -996,12 +1044,12 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 			return;
 		}
 		
-		if (_selectedItem.AHZItemCardObj.enchantmentKnown)
+		if (itemCardData.enchantmentKnown)
 		{
-			if (_selectedItem.AHZItemCardObj.enchantmentKnown == 1){
+			if (itemCardData.enchantmentKnown == 1){
 				IconContainer.appendImage("ahzKnown");
 			}
-			if (_selectedItem.AHZItemCardObj.enchantmentKnown == 2){
+			if (itemCardData.enchantmentKnown == 2){
 				IconContainer.appendImage("ahzEnch");
 			}			
 		}
@@ -1014,25 +1062,25 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 				IconContainer.appendImage("ahzEye");
 			}
 		}
-		else if (_selectedItem.AHZItemCardObj.bookSkill &&
-				 String(_selectedItem.AHZItemCardObj.bookSkill).length )
+		else if (itemCardData.bookSkill &&
+				 String(itemCardData.bookSkill).length )
 		{
-			IconContainer.text = String(_selectedItem.AHZItemCardObj.bookSkill.toUpperCase());
+			IconContainer.text = String(itemCardData.bookSkill.toUpperCase());
 		}
-		else if (_selectedItem.AHZItemCardObj.PosEffects > 0||
-				 _selectedItem.AHZItemCardObj.NegEffects > 0)
+		else if (itemCardData.PosEffects > 0||
+				 itemCardData.NegEffects > 0)
 		{
 			IconContainer.html = true;
-			if (_selectedItem.AHZItemCardObj.PosEffects > 0)
+			if (itemCardData.PosEffects > 0)
 			{
 				IconContainer.appendImage("ahzHealth");
-				IconContainer.appendHtml("<font face=\'$EverywhereBoldFont\' size=\'18\' color=\'"+_config[AHZDefines.CFG_ICON_POS_EFFECT_COLOR]+"\'>&nbsp;" + _selectedItem.AHZItemCardObj.PosEffects + "</font>");
+				IconContainer.appendHtml("<font face=\'$EverywhereBoldFont\' size=\'18\' color=\'"+_config[AHZDefines.CFG_ICON_POS_EFFECT_COLOR]+"\'>&nbsp;" + itemCardData.PosEffects + "</font>");
 				IconContainer.appendHtml("<font face=\'$EverywhereBoldFont\' size=\'18\' color=\'"+_config[AHZDefines.CFG_ICON_POS_EFFECT_COLOR]+"\'>&nbsp;&nbsp;&nbsp;</font>");
 			}
-			if (_selectedItem.AHZItemCardObj.NegEffects > 0)
+			if (itemCardData.NegEffects > 0)
 			{				
 				IconContainer.appendImage("ahzPoison");
-				IconContainer.appendHtml("<font face=\'$EverywhereBoldFont\' size=\'18\' color=\'"+_config[AHZDefines.CFG_ICON_NEG_EFFECT_COLOR]+"\'>&nbsp;" + _selectedItem.AHZItemCardObj.NegEffects + "</font>");
+				IconContainer.appendHtml("<font face=\'$EverywhereBoldFont\' size=\'18\' color=\'"+_config[AHZDefines.CFG_ICON_NEG_EFFECT_COLOR]+"\'>&nbsp;" + itemCardData.NegEffects + "</font>");
 				IconContainer.appendHtml("<font face=\'$EverywhereBoldFont\' size=\'18\' color=\'"+_config[AHZDefines.CFG_ICON_POS_EFFECT_COLOR]+"\'>&nbsp;&nbsp;&nbsp;</font>");	
 			}
 		}

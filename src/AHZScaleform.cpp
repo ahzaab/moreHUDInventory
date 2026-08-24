@@ -85,41 +85,10 @@ void CAHZScaleform::ExtendItemCard(RE::GFxMovieView * view, RE::GFxValue * objec
 				}
 			}
 
-			if (alchItem && alchItem->effects.size())
+			std::uint32_t posEffects = 0;
+			std::uint32_t negEffects = 0;
+			if (GetAlchemyEffectCounts(alchItem, posEffects, negEffects))
 			{
-				uint32_t negEffects = 0;
-				uint32_t posEffects = 0;
-				bool survivalMode = isSurvivalMode();
-
-				for (auto& mgef: alchItem->effects)
-				{
-					if (mgef)
-					{
-						std::string effectName = std::string(mgef->baseEffect->magicItemDescription.c_str());
-						size_t found = effectName.find("[SURV=");
-						bool surVivalDescFound = (found != std::string::npos);
-                        //RE::EffectSetting::EffectSettingData::Flag::kDetrimental
-						if (mgef->baseEffect->data.flags.any(RE::EffectSetting::EffectSettingData::Flag::kDetrimental, RE::EffectSetting::EffectSettingData::Flag::kHostile))
-						{
-							// Do not include the survival mode effects when not in survival mode
-							if (!survivalMode && surVivalDescFound)
-							{
-								continue;
-							}
-							negEffects++;
-						}
-						else
-						{
-							// Do not include the survival mode effects when not in survival mode
-							if (!survivalMode && surVivalDescFound)
-							{
-								continue;
-							}
-							posEffects++;
-						}
-					}
-				}
-
 				RegisterNumber(&obj, "PosEffects", posEffects);
 				RegisterNumber(&obj, "NegEffects", negEffects);
 			}
@@ -363,4 +332,80 @@ namespace Scaleform
             });
         }
     }
+}
+
+bool CAHZScaleform::GetAlchemyEffectCounts(RE::AlchemyItem* a_alchemyItem, std::uint32_t& a_posEffects, std::uint32_t& a_negEffects)
+{
+	a_posEffects = 0;
+	a_negEffects = 0;
+
+	if (!m_showPosNegEffects || !a_alchemyItem || a_alchemyItem->effects.empty())
+	{
+		return false;
+	}
+
+	const bool survivalMode = isSurvivalMode();
+	for (auto& effect : a_alchemyItem->effects)
+	{
+		if (!effect || !effect->baseEffect)
+		{
+			continue;
+		}
+
+		const std::string effectDescription = effect->baseEffect->magicItemDescription.c_str();
+		if (!survivalMode && effectDescription.find("[SURV=") != std::string::npos)
+		{
+			continue;
+		}
+
+		if (effect->baseEffect->data.flags.any(
+				RE::EffectSetting::EffectSettingData::Flag::kDetrimental,
+				RE::EffectSetting::EffectSettingData::Flag::kHostile))
+		{
+			++a_negEffects;
+		}
+		else
+		{
+			++a_posEffects;
+		}
+	}
+
+	return true;
+}
+
+bool CAHZScaleform::GetCurrentAlchemyEffectCounts(
+	std::uint32_t& a_posEffects,
+	std::uint32_t& a_negEffects,
+	bool& a_isAlchemyMenu)
+{
+	a_posEffects = 0;
+	a_negEffects = 0;
+	a_isAlchemyMenu = false;
+
+	auto* ui = RE::UI::GetSingleton();
+	if (!ui)
+	{
+		return false;
+	}
+
+	auto craftingMenu = ui->GetMenu<RE::CraftingMenu>();
+	if (!craftingMenu)
+	{
+		return false;
+	}
+
+	auto* alchemyMenu = skyrim_cast<RE::CraftingSubMenus::CraftingSubMenus::AlchemyMenu*>(
+		craftingMenu->GetCraftingSubMenu());
+	if (!alchemyMenu)
+	{
+		return false;
+	}
+
+	a_isAlchemyMenu = true;
+	if (!alchemyMenu->resultPotion || alchemyMenu->resultPotion == alchemyMenu->unknownPotion)
+	{
+		return false;
+	}
+
+	return GetAlchemyEffectCounts(alchemyMenu->resultPotion, a_posEffects, a_negEffects);
 }
