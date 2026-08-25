@@ -37,7 +37,7 @@ namespace Scaleform
         {
             logger::trace("ShowBookRead: {}", CAHZScaleform::Singleton().m_showBookRead);
             a_params.retVal->SetBoolean(CAHZScaleform::Singleton().m_showBookRead);
-        } 
+        }
     };
 
 
@@ -75,9 +75,9 @@ class SKSEScaleform_GetIconForItemId : public RE::GFxFunctionHandler
 		if (a_params.args && a_params.argCount > 1 && a_params.args[0].IsNumber() && a_params.args[1].IsString())
 		{
 			auto formID = static_cast<std::uint32_t>(a_params.args[0].GetNumber());
-			
+
 			const char * name = a_params.args[1].GetString();
-			
+
 			if (!name)
 			{
                 s_lastIconName.clear();
@@ -115,7 +115,7 @@ class SKSEScaleform_GetFormIcons : public RE::GFxFunctionHandler
                 {
                     entry.SetString(ci);
                     a_params.retVal->SetElement(idx++, entry);
-                }  
+                }
             }
             else{
                 a_params.retVal->SetArraySize(0);
@@ -124,7 +124,7 @@ class SKSEScaleform_GetFormIcons : public RE::GFxFunctionHandler
 	}
 };
 
-class SKSEScaleform_GetAlchemyResultEffects : public RE::GFxFunctionHandler
+class SKSEScaleform_GetCraftingResultData : public RE::GFxFunctionHandler
 {
     public:
     void Call(Params& a_params) override
@@ -132,21 +132,42 @@ class SKSEScaleform_GetAlchemyResultEffects : public RE::GFxFunctionHandler
 		RE::GFxValue result;
 		a_params.movie->CreateObject(&result);
 
-		std::uint32_t posEffects = 0;
-		std::uint32_t negEffects = 0;
+		RE::TESForm* resultForm = nullptr;
+		RE::InventoryEntryData* resultEntry = nullptr;
 		bool isAlchemyMenu = false;
-		const bool hasResult = CAHZScaleform::Singleton().GetCurrentAlchemyEffectCounts(
-			posEffects, negEffects, isAlchemyMenu);
+		const bool hasResult = CAHZScaleform::Singleton().GetCurrentCraftingResult(
+			resultForm, resultEntry, isAlchemyMenu);
 
 		RE::GFxValue value;
 		value.SetBoolean(isAlchemyMenu);
 		result.SetMember("isAlchemyMenu", value);
 		value.SetBoolean(hasResult);
 		result.SetMember("hasResult", value);
-		value.SetNumber(posEffects);
-		result.SetMember("PosEffects", value);
-		value.SetNumber(negEffects);
-		result.SetMember("NegEffects", value);
+
+		if (hasResult && resultForm)
+		{
+			value.SetNumber(resultForm->GetFormID());
+			result.SetMember("formId", value);
+			value.SetBoolean(resultForm->IsDynamicForm());
+			result.SetMember("isDynamicForm", value);
+
+			const char* resultName = resultEntry ? resultEntry->GetDisplayName() : resultForm->GetName();
+			value.SetString(resultName ? resultName : "");
+			result.SetMember("formName", value);
+
+			std::uint32_t posEffects = 0;
+			std::uint32_t negEffects = 0;
+			if (isAlchemyMenu)
+			{
+				CAHZScaleform::Singleton().GetAlchemyEffectCounts(
+					resultForm->As<RE::AlchemyItem>(), posEffects, negEffects);
+			}
+
+			value.SetNumber(posEffects);
+			result.SetMember("PosEffects", value);
+			value.SetNumber(negEffects);
+			result.SetMember("NegEffects", value);
+		}
 
 		*a_params.retVal = result;
 	}
@@ -210,7 +231,7 @@ class SKSEScaleform_AHZLog : public RE::GFxFunctionHandler
         RegisterFunction<SKSEScaleform_GetWasBookRead>(a_root, a_view, "GetWasBookRead");
         RegisterFunction<SKSEScaleform_GetIconForItemId>(a_root, a_view, "GetIconForItemId");
         RegisterFunction<SKSEScaleform_GetFormIcons>(a_root, a_view, "GetFormIcons");
-        RegisterFunction<SKSEScaleform_GetAlchemyResultEffects>(a_root, a_view, "GetAlchemyResultEffects");
+        RegisterFunction<SKSEScaleform_GetCraftingResultData>(a_root, a_view, "GetCraftingResultData");
         RegisterFunction<SKSEScaleform_AHZLog>(a_root, a_view, "AHZLog");
         return true;
     }

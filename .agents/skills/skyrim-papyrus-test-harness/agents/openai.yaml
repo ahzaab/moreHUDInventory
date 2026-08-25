@@ -1,0 +1,4 @@
+interface:
+  display_name: "Skyrim Papyrus Test Harness"
+  short_description: "Build Papyrus tests and attach them with SSEEdit"
+  default_prompt: "Use $skyrim-papyrus-test-harness to build a Papyrus test and attach it to a test ESP with SSEEdit."

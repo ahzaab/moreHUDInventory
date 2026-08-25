@@ -1,4 +1,4 @@
-﻿import ahz.scripts.widgets.AHZDefines.AHZCCSkyUIFrames;
+import ahz.scripts.widgets.AHZDefines.AHZCCSkyUIFrames;
 import ahz.scripts.widgets.AHZDefines.AHZCCSurvFrames;
 import ahz.scripts.widgets.AHZDefines.AHZVanillaFrames;
 import flash.display.BitmapData;
@@ -41,8 +41,8 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 	private var _selectedIndex:Number;
 	private var _selectedItem:Object;
 	private var _lastItemCardVisibility:Boolean;
-	private var _lastAlchemyResultSignature:String;
-	private var _alchemyResultEffects:Object;
+	private var _lastCraftingResultSignature:String;
+	private var _craftingResultData:Object;
 	private var _readyToUpdate:Boolean = false;
 	private var _imageSubs:Array;
 	private var LoadedLargeItemCard_mc:MovieClip;
@@ -62,9 +62,9 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 	private static var AHZ_NormalALPHA:Number = 60;
 	private static var AHZ_IconsFile:String = 'moreHUDIE/baseIcons.swf'
 	private static var AHZ_ItemCardFile:String = 'moreHUDIE/baseLargeItemCard.swf'
-	
-	
-	
+
+
+
 
 	// Types from ItemCard
 	private static var ICT_ARMOR: Number            = 1;
@@ -115,7 +115,7 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 
 	function GetBackgroundMovie():MovieClip
 	{
-		
+
 		if (itemCard.itemInfo.type == ICT_CRAFT_ENCHANTING || itemCard.itemInfo.type == ICT_HOUSE_PART)
 		{
 			var background_mc:MovieClip;
@@ -123,17 +123,17 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 				background_mc = itemCard.Enchanting_Background;
 			} else {
 				background_mc = itemCard.Enchanting_Slim_Background;
-			}	
+			}
 			if (background_mc)
 			{
 				return background_mc;
 			}
 		}
-		
+
 		if (itemCard["background"])
 		{
 			return MovieClip(itemCard["background"]);
-		}	
+		}
 		else
 		{
 			// Vanilla does not name the background clip.  So we must
@@ -159,17 +159,17 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 				}
 			}
 		}
-		
+
 		if (itemCard["Enchanting_Background"])
 		{
 			return MovieClip(itemCard["Enchanting_Background"]);
-		}	
-		
+		}
+
 		if (itemCard["Enchanting_Slim_Background"])
 		{
 			return MovieClip(itemCard["Enchanting_Slim_Background"]);
-		}	
-						
+		}
+
 		return undefined;
 	}
 
@@ -312,7 +312,7 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 			_iconContainerTextFormat.font = "$EverywhereMediumFont";
 			tf.setNewTextFormat(_iconContainerTextFormat);
 			tf.text = "";
-			
+
 			if (_config[AHZDefines.CFG_ICON_DROP_SHADOW])
 			{
 				var filter:DropShadowFilter = new DropShadowFilter(2,45,0,100,2,2,1.5);
@@ -371,23 +371,23 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 
 		if (!_config[AHZDefines.CFG_ICON_NEG_EFFECT_COLOR])
 			_config[AHZDefines.CFG_ICON_NEG_EFFECT_COLOR] = '#FF0000';
-			
+
 		if (!_config[AHZDefines.CFG_LIC_PATH])
 			_config[AHZDefines.CFG_LIC_PATH] = AHZ_ItemCardFile;
-					
+
 		if (!_config[AHZDefines.CFG_ICON_PATH])
 			_config[AHZDefines.CFG_ICON_PATH] = AHZ_IconsFile;
-		
+
 		// Kind of unnecessary if defaulting to false
 		if (!_config[AHZDefines.CFG_ICON_DROP_SHADOW])
 			_config[AHZDefines.CFG_ICON_DROP_SHADOW] = false;
-		
+
 		if (!_config[AHZDefines.CFG_LIC_DRAW_BORDERS])
 			_config[AHZDefines.CFG_LIC_DRAW_BORDERS] = false;
-			
+
 		if (!_config[AHZDefines.CFG_LIC_DESCRIPTION_EXTRADATA_PADDING])
-			_config[AHZDefines.CFG_LIC_DESCRIPTION_EXTRADATA_PADDING] = 5;			
-			
+			_config[AHZDefines.CFG_LIC_DESCRIPTION_EXTRADATA_PADDING] = 5;
+
 		if (!_config[AHZDefines.CFG_ICON_TEXT_FIELD_COLOR])
 			_config[AHZDefines.CFG_ICON_TEXT_FIELD_COLOR] = '#999999';
 	}
@@ -487,7 +487,7 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		}
 		_enableItemCardResize = _global.skse.plugins.AHZmoreHUDInventory.EnableItemCardResize();
 
-		
+
 		if (_enableItemCardResize)
 		{
 			cardBackground = GetBackgroundMovie();
@@ -505,7 +505,7 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 	}
 
 	function DrawBorders():Void {
-		
+
 		for (var a in itemCard)
 		{
 			if (itemCard[a] instanceof TextField)
@@ -523,10 +523,10 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 						var target:TextField = TextField(itemCard[a][b]);
 						target.border = true;
 					}
-				}	
+				}
 			}
 		}
-		
+
 		for (var a in this)
 		{
 			if (this[a] instanceof TextField)
@@ -544,10 +544,10 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 						var target:TextField = TextField(this[a][b]);
 						target.border = true;
 					}
-				}	
+				}
 			}
-		}	
-		
+		}
+
 		IconContainer.textField.border = true;
 	}
 
@@ -591,7 +591,7 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		{
 			return;
 		}
-		
+
 		if (itemCard.itemInfo.type == ICT_CRAFT_ENCHANTING || itemCard.itemInfo.type == ICT_HOUSE_PART)
 		{
 			if (itemCard.itemInfo.effects != undefined && itemCard.itemInfo.effects.length > 0) {
@@ -600,7 +600,7 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 			} else {
 				itemCard.Enchanting_Background._alpha = 0;
 				itemCard.Enchanting_Slim_Background ._alpha = _config[AHZDefines.CFG_LIC_ALPHA];
-			}	
+			}
 		}
 
 		if(_config[AHZDefines.CFG_LIC_DRAW_BORDERS])
@@ -652,43 +652,65 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 			_selectedItem = _entryList[_selectedIndex];
 		}
 
-		var alchemyResultChanged:Boolean = false;
+		var craftingResultChanged:Boolean = false;
 		if (_currentMenu == "Crafting Menu")
 		{
-			var alchemyEffects:Object = _global.skse.plugins.AHZmoreHUDInventory.GetAlchemyResultEffects();
-			var alchemyResultSignature:String = alchemyEffects.hasResult ?
-				String(alchemyEffects.PosEffects) + ":" + String(alchemyEffects.NegEffects) : "";
+			var craftingResult:Object = _global.skse.plugins.AHZmoreHUDInventory.GetCraftingResultData();
+			var craftingResultSignature:String = craftingResult.hasResult ?
+				String(craftingResult.isAlchemyMenu) + ":" + String(craftingResult.formId) + ":" + craftingResult.formName + ":" +
+				String(craftingResult.PosEffects) + ":" + String(craftingResult.NegEffects) : "";
 
-			if (alchemyEffects.isAlchemyMenu && _lastAlchemyResultSignature != alchemyResultSignature)
+			if (_lastCraftingResultSignature != craftingResultSignature)
 			{
-				_lastAlchemyResultSignature = alchemyResultSignature;
-				alchemyResultChanged = true;
-			}
+				_lastCraftingResultSignature = craftingResultSignature;
+				craftingResultChanged = true;
 
-			if (alchemyEffects.isAlchemyMenu && alchemyEffects.hasResult)
-			{
-				_alchemyResultEffects = alchemyEffects;
-
-				// The known-potion pane can repopulate the item card without changing the
-				// ingredient list selection. Restore icons cleared by that card refresh.
-				if ((alchemyEffects.PosEffects > 0 && !IconContainer.GetImageSub("ahzHealth")) ||
-					(alchemyEffects.NegEffects > 0 && !IconContainer.GetImageSub("ahzPoison")))
+				if (craftingResult.hasResult)
 				{
-					alchemyResultChanged = true;
+					craftingResult.AHZItemIcon = _global.skse.plugins.AHZmoreHUDInventory.GetIconForItemId(
+						craftingResult.formId, craftingResult.formName);
+					craftingResult.AHZCustomIcons = _global.skse.plugins.AHZmoreHUDInventory.GetFormIcons(
+						craftingResult.formId);
+					_craftingResultData = craftingResult;
+				}
+				else
+				{
+					_craftingResultData = undefined;
 				}
 			}
-			else if (alchemyEffects.isAlchemyMenu)
+
+			if (craftingResult.hasResult && _craftingResultData)
 			{
-				_alchemyResultEffects = undefined;
-			}
-			else if (!alchemyEffects.isAlchemyMenu)
-			{
-				_lastAlchemyResultSignature = undefined;
-				_alchemyResultEffects = undefined;
+				// Crafting panes can repopulate the item card without changing their item
+				// list selection. Restore any result icons cleared by that card refresh.
+				if ((_craftingResultData.PosEffects > 0 && !IconContainer.GetImageSub("ahzHealth")) ||
+					(_craftingResultData.NegEffects > 0 && !IconContainer.GetImageSub("ahzPoison")) ||
+					(_craftingResultData.AHZItemIcon &&
+					 !IconContainer.GetImageSub(_craftingResultData.AHZItemIcon)))
+				{
+					craftingResultChanged = true;
+				}
+
+				var craftingIconIndex:Number;
+				for (craftingIconIndex = 0;
+					 craftingIconIndex < _craftingResultData.AHZCustomIcons.length;
+					 craftingIconIndex++)
+				{
+					if (!IconContainer.GetImageSub(_craftingResultData.AHZCustomIcons[craftingIconIndex]))
+					{
+						craftingResultChanged = true;
+						break;
+					}
+				}
 			}
 		}
+		else
+		{
+			_lastCraftingResultSignature = undefined;
+			_craftingResultData = undefined;
+		}
 
-		if (selectionChanged || alchemyResultChanged)
+		if (selectionChanged || craftingResultChanged)
 		{
 			UpdateItemCardInfo();
 		}
@@ -820,11 +842,11 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 			} else {
 				itemCard.Enchanting_Background._alpha = 0;
 				itemCard.Enchanting_Slim_Background ._alpha = _config[AHZDefines.CFG_LIC_ALPHA];
-			}	
-		}					
+			}
+		}
 		else{
 			cardBackground._alpha = _config[AHZDefines.CFG_LIC_ALPHA];
-		}		
+		}
 	}
 
 	function AdjustItemCard(itemCardFrame:Number):Void
@@ -893,7 +915,7 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 					processedTextField = itemCard.MagicEffectsLabel;
 				}
 				break;
-				
+
 			// All other frames are not going to be resized
 			default:
 				{
@@ -905,7 +927,7 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		}
 
 		if (processedTextField)
-		{			
+		{
 			_itemCardOverride = true;
 			//this._alpha = AHZ_NormalALPHA;
 			cardBackground._alpha = 0;
@@ -957,8 +979,8 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		{
 			_itemCardOverride = false;
 			this._alpha = 0;
-			SetVanillaAlpha();			
-			
+			SetVanillaAlpha();
+
 			// Shift back to normal
 			if (_currentMenu == "Crafting Menu" && _craftingMenuCardShifted)
 			{
@@ -976,14 +998,14 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		{
 			return;
 		}
-		
+
 		if (selectedItemIn.AHZCustomIcons && selectedItemIn.AHZCustomIcons.length)
 		{
 			var i:Number;
 			for (i = 0; i < selectedItemIn.AHZCustomIcons.length; i++)
 			{
 				IconContainer.appendImage(selectedItemIn.AHZCustomIcons[i]);
-			}		
+			}
 		}
 	}
 
@@ -1000,14 +1022,19 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		ResetIconText();
 		var iconName:String;
 		var formIcons:Array;
+		var displayItem:Object = _selectedItem;
 		var itemCardData:Object = _selectedItem.AHZItemCardObj;
-		if (_currentMenu == "Crafting Menu" && _alchemyResultEffects && _alchemyResultEffects.hasResult)
+		if (_currentMenu == "Crafting Menu" && _craftingResultData && _craftingResultData.hasResult)
 		{
-			itemCardData = _alchemyResultEffects;
+			displayItem = _craftingResultData;
+			if (_craftingResultData.isAlchemyMenu)
+			{
+				itemCardData = _craftingResultData;
+			}
 		}
 
 		IconContainer._x = itemCard.ItemText._x + itemCard.ItemText.ItemTextField._x;
-		IconContainer.textWidth = itemCard.ItemText.ItemTextField._width;		
+		IconContainer.textWidth = itemCard.ItemText.ItemTextField._width;
 		IconContainer._y = ((itemCard.ItemText._y + itemCard.ItemText.ItemTextField._y) - IconContainer.textHeight) + 10;
 
 		if (_enableItemCardResize)
@@ -1024,26 +1051,26 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		// Magic Menu cannot be extended by plugins so call functions to get the custom icons
 		if (_currentMenu == "MagicMenu")
 		{
-			// Only for iEquip  
+			// Only for iEquip
 			_selectedItem.AHZItemIcon = _global.skse.plugins.AHZmoreHUDInventory.GetIconForItemId(_selectedItem.formId, _selectedItem.text);
 			_global.skse.plugins.AHZmoreHUDInventory.AHZLog("Magic Menu iEquip Icon: " + _selectedItem.AHZItemIcon, false);
-			
+
 			// For all other custom icons
 			_selectedItem.AHZCustomIcons = _global.skse.plugins.AHZmoreHUDInventory.GetFormIcons(_selectedItem.formId);
-			_global.skse.plugins.AHZmoreHUDInventory.AHZLog("Magic Menu Custom Icons: " + _selectedItem.AHZCustomIcons.length, false);			
-			
+			_global.skse.plugins.AHZmoreHUDInventory.AHZLog("Magic Menu Custom Icons: " + _selectedItem.AHZCustomIcons.length, false);
+
 		}
 		else if (type != ICT_BOOK &&
-				 type != ICT_ARMOR && 
-				 type != ICT_WEAPON && 
-				 type != ICT_POTION && 
-				 type != ICT_FOOD && !_selectedItem.AHZItemIcon)
+				 type != ICT_ARMOR &&
+				 type != ICT_WEAPON &&
+				 type != ICT_POTION &&
+				 type != ICT_FOOD && !displayItem.AHZItemIcon)
 		{
 			// Allow for checking Misc and Keys (Empty Frame)
-			checkCustomIcons(_selectedItem);
+			checkCustomIcons(displayItem);
 			return;
 		}
-		
+
 		if (itemCardData.enchantmentKnown)
 		{
 			if (itemCardData.enchantmentKnown == 1){
@@ -1051,11 +1078,11 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 			}
 			if (itemCardData.enchantmentKnown == 2){
 				IconContainer.appendImage("ahzEnch");
-			}			
+			}
 		}
 		// Fortunately, extraData is not required for getting the Book Read Status.  This allows us to check
 		// it in real time and make sure the read status is accurate
-		else if (_global.skse.plugins.AHZmoreHUDInventory.GetWasBookRead(_selectedItem.formId))
+		else if (_global.skse.plugins.AHZmoreHUDInventory.GetWasBookRead(displayItem.formId))
 		{
 			if (_global.skse.plugins.AHZmoreHUDInventory.ShowBookRead())
 			{
@@ -1078,19 +1105,19 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 				IconContainer.appendHtml("<font face=\'$EverywhereBoldFont\' size=\'18\' color=\'"+_config[AHZDefines.CFG_ICON_POS_EFFECT_COLOR]+"\'>&nbsp;&nbsp;&nbsp;</font>");
 			}
 			if (itemCardData.NegEffects > 0)
-			{				
+			{
 				IconContainer.appendImage("ahzPoison");
 				IconContainer.appendHtml("<font face=\'$EverywhereBoldFont\' size=\'18\' color=\'"+_config[AHZDefines.CFG_ICON_NEG_EFFECT_COLOR]+"\'>&nbsp;" + itemCardData.NegEffects + "</font>");
-				IconContainer.appendHtml("<font face=\'$EverywhereBoldFont\' size=\'18\' color=\'"+_config[AHZDefines.CFG_ICON_POS_EFFECT_COLOR]+"\'>&nbsp;&nbsp;&nbsp;</font>");	
+				IconContainer.appendHtml("<font face=\'$EverywhereBoldFont\' size=\'18\' color=\'"+_config[AHZDefines.CFG_ICON_POS_EFFECT_COLOR]+"\'>&nbsp;&nbsp;&nbsp;</font>");
 			}
 		}
-		
-		if (_selectedItem.AHZItemIcon && _selectedItem.AHZItemIcon.length)
+
+		if (displayItem.AHZItemIcon && displayItem.AHZItemIcon.length)
 		{
-			IconContainer.appendImage(_selectedItem.AHZItemIcon);	
+			IconContainer.appendImage(displayItem.AHZItemIcon);
 		}
 
-		checkCustomIcons(_selectedItem);
+		checkCustomIcons(displayItem);
 	}
 
 	function interpolate(pBegin:Number, pEnd:Number, pMax:Number, pStep:Number):Number

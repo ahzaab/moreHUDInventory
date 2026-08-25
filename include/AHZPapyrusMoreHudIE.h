@@ -14,10 +14,10 @@ class PapyrusMoreHudIE
 		static bool   HasForm(std::string iconName, uint32_t formId);
 		static std::string GetIconName(uint32_t itemID);
         static std::vector<std::string_view> GetFormIcons(RE::FormID formId);
-        
+
 private:
     static uint32_t GetVersion(RE::StaticFunctionTag* base);
-    static uint32_t GetFormItemId([[maybe_unused]] RE::StaticFunctionTag* base, RE::TESForm* form);
+    static std::int32_t GetFormItemId([[maybe_unused]] RE::StaticFunctionTag* base, RE::TESForm* form);
     static bool     IsIconItemRegistered(RE::StaticFunctionTag* base, uint32_t);
     static void     AddIconItem(RE::StaticFunctionTag* base, uint32_t itemID, RE::BSFixedString iconName);
     static void     RemoveIconItem(RE::StaticFunctionTag* base, uint32_t itemID);

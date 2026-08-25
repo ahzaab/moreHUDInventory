@@ -1,4 +1,4 @@
-﻿#include "PCH.h"
+#include "PCH.h"
 
 #include "ActorValueList.h"
 #include "AHZScaleform.h"
@@ -9,11 +9,11 @@ double CAHZScaleform::mRound(double r)
    return (r >= 0.0) ? floor(r + 0.5) : ceil(r - 0.5);
 }
 
-CAHZScaleform::CAHZScaleform(): 
-m_showBookRead(false), 
+CAHZScaleform::CAHZScaleform():
+m_showBookRead(false),
 m_showBookSkill(false),
-m_showKnownEnchantment{false}, 
-m_showPosNegEffects{false}, 
+m_showKnownEnchantment{false},
+m_showPosNegEffects{false},
 m_enableItemCardResize(false)
 {
 }
@@ -106,7 +106,7 @@ void CAHZScaleform::ExtendItemCard(RE::GFxMovieView * view, RE::GFxValue * objec
 	{
 		RegisterString(object, "AHZItemIcon", iconName.c_str());
 	}
-    
+
     auto customIcons = PapyrusMoreHudIE::GetFormIcons(item->object->formID);
 
     if (m_completionistResponse && m_completionistResponse->m_display && m_completionistResponse->m_formID == item->object->formID)
@@ -125,7 +125,7 @@ void CAHZScaleform::ExtendItemCard(RE::GFxMovieView * view, RE::GFxValue * objec
         {
             entry.SetString(ci);
             customIconArray.SetElement(idx++, entry);
-        }  
+        }
         object->SetMember("AHZCustomIcons", customIconArray);
     }
 
@@ -144,8 +144,8 @@ void CAHZScaleform::Initialize()
    m_showBookRead = g_ahzConfiguration.GetBooleanValue("General", "bShowBookRead", true);
    m_showBookSkill = g_ahzConfiguration.GetBooleanValue("General", "bShowBookSkill", true);
    m_showKnownEnchantment = g_ahzConfiguration.GetBooleanValue("General", "bShowKnownEnchantment", true);
-   m_enableItemCardResize = g_ahzConfiguration.GetBooleanValue("General", "bEnableItemCardResize", true); 
-   m_showPosNegEffects = g_ahzConfiguration.GetBooleanValue("General", "bShowPosNegEffects", true); 
+   m_enableItemCardResize = g_ahzConfiguration.GetBooleanValue("General", "bEnableItemCardResize", true);
+   m_showPosNegEffects = g_ahzConfiguration.GetBooleanValue("General", "bShowPosNegEffects", true);
 }
 
 bool CAHZScaleform::GetWasBookRead(RE::TESForm *theObject)
@@ -327,7 +327,7 @@ namespace Scaleform
                 if (!a_msg || a_msg->type != 2 || !a_msg->data)
                 {
                     return;
-                }            
+                }
                 CAHZScaleform::Singleton().m_completionistResponse = *static_cast<CompletionistResponse*>(a_msg->data);
             });
         }
@@ -373,13 +373,13 @@ bool CAHZScaleform::GetAlchemyEffectCounts(RE::AlchemyItem* a_alchemyItem, std::
 	return true;
 }
 
-bool CAHZScaleform::GetCurrentAlchemyEffectCounts(
-	std::uint32_t& a_posEffects,
-	std::uint32_t& a_negEffects,
+bool CAHZScaleform::GetCurrentCraftingResult(
+	RE::TESForm*& a_resultForm,
+	RE::InventoryEntryData*& a_resultEntry,
 	bool& a_isAlchemyMenu)
 {
-	a_posEffects = 0;
-	a_negEffects = 0;
+	a_resultForm = nullptr;
+	a_resultEntry = nullptr;
 	a_isAlchemyMenu = false;
 
 	auto* ui = RE::UI::GetSingleton();
@@ -394,18 +394,70 @@ bool CAHZScaleform::GetCurrentAlchemyEffectCounts(
 		return false;
 	}
 
-	auto* alchemyMenu = skyrim_cast<RE::CraftingSubMenus::CraftingSubMenus::AlchemyMenu*>(
-		craftingMenu->GetCraftingSubMenu());
-	if (!alchemyMenu)
+	auto* craftingSubMenu = craftingMenu->GetCraftingSubMenu();
+	if (!craftingSubMenu)
 	{
 		return false;
 	}
 
-	a_isAlchemyMenu = true;
-	if (!alchemyMenu->resultPotion || alchemyMenu->resultPotion == alchemyMenu->unknownPotion)
+	if (auto* alchemyMenu = skyrim_cast<RE::CraftingSubMenus::CraftingSubMenus::AlchemyMenu*>(craftingSubMenu))
 	{
+		a_isAlchemyMenu = true;
+		if (alchemyMenu->resultPotion && alchemyMenu->resultPotion != alchemyMenu->unknownPotion)
+		{
+			a_resultForm = alchemyMenu->resultPotion;
+			return true;
+		}
+
 		return false;
 	}
 
-	return GetAlchemyEffectCounts(alchemyMenu->resultPotion, a_posEffects, a_negEffects);
+	if (auto* enchantMenu = skyrim_cast<RE::CraftingSubMenus::EnchantConstructMenu*>(craftingSubMenu))
+	{
+		a_resultEntry = enchantMenu->craftItemPreview;
+		if (!a_resultEntry && enchantMenu->selected.item)
+		{
+			a_resultEntry = enchantMenu->selected.item->data;
+		}
+
+		if (a_resultEntry)
+		{
+			a_resultForm = a_resultEntry->GetObject();
+		}
+
+		return a_resultForm != nullptr;
+	}
+
+	if (auto* smithingMenu = skyrim_cast<RE::CraftingSubMenus::SmithingMenu*>(craftingSubMenu))
+	{
+		if (smithingMenu->unk160 && smithingMenu->unk160->GetObject())
+		{
+			a_resultEntry = smithingMenu->unk160;
+			a_resultForm = a_resultEntry->GetObject();
+			return true;
+		}
+
+		if (smithingMenu->currentIndex < smithingMenu->recipes.size())
+		{
+			a_resultForm = smithingMenu->recipes[smithingMenu->currentIndex].item;
+		}
+
+		return a_resultForm != nullptr;
+	}
+
+	if (auto* constructibleMenu = skyrim_cast<RE::CraftingSubMenus::ConstructibleObjectMenu*>(craftingSubMenu))
+	{
+		if (constructibleMenu->currentIndex < constructibleMenu->recipes.size())
+		{
+			auto* recipe = constructibleMenu->recipes[constructibleMenu->currentIndex].constructibleObject;
+			if (recipe)
+			{
+				a_resultForm = recipe->createdItem;
+			}
+		}
+
+		return a_resultForm != nullptr;
+	}
+
+	return false;
 }
