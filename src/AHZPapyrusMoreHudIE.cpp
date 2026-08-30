@@ -17,14 +17,14 @@ auto PapyrusMoreHudIE::GetVersion([[maybe_unused]] RE::StaticFunctionTag* base) 
     return version;
 }
 
-auto PapyrusMoreHudIE::GetFormItemId([[maybe_unused]] RE::StaticFunctionTag* base, RE::TESForm* form) -> uint32_t
+auto PapyrusMoreHudIE::GetFormItemId([[maybe_unused]] RE::StaticFunctionTag* base, RE::TESForm* form) -> std::int32_t
 {
     if (!form)
     {
         return 0;
     }
-    auto crc = SKSE::HashUtil::CRC32(form->GetName() , form->formID & 0x00FFFFFF);
-    return crc;
+    const char* name = form->GetName();
+    return static_cast<std::int32_t>(SKSE::HashUtil::CRC32(name, form->formID & 0x00FFFFFF));
 }
 
 void PapyrusMoreHudIE::RegisterIconFormList(RE::StaticFunctionTag* base, RE::BSFixedString iconName, RE::BGSListForm* list)
@@ -76,7 +76,7 @@ std::vector<std::string_view> PapyrusMoreHudIE::GetFormIcons(RE::FormID formId)
     {
         auto list = s_ahzRegisteredIconFormLists[kvp.first];
 
-        if (list && list->HasForm(formId))   
+        if (list && list->HasForm(formId))
         {
             results.emplace_back(kvp.first);
         }
@@ -192,6 +192,6 @@ auto PapyrusMoreHudIE::RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm) ->
     a_vm->RegisterFunction("UnRegisterIconFormList", "AhzMoreHudIe", UnRegisterIconFormList);
     a_vm->RegisterFunction("IsIconFormListRegistered", "AhzMoreHudIe", IsIconFormListRegistered);
     a_vm->RegisterFunction("GetFormItemId", "AhzMoreHudIe", GetFormItemId);
-    
+
     return true;
 }

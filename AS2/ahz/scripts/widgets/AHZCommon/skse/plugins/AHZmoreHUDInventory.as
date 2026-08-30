@@ -1,4 +1,4 @@
-﻿
+
 intrinsic class skse.plugins.AHZmoreHUDInventory
 {
     static function InstallHooks():Void;
@@ -9,4 +9,5 @@ intrinsic class skse.plugins.AHZmoreHUDInventory
 	static function GetWasBookRead():Boolean;
 	static function GetIconForItemId(formId: Number, formName:String):String;
 	static function GetFormIcons(formId: Number):Array;
+	static function GetCraftingResultData():Object;
 }

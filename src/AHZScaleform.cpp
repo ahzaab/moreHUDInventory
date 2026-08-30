@@ -1,4 +1,4 @@
-﻿#include "PCH.h"
+#include "PCH.h"
 
 #include "ActorValueList.h"
 #include "AHZScaleform.h"
@@ -9,11 +9,11 @@ double CAHZScaleform::mRound(double r)
    return (r >= 0.0) ? floor(r + 0.5) : ceil(r - 0.5);
 }
 
-CAHZScaleform::CAHZScaleform(): 
-m_showBookRead(false), 
+CAHZScaleform::CAHZScaleform():
+m_showBookRead(false),
 m_showBookSkill(false),
-m_showKnownEnchantment{false}, 
-m_showPosNegEffects{false}, 
+m_showKnownEnchantment{false},
+m_showPosNegEffects{false},
 m_enableItemCardResize(false)
 {
 }
@@ -85,41 +85,10 @@ void CAHZScaleform::ExtendItemCard(RE::GFxMovieView * view, RE::GFxValue * objec
 				}
 			}
 
-			if (alchItem && alchItem->effects.size())
+			std::uint32_t posEffects = 0;
+			std::uint32_t negEffects = 0;
+			if (GetAlchemyEffectCounts(alchItem, posEffects, negEffects))
 			{
-				uint32_t negEffects = 0;
-				uint32_t posEffects = 0;
-				bool survivalMode = isSurvivalMode();
-
-				for (auto& mgef: alchItem->effects)
-				{
-					if (mgef)
-					{
-						std::string effectName = std::string(mgef->baseEffect->magicItemDescription.c_str());
-						size_t found = effectName.find("[SURV=");
-						bool surVivalDescFound = (found != std::string::npos);
-                        //RE::EffectSetting::EffectSettingData::Flag::kDetrimental
-						if (mgef->baseEffect->data.flags.any(RE::EffectSetting::EffectSettingData::Flag::kDetrimental, RE::EffectSetting::EffectSettingData::Flag::kHostile))
-						{
-							// Do not include the survival mode effects when not in survival mode
-							if (!survivalMode && surVivalDescFound)
-							{
-								continue;
-							}
-							negEffects++;
-						}
-						else
-						{
-							// Do not include the survival mode effects when not in survival mode
-							if (!survivalMode && surVivalDescFound)
-							{
-								continue;
-							}
-							posEffects++;
-						}
-					}
-				}
-
 				RegisterNumber(&obj, "PosEffects", posEffects);
 				RegisterNumber(&obj, "NegEffects", negEffects);
 			}
@@ -137,7 +106,7 @@ void CAHZScaleform::ExtendItemCard(RE::GFxMovieView * view, RE::GFxValue * objec
 	{
 		RegisterString(object, "AHZItemIcon", iconName.c_str());
 	}
-    
+
     auto customIcons = PapyrusMoreHudIE::GetFormIcons(item->object->formID);
 
     if (m_completionistResponse && m_completionistResponse->m_display && m_completionistResponse->m_formID == item->object->formID)
@@ -156,7 +125,7 @@ void CAHZScaleform::ExtendItemCard(RE::GFxMovieView * view, RE::GFxValue * objec
         {
             entry.SetString(ci);
             customIconArray.SetElement(idx++, entry);
-        }  
+        }
         object->SetMember("AHZCustomIcons", customIconArray);
     }
 
@@ -175,8 +144,8 @@ void CAHZScaleform::Initialize()
    m_showBookRead = g_ahzConfiguration.GetBooleanValue("General", "bShowBookRead", true);
    m_showBookSkill = g_ahzConfiguration.GetBooleanValue("General", "bShowBookSkill", true);
    m_showKnownEnchantment = g_ahzConfiguration.GetBooleanValue("General", "bShowKnownEnchantment", true);
-   m_enableItemCardResize = g_ahzConfiguration.GetBooleanValue("General", "bEnableItemCardResize", true); 
-   m_showPosNegEffects = g_ahzConfiguration.GetBooleanValue("General", "bShowPosNegEffects", true); 
+   m_enableItemCardResize = g_ahzConfiguration.GetBooleanValue("General", "bEnableItemCardResize", true);
+   m_showPosNegEffects = g_ahzConfiguration.GetBooleanValue("General", "bShowPosNegEffects", true);
 }
 
 bool CAHZScaleform::GetWasBookRead(RE::TESForm *theObject)
@@ -358,9 +327,137 @@ namespace Scaleform
                 if (!a_msg || a_msg->type != 2 || !a_msg->data)
                 {
                     return;
-                }            
+                }
                 CAHZScaleform::Singleton().m_completionistResponse = *static_cast<CompletionistResponse*>(a_msg->data);
             });
         }
     }
+}
+
+bool CAHZScaleform::GetAlchemyEffectCounts(RE::AlchemyItem* a_alchemyItem, std::uint32_t& a_posEffects, std::uint32_t& a_negEffects)
+{
+	a_posEffects = 0;
+	a_negEffects = 0;
+
+	if (!m_showPosNegEffects || !a_alchemyItem || a_alchemyItem->effects.empty())
+	{
+		return false;
+	}
+
+	const bool survivalMode = isSurvivalMode();
+	for (auto& effect : a_alchemyItem->effects)
+	{
+		if (!effect || !effect->baseEffect)
+		{
+			continue;
+		}
+
+		const std::string effectDescription = effect->baseEffect->magicItemDescription.c_str();
+		if (!survivalMode && effectDescription.find("[SURV=") != std::string::npos)
+		{
+			continue;
+		}
+
+		if (effect->baseEffect->data.flags.any(
+				RE::EffectSetting::EffectSettingData::Flag::kDetrimental,
+				RE::EffectSetting::EffectSettingData::Flag::kHostile))
+		{
+			++a_negEffects;
+		}
+		else
+		{
+			++a_posEffects;
+		}
+	}
+
+	return true;
+}
+
+bool CAHZScaleform::GetCurrentCraftingResult(
+	RE::TESForm*& a_resultForm,
+	RE::InventoryEntryData*& a_resultEntry,
+	bool& a_isAlchemyMenu)
+{
+	a_resultForm = nullptr;
+	a_resultEntry = nullptr;
+	a_isAlchemyMenu = false;
+
+	auto* ui = RE::UI::GetSingleton();
+	if (!ui)
+	{
+		return false;
+	}
+
+	auto craftingMenu = ui->GetMenu<RE::CraftingMenu>();
+	if (!craftingMenu)
+	{
+		return false;
+	}
+
+	auto* craftingSubMenu = craftingMenu->GetCraftingSubMenu();
+	if (!craftingSubMenu)
+	{
+		return false;
+	}
+
+	if (auto* alchemyMenu = skyrim_cast<RE::CraftingSubMenus::CraftingSubMenus::AlchemyMenu*>(craftingSubMenu))
+	{
+		a_isAlchemyMenu = true;
+		if (alchemyMenu->resultPotion && alchemyMenu->resultPotion != alchemyMenu->unknownPotion)
+		{
+			a_resultForm = alchemyMenu->resultPotion;
+			return true;
+		}
+
+		return false;
+	}
+
+	if (auto* enchantMenu = skyrim_cast<RE::CraftingSubMenus::EnchantConstructMenu*>(craftingSubMenu))
+	{
+		a_resultEntry = enchantMenu->craftItemPreview;
+		if (!a_resultEntry && enchantMenu->selected.item)
+		{
+			a_resultEntry = enchantMenu->selected.item->data;
+		}
+
+		if (a_resultEntry)
+		{
+			a_resultForm = a_resultEntry->GetObject();
+		}
+
+		return a_resultForm != nullptr;
+	}
+
+	if (auto* smithingMenu = skyrim_cast<RE::CraftingSubMenus::SmithingMenu*>(craftingSubMenu))
+	{
+		if (smithingMenu->unk160 && smithingMenu->unk160->GetObject())
+		{
+			a_resultEntry = smithingMenu->unk160;
+			a_resultForm = a_resultEntry->GetObject();
+			return true;
+		}
+
+		if (smithingMenu->currentIndex < smithingMenu->recipes.size())
+		{
+			a_resultForm = smithingMenu->recipes[smithingMenu->currentIndex].item;
+		}
+
+		return a_resultForm != nullptr;
+	}
+
+	if (auto* constructibleMenu = skyrim_cast<RE::CraftingSubMenus::ConstructibleObjectMenu*>(craftingSubMenu))
+	{
+		if (constructibleMenu->currentIndex < constructibleMenu->recipes.size())
+		{
+			auto* recipe = constructibleMenu->recipes[constructibleMenu->currentIndex].constructibleObject;
+			if (recipe)
+			{
+				a_resultForm = recipe->createdItem;
+			}
+		}
+
+		return a_resultForm != nullptr;
+	}
+
+	return false;
 }

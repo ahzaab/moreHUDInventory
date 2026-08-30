@@ -10,7 +10,7 @@ struct CompletionistResponse {
    RE::FormID m_formID;
    bool m_icontype; // false = New, true = Found
    bool m_display;
-};  
+};
 
 class CAHZScaleform
 {
@@ -30,9 +30,11 @@ public:
    bool m_enableItemCardResize;
    bool GetWasBookRead(RE::TESForm *form);
    bool isSurvivalMode();
+   bool GetCurrentCraftingResult(RE::TESForm*& a_resultForm, RE::InventoryEntryData*& a_resultEntry, bool& a_isAlchemyMenu);
+   bool GetAlchemyEffectCounts(RE::AlchemyItem* a_alchemyItem, std::uint32_t& a_posEffects, std::uint32_t& a_negEffects);
    std::optional<CompletionistResponse> m_completionistResponse{std::nullopt};
    bool m_completionistInstalled{};
-   
+
 private:
    CAHZScaleform();
    static void ReplaceStringInPlace(std::string& subject, const std::string& search,
@@ -45,7 +47,6 @@ private:
    std::string GetBookSkill(RE::TESForm *form);
    uint32_t GetIsKnownEnchantment(RE::InventoryEntryData * item);
    uint32_t GetIsKnownEnchantment_Impl(RE::InventoryEntryData * item);
-
    bool m_showBookSkill;
    bool m_showKnownEnchantment;
    bool m_showPosNegEffects;
