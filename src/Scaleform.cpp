@@ -14,17 +14,20 @@ namespace Scaleform
 
     class SKSEScaleform_InstallHooks : public RE::GFxFunctionHandler
     {
-        public:
-            void Call([[maybe_unused]] Params& a_params) override
+    public:
+        void Call([[maybe_unused]] Params& a_params) override
         {
         }
     };
 
-    class SKSEScaleform_GetCurrentMenu: public RE::GFxFunctionHandler
+    class SKSEScaleform_GetCurrentMenu : public RE::GFxFunctionHandler
     {
-        public:
-            void Call(Params& a_params) override
+    public:
+        void Call(Params& a_params) override
         {
+            if (!a_params.retVal) {
+                return;
+            }
             logger::trace("Current Menu: {}", Events::g_currentMenu.c_str());
             a_params.retVal->SetString(Events::g_currentMenu.c_str());
         }
@@ -32,9 +35,12 @@ namespace Scaleform
 
     class SKSEScaleform_ShowBookRead : public RE::GFxFunctionHandler
     {
-        public:
-            void Call(Params& a_params) override
+    public:
+        void Call(Params& a_params) override
         {
+            if (!a_params.retVal) {
+                return;
+            }
             logger::trace("ShowBookRead: {}", CAHZScaleform::Singleton().m_showBookRead);
             a_params.retVal->SetBoolean(CAHZScaleform::Singleton().m_showBookRead);
         }
@@ -43,20 +49,26 @@ namespace Scaleform
 
     class SKSEScaleform_EnableItemCardResize : public RE::GFxFunctionHandler
     {
-        public:
-            void Call(Params& a_params) override
+    public:
+        void Call(Params& a_params) override
         {
+            if (!a_params.retVal) {
+                return;
+            }
             a_params.retVal->SetBoolean(CAHZScaleform::Singleton().m_enableItemCardResize);
         }
     };
 
     class SKSEScaleform_GetWasBookRead : public RE::GFxFunctionHandler
     {
-        public:
-            void Call(Params& a_params) override
+    public:
+        void Call(Params& a_params) override
         {
-            if (a_params.args && a_params.argCount && a_params.args[0].IsNumber())
-            {
+            if (!a_params.retVal) {
+                return;
+            }
+            a_params.retVal->SetBoolean(false);
+            if (a_params.args && a_params.argCount && a_params.args[0].IsNumber()) {
                 auto formID = static_cast<std::uint32_t>(a_params.args[0].GetNumber());
                 auto bookForm = RE::TESForm::LookupByID(formID);
                 auto isReadBook = CAHZScaleform::Singleton().GetWasBookRead(bookForm);
@@ -67,128 +79,125 @@ namespace Scaleform
     };
 
 
-class SKSEScaleform_GetIconForItemId : public RE::GFxFunctionHandler
-{
-        public:
-            void Call(Params& a_params) override
-	{
-		if (a_params.args && a_params.argCount > 1 && a_params.args[0].IsNumber() && a_params.args[1].IsString())
-		{
-			auto formID = static_cast<std::uint32_t>(a_params.args[0].GetNumber());
-
-			const char * name = a_params.args[1].GetString();
-
-			if (!name)
-			{
-                s_lastIconName.clear();
-                a_params.retVal->SetString(s_lastIconName.c_str());
-				return;
-			}
-
-			int32_t itemId = static_cast<int32_t>(SKSE::HashUtil::CRC32(name, formID & 0x00FFFFFF));
-			s_lastIconName.clear();
-			s_lastIconName.append(PapyrusMoreHudIE::GetIconName(itemId));
-			a_params.retVal->SetString(s_lastIconName.c_str());
-
-		}
-	}
-};
-
-class SKSEScaleform_GetFormIcons : public RE::GFxFunctionHandler
-{
+    class SKSEScaleform_GetIconForItemId : public RE::GFxFunctionHandler
+    {
     public:
-    void Call(Params& a_params) override
-	{
-		if (a_params.args && a_params.argCount && a_params.args[0].IsNumber())
-		{
-			auto formId = static_cast<RE::FormID>(a_params.args[0].GetNumber());
+        void Call(Params& a_params) override
+        {
+            if (!a_params.retVal) {
+                return;
+            }
+            s_lastIconName.clear();
+            a_params.retVal->SetString(s_lastIconName.c_str());
 
-            auto customIcons = PapyrusMoreHudIE::GetFormIcons(formId);
-            RE::GFxValue          customIconArray;
+            if (a_params.args && a_params.argCount > 1 && a_params.args[0].IsNumber() && a_params.args[1].IsString()) {
+                auto formID = static_cast<std::uint32_t>(a_params.args[0].GetNumber());
+
+                const char* name = a_params.args[1].GetString();
+
+                if (!name) {
+                    return;
+                }
+
+                int32_t itemId = static_cast<int32_t>(SKSE::HashUtil::CRC32(name, formID & 0x00FFFFFF));
+                s_lastIconName.clear();
+                s_lastIconName.append(PapyrusMoreHudIE::GetIconName(itemId));
+                a_params.retVal->SetString(s_lastIconName.c_str());
+            }
+        }
+    };
+
+    class SKSEScaleform_GetFormIcons : public RE::GFxFunctionHandler
+    {
+    public:
+        void Call(Params& a_params) override
+        {
+            if (!a_params.retVal || !a_params.movie) {
+                return;
+            }
             a_params.movie->CreateArray(a_params.retVal);
+            a_params.retVal->SetArraySize(0);
 
-            if (!customIcons.empty()){
-                RE::GFxValue          entry;
-                a_params.retVal->SetArraySize(static_cast<uint32_t>(customIcons.size()));
-                auto idx = 0;
-                for (auto& ci: customIcons)
-                {
-                    entry.SetString(ci);
-                    a_params.retVal->SetElement(idx++, entry);
+            if (a_params.args && a_params.argCount && a_params.args[0].IsNumber()) {
+                auto formId = static_cast<RE::FormID>(a_params.args[0].GetNumber());
+
+                auto customIcons = PapyrusMoreHudIE::GetFormIcons(formId);
+                if (!customIcons.empty()) {
+                    RE::GFxValue entry;
+                    a_params.retVal->SetArraySize(static_cast<uint32_t>(customIcons.size()));
+                    auto idx = 0;
+                    for (auto& ci : customIcons) {
+                        entry.SetString(ci);
+                        a_params.retVal->SetElement(idx++, entry);
+                    }
+                } else {
+                    a_params.retVal->SetArraySize(0);
                 }
             }
-            else{
-                a_params.retVal->SetArraySize(0);
-            }
-		}
-	}
-};
+        }
+    };
 
-class SKSEScaleform_GetCraftingResultData : public RE::GFxFunctionHandler
-{
+    class SKSEScaleform_GetCraftingResultData : public RE::GFxFunctionHandler
+    {
     public:
-    void Call(Params& a_params) override
-	{
-		RE::GFxValue result;
-		a_params.movie->CreateObject(&result);
+        void Call(Params& a_params) override
+        {
+            if (!a_params.retVal || !a_params.movie) {
+                return;
+            }
 
-		RE::TESForm* resultForm = nullptr;
-		RE::InventoryEntryData* resultEntry = nullptr;
-		bool isAlchemyMenu = false;
-		const bool hasResult = CAHZScaleform::Singleton().GetCurrentCraftingResult(
-			resultForm, resultEntry, isAlchemyMenu);
+            RE::GFxValue result;
+            a_params.movie->CreateObject(&result);
 
-		RE::GFxValue value;
-		value.SetBoolean(isAlchemyMenu);
-		result.SetMember("isAlchemyMenu", value);
-		value.SetBoolean(hasResult);
-		result.SetMember("hasResult", value);
+            CraftingResultData craftingResult;
+            const bool         hasResult = CAHZScaleform::Singleton().GetCurrentCraftingResult(craftingResult);
 
-		if (hasResult && resultForm)
-		{
-			value.SetNumber(resultForm->GetFormID());
-			result.SetMember("formId", value);
-			value.SetBoolean(resultForm->IsDynamicForm());
-			result.SetMember("isDynamicForm", value);
+            RE::GFxValue value;
+            value.SetBoolean(craftingResult.isAlchemyMenu);
+            result.SetMember("isAlchemyMenu", value);
+            value.SetBoolean(hasResult);
+            result.SetMember("hasResult", value);
 
-			const char* resultName = resultEntry ? resultEntry->GetDisplayName() : resultForm->GetName();
-			value.SetString(resultName ? resultName : "");
-			result.SetMember("formName", value);
+            if (hasResult) {
+                value.SetNumber(craftingResult.formID);
+                result.SetMember("formId", value);
+                value.SetBoolean(craftingResult.isDynamicForm);
+                result.SetMember("isDynamicForm", value);
 
-			std::uint32_t posEffects = 0;
-			std::uint32_t negEffects = 0;
-			if (isAlchemyMenu)
-			{
-				CAHZScaleform::Singleton().GetAlchemyEffectCounts(
-					resultForm->As<RE::AlchemyItem>(), posEffects, negEffects);
-			}
+                value.SetString(craftingResult.formName.c_str());
+                result.SetMember("formName", value);
 
-			value.SetNumber(posEffects);
-			result.SetMember("PosEffects", value);
-			value.SetNumber(negEffects);
-			result.SetMember("NegEffects", value);
-		}
+                value.SetNumber(craftingResult.posEffects);
+                result.SetMember("PosEffects", value);
+                value.SetNumber(craftingResult.negEffects);
+                result.SetMember("NegEffects", value);
+            }
 
-		*a_params.retVal = result;
-	}
-};
+            *a_params.retVal = result;
+        }
+    };
 
-class SKSEScaleform_AHZLog : public RE::GFxFunctionHandler
-{
-        public:
-            void Call(Params& a_params) override
-	{
+    class SKSEScaleform_AHZLog : public RE::GFxFunctionHandler
+    {
+    public:
+        void Call(Params& a_params) override
+        {
+            if (!a_params.args || a_params.argCount == 0 || !a_params.args[0].IsString()) {
+                return;
+            }
+            const char* message = a_params.args[0].GetString();
+            if (!message) {
+                return;
+            }
 #if _DEBUG
-		logger::trace("{}", a_params.args[0].GetString());
+            logger::trace("{}", message);
 #else  // Only allow release verbosity for a release build
-		if (a_params.args && a_params.argCount > 1 && a_params.args[1].IsBool() && a_params.args[1].GetBool())
-		{
-			logger::info("{}", a_params.args[0].GetString());
-		}
+            if (a_params.args && a_params.argCount > 1 && a_params.args[1].IsBool() && a_params.args[1].GetBool()) {
+                logger::info("{}", message);
+            }
 #endif
-	}
-};
-
+        }
+    };
 
 
     typedef std::map<const std::type_info*, RE::GFxFunctionHandler*> FunctionHandlerCache;
@@ -197,6 +206,10 @@ class SKSEScaleform_AHZLog : public RE::GFxFunctionHandler
     template <typename T>
     void RegisterFunction(RE::GFxValue* dst, RE::GFxMovieView* movie, const char* name)
     {
+        if (!dst || !movie || !name) {
+            return;
+        }
+
         // either allocate the object or retrieve an existing instance from the cache
         RE::GFxFunctionHandler* fn = nullptr;
 
@@ -224,6 +237,10 @@ class SKSEScaleform_AHZLog : public RE::GFxFunctionHandler
 
     auto RegisterScaleformFunctions(RE::GFxMovieView* a_view, RE::GFxValue* a_root) -> bool
     {
+        if (!a_view || !a_root) {
+            return false;
+        }
+
         RegisterFunction<SKSEScaleform_InstallHooks>(a_root, a_view, "InstallHooks");
         RegisterFunction<SKSEScaleform_GetCurrentMenu>(a_root, a_view, "GetCurrentMenu");
         RegisterFunction<SKSEScaleform_ShowBookRead>(a_root, a_view, "ShowBookRead");
@@ -239,11 +256,19 @@ class SKSEScaleform_AHZLog : public RE::GFxFunctionHandler
     void RegisterCallbacks()
     {
         auto scaleform = SKSE::GetScaleformInterface();
+        if (!scaleform) {
+            logger::critical("Unable to register Scaleform callbacks: SKSE Scaleform interface is unavailable");
+            return;
+        }
         scaleform->Register(RegisterScaleformFunctions, "AHZmoreHUDInventory");
         logger::info("Registered all scaleform callbacks");
     }
 
-    void RegisterInventory(RE::GFxMovieView * view, RE::GFxValue * object, RE::InventoryEntryData * item){
+    void RegisterInventory(RE::GFxMovieView* view, RE::GFxValue* object, RE::InventoryEntryData* item)
+    {
+        if (!view || !object || !item) {
+            return;
+        }
         CAHZScaleform::Singleton().ExtendItemCard(view, object, item);
     }
 

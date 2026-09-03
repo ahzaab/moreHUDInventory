@@ -581,6 +581,11 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 
 	function ItemCardOnEnterFrame(): Void
 	{
+		if (!itemCard || !itemCard.itemInfo || !rootMenuInstance || !IconContainer)
+		{
+			return;
+		}
+
 		var itemCardVisible:Boolean = (itemCard._alpha > 0 && rootMenuInstance._alpha == 100);
 		if (itemCardVisible)
 		{
@@ -642,20 +647,52 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		}
 
 		_selectedIndex = GetSelectedIndex();
-		var selectionChanged:Boolean = (_lastSelectedIndex != _selectedIndex ||
-				_selectedItem.formId != _entryList[_selectedIndex].formId ||
-				_selectedItem.text != _entryList[_selectedIndex].text);
+		var selectedEntry:Object = undefined;
+		if (_entryList && _selectedIndex >= 0 && _selectedIndex < _entryList.length)
+		{
+			selectedEntry = _entryList[_selectedIndex];
+		}
+		if (!selectedEntry)
+		{
+			_lastSelectedIndex = _selectedIndex;
+			_selectedItem = undefined;
+			_lastCraftingResultSignature = undefined;
+			_craftingResultData = undefined;
+			return;
+		}
+
+		var selectionChanged:Boolean = (!_selectedItem ||
+				_lastSelectedIndex != _selectedIndex ||
+				_selectedItem.formId != selectedEntry.formId ||
+				_selectedItem.text != selectedEntry.text);
 
 		if (selectionChanged)
 		{
 			_lastSelectedIndex = _selectedIndex;
-			_selectedItem = _entryList[_selectedIndex];
+			_selectedItem = selectedEntry;
 		}
 
 		var craftingResultChanged:Boolean = false;
 		if (_currentMenu == "Crafting Menu")
 		{
 			var craftingResult:Object = _global.skse.plugins.AHZmoreHUDInventory.GetCraftingResultData();
+			if (!craftingResult)
+			{
+				craftingResult = new Object();
+				craftingResult.hasResult = false;
+			}
+			if (!craftingResult.hasResult && !craftingResult.isAlchemyMenu &&
+				selectedEntry.formId != undefined)
+			{
+				// Static crafting menus already copy the selected result identity into
+				// their GFx rows. Avoid native recipe and inventory-entry pointers.
+				craftingResult.hasResult = true;
+				craftingResult.isAlchemyMenu = false;
+				craftingResult.formId = selectedEntry.formId;
+				craftingResult.formName = selectedEntry.text ? selectedEntry.text : "";
+				craftingResult.PosEffects = 0;
+				craftingResult.NegEffects = 0;
+			}
 			var craftingResultSignature:String = craftingResult.hasResult ?
 				String(craftingResult.isAlchemyMenu) + ":" + String(craftingResult.formId) + ":" + craftingResult.formName + ":" +
 				String(craftingResult.PosEffects) + ":" + String(craftingResult.NegEffects) : "";
@@ -671,6 +708,10 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 						craftingResult.formId, craftingResult.formName);
 					craftingResult.AHZCustomIcons = _global.skse.plugins.AHZmoreHUDInventory.GetFormIcons(
 						craftingResult.formId);
+					if (!craftingResult.AHZCustomIcons)
+					{
+						craftingResult.AHZCustomIcons = new Array();
+					}
 					_craftingResultData = craftingResult;
 				}
 				else
@@ -693,6 +734,7 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 
 				var craftingIconIndex:Number;
 				for (craftingIconIndex = 0;
+					 _craftingResultData.AHZCustomIcons &&
 					 craftingIconIndex < _craftingResultData.AHZCustomIcons.length;
 					 craftingIconIndex++)
 				{
@@ -1016,6 +1058,12 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 	function UpdateItemCardInfo(): Void
 	{
 		//_global.skse.plugins.AHZmoreHUDInventory.AHZLog("-->UpdateItemCardInfo", false);
+		if (!itemCard || !itemCard.itemInfo || !_selectedItem || !IconContainer ||
+			!itemCard.ItemText || !itemCard.ItemText.ItemTextField)
+		{
+			return;
+		}
+
 		var type:Number;
 		var itemCardFrame:Number = itemCard._currentframe;
 		type = itemCard.itemInfo.type;
@@ -1024,6 +1072,10 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 		var formIcons:Array;
 		var displayItem:Object = _selectedItem;
 		var itemCardData:Object = _selectedItem.AHZItemCardObj;
+		if (!itemCardData)
+		{
+			itemCardData = new Object();
+		}
 		if (_currentMenu == "Crafting Menu" && _craftingResultData && _craftingResultData.hasResult)
 		{
 			displayItem = _craftingResultData;
@@ -1057,6 +1109,10 @@ class ahz.scripts.widgets.AHZmoreHUDInventory extends MovieClip
 
 			// For all other custom icons
 			_selectedItem.AHZCustomIcons = _global.skse.plugins.AHZmoreHUDInventory.GetFormIcons(_selectedItem.formId);
+			if (!_selectedItem.AHZCustomIcons)
+			{
+				_selectedItem.AHZCustomIcons = new Array();
+			}
 			_global.skse.plugins.AHZmoreHUDInventory.AHZLog("Magic Menu Custom Icons: " + _selectedItem.AHZCustomIcons.length, false);
 
 		}

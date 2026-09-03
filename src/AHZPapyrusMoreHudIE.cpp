@@ -19,11 +19,13 @@ auto PapyrusMoreHudIE::GetVersion([[maybe_unused]] RE::StaticFunctionTag* base) 
 
 auto PapyrusMoreHudIE::GetFormItemId([[maybe_unused]] RE::StaticFunctionTag* base, RE::TESForm* form) -> std::int32_t
 {
-    if (!form)
-    {
+    if (!form) {
         return 0;
     }
     const char* name = form->GetName();
+    if (!name) {
+        name = "";
+    }
     return static_cast<std::int32_t>(SKSE::HashUtil::CRC32(name, form->formID & 0x00FFFFFF));
 }
 
@@ -71,13 +73,11 @@ auto PapyrusMoreHudIE::IsIconFormListRegistered([[maybe_unused]] RE::StaticFunct
 std::vector<std::string_view> PapyrusMoreHudIE::GetFormIcons(RE::FormID formId)
 {
     std::lock_guard<std::recursive_mutex> lock(mtx);
-    std::vector<std::string_view> results;
-    for (auto& kvp: s_ahzRegisteredIconFormLists)
-    {
+    std::vector<std::string_view>         results;
+    for (auto& kvp : s_ahzRegisteredIconFormLists) {
         auto list = s_ahzRegisteredIconFormLists[kvp.first];
 
-        if (list && list->HasForm(formId))
-        {
+        if (list && list->HasForm(formId)) {
             results.emplace_back(kvp.first);
         }
     }
@@ -90,6 +90,9 @@ auto PapyrusMoreHudIE::HasForm(std::string iconName, uint32_t formId) -> bool
     std::lock_guard<std::recursive_mutex> lock(mtx);
     if (IsIconFormListRegistered_Internal(iconName)) {
         auto formList = s_ahzRegisteredIconFormLists[iconName];
+        if (!formList) {
+            return false;
+        }
 
         if (!formId)
             return false;
@@ -182,6 +185,10 @@ auto PapyrusMoreHudIE::GetIconName(uint32_t itemID) -> std::string
 
 auto PapyrusMoreHudIE::RegisterFunctions(RE::BSScript::IVirtualMachine* a_vm) -> bool
 {
+    if (!a_vm) {
+        return false;
+    }
+
     a_vm->RegisterFunction("GetVersion", "AhzMoreHudIe", GetVersion);
     a_vm->RegisterFunction("IsIconItemRegistered", "AhzMoreHudIe", IsIconItemRegistered);
     a_vm->RegisterFunction("AddIconItem", "AhzMoreHudIe", AddIconItem);
