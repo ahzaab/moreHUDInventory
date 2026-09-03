@@ -1,7 +1,7 @@
 {
   "name": "morehudinventory-release",
   "private": true,
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "Build tooling for moreHUD Inventory Edition Scaleform assets",
   "dependencies": {
     "flc": "3.1.0"

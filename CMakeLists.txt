@@ -3,7 +3,7 @@ message("Using toolchain file ${CMAKE_TOOLCHAIN_FILE}.")
 
 project(
     AHZmoreHUDInventory
-    VERSION 2.2.2.0
+    VERSION 2.2.3.0
     LANGUAGES CXX
     DESCRIPTION "SKSE64 moreHUD Inventory Edition plugin"
 )
