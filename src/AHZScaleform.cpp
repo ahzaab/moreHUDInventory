@@ -439,7 +439,17 @@ bool CAHZScaleform::GetCurrentCraftingResult(
 
 		if (smithingMenu->currentIndex < smithingMenu->recipes.size())
 		{
-			a_resultForm = smithingMenu->recipes[smithingMenu->currentIndex].item;
+			// SmithingItemEntry::item is declared as TESForm* by CommonLibSSE-NG, but the
+			// game stores an InventoryEntryData* here.  This is consistent across
+			// Skyrim 1.5.97, 1.6.1170, and 1.7.99; the game itself deep-copies the
+			// pointed-to InventoryEntryData when the recipe is selected.
+			auto* recipeEntry = reinterpret_cast<RE::InventoryEntryData*>(
+				smithingMenu->recipes[smithingMenu->currentIndex].item);
+			if (recipeEntry)
+			{
+				a_resultEntry = recipeEntry;
+				a_resultForm = recipeEntry->GetObject();
+			}
 		}
 
 		return a_resultForm != nullptr;
