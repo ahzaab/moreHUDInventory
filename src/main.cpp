@@ -27,7 +27,7 @@ namespace
             } break;
             case SKSE::MessagingInterface::kPostPostLoad:
             {
-                Scaleform::RegisterListener();
+                Scaleform::InitializeCompletionist();
             }
             break;
         }

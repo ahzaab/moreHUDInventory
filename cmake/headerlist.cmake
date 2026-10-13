@@ -1,6 +1,7 @@
 set(headers ${headers}
     include/PCH.h
     include/AHZConfiguration.h
+    include/CompletionistAPI.h
     include/AHZConsole.h
     include/AHZPapyrusMoreHudIE.h
     include/AHZScaleform.h

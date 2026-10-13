@@ -2,17 +2,6 @@
 #include "AHZConfiguration.h"
 #include "AHZPapyrusMoreHudIE.h"
 
-struct CompletionistRequest
-{
-    RE::FormID m_formId;
-};
-struct CompletionistResponse
-{
-    RE::FormID m_formID;
-    bool       m_icontype;  // false = New, true = Found
-    bool       m_display;
-};
-
 struct CraftingResultData
 {
     RE::FormID    formID{};
@@ -43,8 +32,6 @@ public:
     bool                                 isSurvivalMode();
     bool                                 GetCurrentCraftingResult(CraftingResultData& a_result);
     bool                                 GetAlchemyEffectCounts(RE::AlchemyItem* a_alchemyItem, std::uint32_t& a_posEffects, std::uint32_t& a_negEffects);
-    std::optional<CompletionistResponse> m_completionistResponse{ std::nullopt };
-    bool                                 m_completionistInstalled{};
 
 private:
     CAHZScaleform();
@@ -65,7 +52,7 @@ private:
 
 namespace Scaleform
 {
-    void RegisterListener();
+    void InitializeCompletionist();
 }
 
 //extern CAHZScaleform g_ahzScaleform;
