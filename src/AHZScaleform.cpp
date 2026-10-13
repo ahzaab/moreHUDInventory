@@ -2,6 +2,7 @@
 
 #include "ActorValueList.h"
 #include "AHZScaleform.h"
+#include "CompletionistAPI.h"
 #include "HashUtil.h"
 
 double CAHZScaleform::mRound(double r)
@@ -30,15 +31,6 @@ void CAHZScaleform::ExtendItemCard(RE::GFxMovieView* view, RE::GFxValue* object,
 
     RE::GFxValue obj;
     view->CreateObject(&obj);
-
-    m_completionistResponse = std::nullopt;
-
-    if (m_completionistInstalled) {
-        if (auto* messageInterface = SKSE::GetMessagingInterface()) {
-            CompletionistRequest request{ baseForm->GetFormID() };
-            messageInterface->Dispatch(1, &request, sizeof(request), "Completionist");
-        }
-    }
 
     const auto formType = baseForm->GetFormType();
     if ((formType == RE::FormType::Armor || formType == RE::FormType::Weapon) && m_showKnownEnchantment) {
@@ -102,10 +94,13 @@ void CAHZScaleform::ExtendItemCard(RE::GFxMovieView* view, RE::GFxValue* object,
 
     auto customIcons = PapyrusMoreHudIE::GetFormIcons(baseForm->formID);
 
-    if (m_completionistResponse && m_completionistResponse->m_display && m_completionistResponse->m_formID == baseForm->formID) {
-        customIcons.emplace_back(m_completionistResponse->m_icontype ? "cmpFound"sv : "cmpNew"sv);
+    if (CompletionistAPI::IsReady()) {
+        const auto iconInfo = CompletionistAPI::GetIconInfo(baseForm);
+        const auto completionistIconName = iconInfo.GetRequiredIconName();
+        if (completionistIconName && *completionistIconName) {
+            customIcons.emplace_back(completionistIconName);
+        }
     }
-    m_completionistResponse = std::nullopt;
 
     if (!customIcons.empty()) {
         RE::GFxValue entry;
@@ -321,23 +316,12 @@ void CAHZScaleform::RegisterBoolean(RE::GFxValue* dst, const char* name, bool va
 };
 namespace Scaleform
 {
-    void RegisterListener()
+    void InitializeCompletionist()
     {
-        if (GetModuleHandle(L"Completionist")) {
-            auto* messageInterface = SKSE::GetMessagingInterface();
-            if (!messageInterface) {
-                logger::warn("Completionist is installed, but the SKSE messaging interface is unavailable"sv);
-                return;
-            }
-
-            CAHZScaleform::Singleton().m_completionistInstalled = true;
-            logger::info("Completionist is installed, registering listener"sv);
-            messageInterface->RegisterListener("Completionist", [](SKSE::MessagingInterface::Message* a_msg) {
-                if (!a_msg || a_msg->type != 2 || !a_msg->data || a_msg->dataLen < sizeof(CompletionistResponse)) {
-                    return;
-                }
-                CAHZScaleform::Singleton().m_completionistResponse = *static_cast<CompletionistResponse*>(a_msg->data);
-            });
+        if (CompletionistAPI::Init()) {
+            logger::info("Completionist API initialized"sv);
+        } else {
+            logger::info("Completionist API is unavailable"sv);
         }
     }
 }
