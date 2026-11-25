@@ -171,14 +171,20 @@ try
     Copy-Item -LiteralPath $bsaPath -Destination $standardData -Force
     Copy-Item -LiteralPath (Join-Path $stagingDataDirectory 'AHZmoreHUDInventory.esl') -Destination $standardData -Force
     Copy-Item -Path (Join-Path $stagingPluginDirectory '*') -Destination $standardPluginDirectory -Force
-    Copy-Item -LiteralPath $licensePath -Destination $standardRoot -Force
 
     # Preserve the historical optional loose-assets package. It intentionally omits
     # the ESL and is installed over the primary package for troubleshooting/overrides.
     $looseData = Join-Path $looseRoot 'Data'
     Copy-Item -LiteralPath $stagingDataDirectory -Destination $looseRoot -Recurse -Force
     Remove-Item -LiteralPath (Join-Path $looseData 'AHZmoreHUDInventory.esl') -Force
-    Copy-Item -LiteralPath $licensePath -Destination $looseRoot -Force
+
+    # Stage the license after building the BSA so it stays loose in both packages.
+    foreach ($packageData in @($standardData, $looseData))
+    {
+        $licenseDirectory = Join-Path $packageData 'SKSE\Plugins\AHZmoreHUDInventory'
+        New-Item -ItemType Directory -Path $licenseDirectory -Force | Out-Null
+        Copy-Item -LiteralPath $licensePath -Destination $licenseDirectory -Force
+    }
 
     # Match the human-facing Nexus upload names. Nexus adds its mod and upload IDs
     # to downloaded filenames, so those generated numeric suffixes do not belong here.
@@ -186,16 +192,13 @@ try
     $standardArchive = Join-Path $versionDirectory "moreHUD Inventory Edition - AE-$fileVersion.7z"
     $looseArchive = Join-Path $versionDirectory "moreHUD Inventory Edition Loose Version - AE-$fileVersion.7z"
 
-    # MO2 recognizes a Data folder plus top-level text files, and Vortex recognizes
-    # the full game-folder layout with documentation beside it. Keep both archive
-    # entries explicit so the license never becomes nested inside Data.
-    & $SevenZipExe a $standardArchive (Join-Path $standardRoot 'Data') (Join-Path $standardRoot 'LICENSE.txt') -mx5 -t7z
+    & $SevenZipExe a $standardArchive $standardData -mx5 -t7z
     if ($LASTEXITCODE -ne 0)
     {
         throw "7-Zip failed to create the primary package with exit code $LASTEXITCODE."
     }
 
-    & $SevenZipExe a $looseArchive (Join-Path $looseRoot 'Data') (Join-Path $looseRoot 'LICENSE.txt') -mx5 -t7z
+    & $SevenZipExe a $looseArchive $looseData -mx5 -t7z
     if ($LASTEXITCODE -ne 0)
     {
         throw "7-Zip failed to create the loose package with exit code $LASTEXITCODE."

@@ -64,7 +64,7 @@ Install the current Creation Kit archive tool and 7-Zip, then run:
 
 You can supply `-ArchiveExe` and `-SevenZipExe`, or set `ARCHIVE_EXE` and `SEVENZIP_EXE`. `SKYRIM_AE_ROOT` may also point to a game installation containing `Tools\Archive\Archive.exe`.
 
-The script builds the Release preset, creates the BSA, and writes `moreHUD Inventory Edition - AE-<version>.7z` and `moreHUD Inventory Edition Loose Version - AE-<version>.7z` under `release\<version>`. Nexus adds its mod and upload IDs to the downloaded filenames. Both packages include the optimized DLL and its matching PDB so crash loggers can resolve plugin symbols. `LICENSE.txt` is included beside the `Data` directory at the archive root; this `Data`-plus-text layout is recognized by both Mod Organizer 2 and Vortex, while keeping the license out of the packaged game-data tree. Generated DLL, PDB, BSA, and 7z artifacts remain ignored by Git.
+The script builds the Release preset, creates the BSA, and writes `moreHUD Inventory Edition - AE-<version>.7z` and `moreHUD Inventory Edition Loose Version - AE-<version>.7z` under `release\<version>`. Nexus adds its mod and upload IDs to the downloaded filenames. Both packages include the optimized DLL and its matching PDB so crash loggers can resolve plugin symbols. Both packages install the license at `Data\SKSE\Plugins\AHZmoreHUDInventory\LICENSE.txt` to avoid conflicts with other mods' license files. Generated DLL, PDB, BSA, and 7z artifacts remain ignored by Git.
 
 The separate Skyrim VR variant is intentionally outside this migration and will be integrated later.
 
